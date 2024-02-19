@@ -6,11 +6,17 @@ const Post = () => {
     const [posts, setPosts] = useState([]);
 
     const fetchPost = async () => {
-        const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/api/post');
-        const data = await response.json();
-        if (data.message === 'success' && Object.keys(data).length > 0) {
-            delete data.message;
-            setPosts(Object.values(data));
+        try {
+            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/api/post');
+            const data = await response.json();
+            if (data && data.message === 'success' && Object.keys(data).length > 0) {
+                delete data.message;
+                setPosts(Object.values(data));
+            } else {
+                console.log('No posts found');
+            }
+        } catch (error) {
+            console.error('Error:', error);
         }
     }
 
@@ -54,12 +60,12 @@ const Post = () => {
                         <button className="text-blue-500 ml-2">Share</button>
                     </div>
                 </div>
-                    <div className="flex items-center">
-                        <input type="text" className="border border-gray-300 rounded-lg p-2 w-full mr-2" placeholder="Write a comment..." />
-                        <button className="bg-blue-500 text-white rounded-lg p-2">Post</button>
-                    </div>
+                <div className="flex items-center">
+                    <input type="text" className="border border-gray-300 rounded-lg p-2 w-full mr-2" placeholder="Write a comment..." />
+                    <button className="bg-blue-500 text-white rounded-lg p-2">Post</button>
+                </div>
                 {/* Post comments */}
-                
+
             </div>
         ))
     ) : (

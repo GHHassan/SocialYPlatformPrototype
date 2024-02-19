@@ -20,7 +20,9 @@ const ProfileAvatar = ({ imagePath, userID, firstName, lastName }) => {
   );
 
   const handleClick = () => {
-    console.log(userID + " is the userID from ProfileAvatar");
+    if(userID === null || userID === undefined || userID === '') {
+      return;
+    }
     navigate(`/singleProfile/${userID}`);
   }
   return (

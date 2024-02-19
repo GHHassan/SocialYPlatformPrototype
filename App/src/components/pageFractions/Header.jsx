@@ -11,6 +11,12 @@ const Header = () => {
             <li>
                 <Link to="/profile" className="text-white hover:text-gray-300">Profile</Link>
             </li>
+            <li>
+                <Link to="/settings" className="text-white hover:text-gray-300">Settings</Link>
+            </li>
+            <li>
+                <Link to="/signIn" className="text-white hover:text-gray-300">Sign In</Link>
+            </li>
         </ul>
     </nav>
   );

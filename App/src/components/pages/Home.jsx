@@ -1,11 +1,15 @@
 import Post from '../pageFractions/Post';
+import CreatePost from '../pageFractions/CreatePost';
 
-const Home = () => {
 
-    
+const Home = (props) => {
 
     return (
        <>
+       <CreatePost
+            signedIn={props.signedIn}
+            userID={props.userID}
+        />
         <Post />
        </>
     );

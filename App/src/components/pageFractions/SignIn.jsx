@@ -20,10 +20,12 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 
 function SignIn(props) {
 
+  const navigate = useNavigate()
   const usernameRef = useRef(null)
   const passwordRef = useRef(null)
   const [signinError, setSigninError] = useState(null)
@@ -51,12 +53,12 @@ function SignIn(props) {
       return
     } else {
       const encodedString = btoa(usernameRef.current.value.toLowerCase() + ':' + passwordRef.current.value)
-      fetchData(encodedString)
+      fetchToken(encodedString)
     }
   }
 
-  const fetchData = (encodedString) => {
-    fetch('https://w20017074.nuwebspace.co.uk/kf6012/coursework/api/token', {
+  const fetchToken = (encodedString) => {
+    fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/api/token`,{
       method: 'GET',
       headers: new Headers({ Authorization: 'Basic ' + encodedString }),
     })
@@ -78,6 +80,7 @@ function SignIn(props) {
           notifySignIn()
           props.setShowSignIn(false)
           setSigninError(null)
+          navigate('/')
         } else {
           setSigninError('Invalid response from the server.')
           props.setShowSignIn(true)
