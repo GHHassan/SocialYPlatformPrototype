@@ -1,8 +1,6 @@
 import React from 'react';
-import Comment from './Comment';
 import ProfileAvatar from '../utils/ProfileAvatar';
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
 const Post = () => {
 
     const [posts, setPosts] = useState([]);
@@ -18,10 +16,6 @@ const Post = () => {
 
     useEffect(() => {
         fetchPost();
-    }, []);
-
-    useEffect(() => {
-        console.log(posts);
     }, [posts]);
 
     const postJSX = posts ? (
