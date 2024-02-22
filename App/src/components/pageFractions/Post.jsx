@@ -7,7 +7,7 @@ const Post = () => {
 
     const fetchPost = async () => {
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/api/post');
+            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post');
             const data = await response.json();
             if (data && data.message === 'success' && Object.keys(data).length > 0) {
                 delete data.message;
@@ -50,9 +50,23 @@ const Post = () => {
                 </div>
                 <div className='m-2 bg-blue-200'>
                     <h1 className="text-lg font-semibold mb-2">{post.textContent}</h1>
-                    {post.videoPath && <p className="mb-2">{post.videoPath}</p>}
-                    {post.photoPath && <p className="mb-2">{post.photoPath}</p>}
+
+                    {post.videoPath &&
+                        <div className="video-container mb-2">
+                            <video controls width="100%" height="auto">
+                                <source src={post.videoPath} type="video/mp4" />
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    }
+
+                    {post.photoPath &&
+                        <div className="image-container mb-2">
+                            <img src={post.photoPath} alt="Post Image" style={{ width: '100%', height: 'auto' }} />
+                        </div>
+                    }
                 </div>
+
                 <div className="flex justify-between items-center">
                     <div className="flex items-center">
                         <button className="text-blue-500">Like</button>
