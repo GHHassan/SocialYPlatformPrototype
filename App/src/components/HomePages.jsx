@@ -5,6 +5,8 @@ import Profile from './pages/Profile'
 import Post from './pageFractions/Post'
 import SingleProfile from './pages/SingleProfile'
 import SignIn from './pageFractions/SignIn'
+import SignUp from './pageFractions/SignUp'
+import CreateProfile from './pages/CreateProfile'
 
 const HomePages = (props) => {
 
@@ -14,9 +16,13 @@ const HomePages = (props) => {
         <Route path="/signIn" element={<SignIn 
           setSignedIn={props.setSignedIn}
           signedIn={props.signedIn}
-          setShowSignIn={props.setShowSignIn}
-          setShowSignUp={props.setShowSignUp}
           showSignIn={props.showSignIn}
+        />} />
+        <Route path="/createProfile" element={<CreateProfile
+          setSignedIn={props.setSignedIn}
+        />} />
+        <Route path="/signUp" element={<SignUp 
+          setSignedIn={props.setSignedIn}
         />} />
         <Route path="/" element={<Home />} />
         <Route path="Chat" element={<Chat 
