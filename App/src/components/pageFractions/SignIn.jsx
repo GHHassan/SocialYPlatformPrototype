@@ -42,8 +42,7 @@ function SignIn(props) {
   }, [props.signedIn])
 
   const cancel = () => {
-    props.setShowSignIn(false)
-    props.setShowSignUp(false)
+    navigate('/')
     notiySignInCancel()
   }
   const signIn = () => {
@@ -58,7 +57,7 @@ function SignIn(props) {
   }
 
   const fetchToken = (encodedString) => {
-    fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/api/token`,{
+    fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/token`,{
       method: 'GET',
       headers: new Headers({ Authorization: 'Basic ' + encodedString }),
     })
@@ -78,12 +77,10 @@ function SignIn(props) {
           localStorage.setItem('token', data.token)
           props.setSignedIn(true)
           notifySignIn()
-          props.setShowSignIn(false)
           setSigninError(null)
           navigate('/')
         } else {
           setSigninError('Invalid response from the server.')
-          props.setShowSignIn(true)
           notifySignInError()
         }
       })
@@ -93,13 +90,11 @@ function SignIn(props) {
   const signOut = () => {
     localStorage.removeItem('token')
     props.setSignedIn(false)
-    props.setShowSignIn(false)
     notifySignOut()
   }
 
   const signUp = () => {
-    props.setShowSignIn(false)
-    props.setShowSignUp(true)
+    navigate('/signUp')
   }
 
   return (
@@ -138,14 +133,6 @@ function SignIn(props) {
             > Cancel
             </button>
           </div>
-        )}
-        {props.signedIn && (
-          <button
-            className="py-1 px-4 font-bold bg-red-400 hover:bg-red-800 text-white rounded-md"
-            onClick={signOut}
-          >
-            Sign Out
-          </button>
         )}
         {signinError && <p className="text-red-300 text-sm my-2">{signinError}</p>}
       </div>
