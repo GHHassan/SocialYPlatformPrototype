@@ -11,24 +11,26 @@
  */
 
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import { registerUser } from '../utils/FetchFunctions'
 
 function SignUp(props) {
+
+  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [email2, setEmail2] = useState('')
+  const [password2, setpassword2] = useState('')
   const [password, setPassword] = useState('')
   const [invalidEmail, setInvalidEmail] = useState(false)
   const [signUpSuccess, setSignUpSuccess] = useState(false)
   const [emptyFields, setEmptyFields] = useState(false)
-  const [duplicate, setDuplicate] = useState(false)
+  const [matched, setMatched] = useState(false)
   const [modified, setModified] = useState(true)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-  const notifySignUpCancel = () => toast.success('Sign up cancelled.')
   const notifySignUp = () => toast.success('You have successfully signed up!')
-  const notifyDuplicateUser = () => toast.error('Email already exists. Please choose another email.')
+  const notifymatchedUser = () => toast.error('Email already exists. Please choose another email.')
   const notifyEmptyFields = () => toast.error('Please enter your name, email, and password.')
   const notifyError = () => toast.error('Please check the form and try again.')
   const notifyInvalidEmail = () => toast.error('Please enter a valid email address.')
@@ -44,11 +46,13 @@ function SignUp(props) {
       if (data.message === 'success') {
         setSignUpSuccess(true)
         notifySignUp()
-      } else if (data.message === 'duplicate (Conflict)') {
+        navigate('/createProfile')
+      } else if (data.message === 'matched (Conflict)') {
         setSignUpSuccess(false)
-        setDuplicate(true)
-        notifyDuplicateUser()
+        setMatched(true)
+        notifymatchedUser()
       } else if (data.message === 'Invalid email (Bad Request)') {
+        console.log('Invalid email');
         setSignUpSuccess(false)
         setInvalidEmail(true)
         notifyInvalidEmail()
@@ -61,42 +65,25 @@ function SignUp(props) {
 
   const handleSignUp = () => {
     try {
-      if (name === '' || email === '' || password === '') {
+      if (name === '' || email === '' || password === '' || password2 === '') {
         setEmptyFields(true)
         notifyEmptyFields()
         return
       }
 
-      if (!emailRegex.test(email) || !emailRegex.test(email2)) {
+      if (!emailRegex.test(email)) {
         setInvalidEmail(true)
         notifyInvalidEmail()
       }
-      if (email === email2 && !invalidEmail && !emptyFields && !duplicate) {
+      if (password === password2) {
         signingUp()
-        setModified(false)
       }
     } catch (error) {}
   }
 
-  const signUpCancelled = () => {
-    props.setShowSignUp(false)
-    notifySignUpCancel()
-  }
-
-  const goSignIn = () => {
-    props.setShowSignUp(false)
-    props.setShowSignIn(true)
-  }
-
-  const goHome = () => {
-    props.setShowSignUp(false)
-    props.setShowSignIn(false)
-    navigate('/')
-  }
-
   const modify = () => {
     setInvalidEmail(false)
-    setDuplicate(false)
+    setMatched(false)
     setModified(true)
     setEmptyFields(false)
   }
@@ -109,12 +96,12 @@ function SignUp(props) {
     modify()
   }
 
-  const handleEmail2Change = (e) => {
-    setEmail2(e.target.value)
+  const handlepassword2Change = (e) => {
+    setpassword2(e.target.value)
     modify()
   }
 
-  const handlePasswordChange = (e) => {
+  const handlepasswordChange = (e) => {
     setPassword(e.target.value)
     modify()
   }
@@ -143,47 +130,51 @@ function SignUp(props) {
             {invalidEmail && "Please enter a valid email address."}
           </p>
           <p className="text-red-500 text-sm">
-            {duplicate && "Email already exists. Please sign in or use another email."}
+            {matched && "Email already exists. Please sign in or use another email."}
           </p>
           <input
-            type="email"
-            placeholder="Re-enter Email"
+            type="password"
+            placeholder="Re-enter password"
             className="p-2 w-9/12 lg:w-80 block md:w-80 bg-slate-100 rounded-md text-black m-auto"
-            value={email2}
-            onChange={handleEmail2Change}
+            value={password}
+            onChange={handlepasswordChange}
           />
-          <p className="text-red-500 text-sm">
-            {(email !== email2) && "Emails do not match."}
-          </p>
           <input
             type="password"
             placeholder="Password"
             className="p-2 my-2 w-9/12 lg:w-80 md:w-80 bg-slate-100 rounded-md text-black m-auto"
-            value={password}
-            onChange={handlePasswordChange}
+            value={password2}
+            onChange={handlepassword2Change}
           />
+          <p className="text-red-500 text-sm">
+            {(password !== password2) && "Passwords do not match. Please re-enter your password."}
+          </p>
+
           <p className="text-red-500 text-sm">
             {emptyFields && "Please enter your name, email, and password."}
           </p>
+
           <button
             className="py-1 px-4 bg-blue-500 hover:bg-sky-500 rounded-md text-white"
             onClick={handleSignUp}
           >
             Submit
           </button>
+
           <button
             className="py-1 px-4 bg-blue-500 hover:bg-sky-500 rounded-md text-white ml-2"
-            onClick={signUpCancelled}
+            onClick={()=> navigate('/')}
           >
             Cancel
           </button>
+
           {!modified && <p className="text-red-500 text-sm">
              "Please correct the errors and try again."
           </p>
           }
           <p className="text-blue-500 text-lg">
             Already have an account?{' '}
-            <span className="text-red-500 cursor-pointer " onClick={goSignIn}>
+            <span className="text-red-500 cursor-pointer " onClick={()=> navigate('/signIn')}>
               Sign In
             </span>
           </p>
@@ -193,13 +184,13 @@ function SignUp(props) {
         <>
           <button
             className="py-1 px-4 bg-blue-500 hover:bg-sky-500 rounded-md text-white"
-            onClick={goSignIn}
+            onClick={()=> navigate('/')}
           >
             Sign In
           </button>
           <button
             className="py-1 px-4 bg-blue-500 hover:bg-sky-500 rounded-md text-white"
-            onClick={goHome}
+            onClick={()=> navigate('/')}
           >
             Home
           </button>
