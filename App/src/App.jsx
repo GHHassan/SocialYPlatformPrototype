@@ -8,10 +8,7 @@ function App() {
 
   const [postOwnerUserID, setPostOwnerUserID] = useState("");
   const [signedIn, setSignedIn] = useState(false);
-  const [showSignIn, setShowSignIn] = useState(false);
-  const [showSignUp, setShowSignUp] = useState(false);
-  const [signedOut, setSignedOut] = useState(false);
-  const [userID, setUserID] = useState(null);
+  const [user, setUser] = useState({});//[userID, setUserID] = useState(null);
 
   const token = localStorage.getItem('token');
   
@@ -22,7 +19,7 @@ function App() {
         localStorage.removeItem('token');
         setSignedIn(false);
       } else {
-        setUserID(decodedToken.sub);
+        setUser(decodedToken);
         setSignedIn(true);
       }
     }
@@ -34,12 +31,8 @@ function App() {
         {/* Header */}
         <header className="bg-white p-4 shadow-md">
           <Headers 
-            showSignIn={showSignIn}
-            setShowSignIn={setShowSignIn}
-            showSignUp={showSignUp}
-            setShowSignUp={setShowSignUp}
-            signedOut={signedOut}
-            setSignedOut={setSignedOut} 
+            signedIn={signedIn}
+            setSignedIn={setSignedIn}
           />
         </header>
 
@@ -54,12 +47,7 @@ function App() {
             <HomePages 
               signedIn={signedIn}
               setSignedIn={setSignedIn}
-              showSignIn={showSignIn}
-              setShowSignIn={setShowSignIn}
-              showSignUp={showSignUp}
-              setShowSignUp={setShowSignUp}
-              signedOut={signedOut}
-              setSignedOut={setSignedOut} 
+              user={user}
             />
           </div>
           <div className="bg-white p-4 rounded-lg shadow-md hidden sm:hidden md:block md:col-start-2 lg:col-start-3">
