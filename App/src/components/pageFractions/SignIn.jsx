@@ -75,7 +75,9 @@ function SignIn(props) {
       .then((data) => {
         if (data.message === 'success') {
           localStorage.setItem('token', data.token)
-          props.setSignedIn(true)
+          if (localStorage.getItem('token')) {
+            props.setSignedIn(true)
+          }
           notifySignIn()
           setSigninError(null)
           navigate('/')

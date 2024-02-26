@@ -21,7 +21,7 @@ const Header = (props) => {
             </li>
             <li>
                 {props.signedIn ? (
-                    <p className="text-white hover:text-gray-300" onClick={signOut}>Sign Out</p>
+                    <p className="bg-red-500 text-white hover:text-gray-300" onClick={signOut}>Sign Out</p>
                 ) : (
                     <Link to="/signIn" className="text-white hover:text-gray-300">Sign In</Link>
                 )}
