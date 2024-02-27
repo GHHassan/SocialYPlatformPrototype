@@ -8,14 +8,11 @@
  * @author Ghulam Hassan Hassani <w20017074>
  */
 
-function Select(props) {
-  const { options, value, identifier, onChange } = props;
-
+function Select({ options, value, identifier, onChange }) {
   
   return (
-    <div className="flex items-center mb-4">
+    < >
       <select
-        className="block md:inline-block p-2 m-5 border text-black border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
         value={value}
         onChange={(e) =>
           onChange(identifier, e.target.value)
@@ -27,7 +24,7 @@ function Select(props) {
           </option>
         ))}
       </select>
-    </div>
+    </>
   );
 }
 

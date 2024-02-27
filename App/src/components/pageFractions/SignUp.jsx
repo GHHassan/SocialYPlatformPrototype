@@ -13,7 +13,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
-import { registerUser } from '../utils/FetchFunctions'
 
 function SignUp(props) {
 
@@ -42,11 +41,15 @@ function SignUp(props) {
         notifyEmptyFields()
         return
       }
-      const data = await registerUser(name, email, password)
+      const data = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/register', {
+        method: 'POST',
+        body: JSON.stringify({ "username": name, "email": email, "password": password })
+    })
+      .then(response => response.json())
       if (data.message === 'success') {
-        setSignUpSuccess(true)
         notifySignUp()
         navigate('/createProfile')
+        setSignUpSuccess(true)
       } else if (data.message === 'matched (Conflict)') {
         setSignUpSuccess(false)
         setMatched(true)

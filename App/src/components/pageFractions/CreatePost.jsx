@@ -27,40 +27,59 @@ const CreatePost = ({ user, setReloadPage }) => {
 
     const imageInputRef = useRef(null);
     const videoInputRef = useRef(null);
-
+    let imageURL = '';
+    let videoURL = '';
     const uploadFile = async () => {
-
         const body = new FormData();
         body.append('image', postImage ? postImage : '');
         body.append('video', postVideo ? postVideo : '');
-        const resopnse = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload', {
+
+        const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload', {
             method: 'POST',
             body: body,
-        })
-        const result = await resopnse.json();
+        });
 
-        if ((result.imageUpload && result.imageUpload.message === 'success')) {
+        const result = await response.json();
+
+        console.log('File upload result:', result);
+        if (result.imageUpload && result.videoUpload) {
+            imageURL = result.imageUpload.url;
+            videoURL = result.videoUpload.url;
             setPostImageURL(result.imageUpload.url);
-        } else if (result && result.message === 'success') {
-            setPostImageURL(result.url);
-        }
-        if (result.videoUpload && result.videoUpload.message === 'success') {
             setPostVideoURL(result.videoUpload.url);
-        } else if (result && result.message === 'success') {
-            setPostVideoURL(result.url);
         }
-    }
+
+        if (result.message) {
+            if (result.imageURL) {
+                setPostImageURL(result.imageURL)
+                imageURL = result.imageURL;
+            }
+            if (result.videoURL) {
+                videoURL = result.videoURL;
+                setPostVideoURL(result.videoURL);
+            }
+        }
+
+        if (!result) {
+            console.error('File upload failed:', result.message);
+        }
+    };
 
     const uploadData = async () => {
+        console.log('imageURL variable: ', imageURL)
+        console.log('videoURL variable: ', videoURL)
+        console.log('postImageURL:', postImageURL);
+        console.log('postVideoURL:', postVideoURL);
         const body = {
             "userID": user.userID,
             "firstName": user.firstName,
-            "lastName": user.lastName, 
+            "lastName": user.lastName,
             "textContent": postContent,
-            "photoPath": postImageURL,
-            "videoPath": postVideoURL,
+            "photoPath": imageURL,
+            "videoPath": videoURL,
         }
         try {
+            console.log('Uploading post data:', body);
             setReloadPage(false);
             const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post', {
                 method: 'POST',
@@ -108,6 +127,7 @@ const CreatePost = ({ user, setReloadPage }) => {
     };
 
     const resetPostForm = () => {
+        console.log('Resetting post form');
         setPostContent('');
         setPostImage(null);
         setPostVideo(null);
@@ -138,7 +158,7 @@ const CreatePost = ({ user, setReloadPage }) => {
                     {postVideoURL && (
                         <img src={postVideoURL} alt="Post Video" className="w-full h-full" />)}
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center mb-1">
                     <label htmlFor="imageInput" className="mr-2">
                         Image
                     </label>

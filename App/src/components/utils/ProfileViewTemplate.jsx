@@ -13,7 +13,7 @@ const ProfileTemplate = (props) => {
     // This is a good candidate for a custom hook
     const fetchProfile = async () => {
         try {
-            const response = await fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/api/profile?userID=${userID}`, {
+            const response = await fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/profile?userID=${userID}`, {
                 method: "GET"
             });
             const data = await response.json();

@@ -3,38 +3,46 @@ import { Routes, Route } from 'react-router-dom'
 import Chat from './pages/Chat'
 import Profile from './pages/Profile'
 import Post from './pageFractions/Post'
-import SingleProfile from './pages/SingleProfile'
-import SignIn from './pageFractions/SignIn'
-import SignUp from './pageFractions/SignUp'
+import OtherUsersProfile from './pages/OtherUsersProfile'
 import CreateProfile from './pages/CreateProfile'
+import Header from './pageFractions/Header'
+import { useEffect } from 'react'
+import { Toaster } from 'react-hot-toast'
 
 const HomePages = (props) => {
 
+  console.log('homepages props = '+{...props})
+
   return (
     <>
-      <Routes>
-        <Route path="/signIn" element={<SignIn 
-          setSignedIn={props.setSignedIn}
-          signedIn={props.signedIn}
-          showSignIn={props.showSignIn}
-        />} />
-        <Route path="/createProfile" element={<CreateProfile
-          setSignedIn={props.setSignedIn}
-        />} />
-        <Route path="/signUp" element={<SignUp 
-          setSignedIn={props.setSignedIn}
-        />} />
-        <Route path="/" element={<Home />} />
-        <Route path="Chat" element={<Chat 
-        />} />
-        <Route path="/profile" 
-          element={<Profile 
-            userID={props.userID}
+      {(!props.showSignIn && !props.showSignUp && props.signedIn) && (
+        <Routes>
+          <Route path="/createProfile" element={<CreateProfile
+            signedIn={props.signedIn}
+            user={props.user}
           />} />
-        <Route path='/post' element={<Post />} />
-        <Route path='/singleProfile/:userID' element={<SingleProfile />} />
-        <Route path="*" element={<div>Not Found</div>} />
-      </Routes>
+
+          <Route path="/" element={<Home
+            signedIn={props.signedIn}
+            user={props.user}
+          />} />
+
+          <Route path="Chat" element={<Chat
+          />} />
+          <Route path="/profile"
+            element={<Profile
+              signedIn={props.signedIn}
+              user={props.user}
+              setUser={props.setUser}
+            />} />
+          <Route path='/post' element={<Post
+            user={props.user}
+            signedIn={props.signedIn}
+          />} />
+          <Route path='/otherUsersProfile/:userID' element={<OtherUsersProfile />} />
+          <Route path="*" element={<div>Not Found</div>} />
+        </Routes>
+      )}
     </>
   )
 }

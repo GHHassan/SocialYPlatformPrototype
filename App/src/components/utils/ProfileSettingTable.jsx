@@ -1,7 +1,8 @@
 import Select from '../pageFractions/Select';
-import { useEffect, useState } from 'react';
+import {useState } from 'react';
 
-const Table = (props) => {
+// fix the dropdown functionality
+const ProfileSettingTable = (user) => {
 
     const [updated, setUpdated] = useState(false);
     const optionalValues = ['Public', 'Friends', 'Private'];
@@ -40,62 +41,42 @@ const Table = (props) => {
 
     const handleSelectChange = (key, value) => {
         console.log(key, value);
-        updateVisibility(key, value);
+        
     }
 
-    // send a put request to the server to update the visibility of the field
-    const updateVisibility = async (key, value) => {
-        try {
-            console.log(JSON.stringify({ 'userID': props.profile.userID ,[key + 'Visibility']: value }))
-            const response = await fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/api/profile`, {
-                method: "PUT",
-                body: JSON.stringify({ 'userID': props.profile.userID ,[key + 'Visibility']: value }),
-            });
-            const data = await response.json();
-            if(data.message === 'success') {
-                setUpdated(true);
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
-
-    useEffect(() => {
-        if(updated) {
-            props.refresh();
-            setUpdated(false);
-        }
-    }, [updated]);
-    const rows = [];
-    for (const [key, value] of Object.entries(props.profile)) {
-        if (settingParams.includes(key)) continue;
-
+    if (user === undefined) {
+        return (
+            <div>
+                <h1>Profile not found</h1>
+            </div>
+        );
+    }
+    const rows = Object.entries(user.user).map(([key, value]) => {
         if (!publicParams.includes(key) && privateParams.includes(key)) {
-            rows.push(
+            return (
                 <tr key={key} className='border-solid'>
                     <td className="py-2 px-4 w-40">{key}</td>
                     <td className="py-2 px-4 w-40">{value ?? ""}</td>
                     <td className="py-2 px-4 w-40">
                         <Select
-                            value={props.profile[key + 'Visibility']}
+                            value={key + 'Visibility'}
                             options={optionalValues}
                             onChange={handleSelectChange}
                             identifier={key}
                         />
                     </td>
                 </tr>
-            );
-        } else {
+            )
+        } else if(publicParams.includes(key)) {
             // If the key is in the intersection, render only the text without Select
-            rows.push(
+            return (
                 <tr key={key}>
                     <td className="py-2 px-4 w-40">{key}</td>
                     <td className="py-2 px-4 w-40">{value ?? ""}</td>
                 </tr>
             );
         }
-    }
-
+    })
     return (
         <table className="border-separate border border-spacing-x-5">
             <thead>
@@ -112,4 +93,4 @@ const Table = (props) => {
     );
 }
 
-export default Table;
+export default ProfileSettingTable;

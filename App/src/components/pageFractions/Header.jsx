@@ -1,34 +1,81 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+/**
+ * Header component
+ * 
+ * This component styles and renders the header
+ * of the application. this includes the title,
+ * sign in and sign out buttons and the nav menu.
+ * 
+ * @uses Menu and SignIn components
+ * @author Ghulam Hassan Hassani <w20017074>
+ */
 
-const Header = (props) => {
+import React from 'react'
+import Menu from './Menu'
+import SignIn from './SignIn'
+import { toast } from 'react-hot-toast'
+import { useLocation } from 'react-router-dom'
+import SignUp from './SignUp'
 
-    const signOut = () => {
-        localStorage.removeItem('token');
-        props.setSignedIn(false);
-    }
+function Header(props) {
+
+  console.log('props:', props)
+  const location = useLocation()
+
+  const signUp = () => {
+    props.setShowSignIn(false)
+    props.setShowSignUp(true)
+  }
+
+  const notifySignOut = () => toast.success('You have successfully signed out!')
+  const signIn = () => {
+    if (location.pathname !== '/signin')
+      props.setShowSignIn(true)
+      props.setShowSignUp(false)
+  }
+
+  const signOut = () => {
+    localStorage.removeItem('token')
+    notifySignOut()
+    props.setShowSignIn(false)
+    props.setSignedIn(false)
+  }
+
   return (
-    <nav className="bg-gray-800">
-        <ul className="flex justify-center space-x-4">
-            <li>
-                <Link to="/" className="text-white hover:text-gray-300">Home</Link>
-            </li>
-            <li>
-                <Link to="/profile" className="text-white hover:text-gray-300">Profile</Link>
-            </li>
-            <li>
-                <Link to="/settings" className="text-white hover:text-gray-300">Settings</Link>
-            </li>
-            <li>
-                {props.signedIn ? (
-                    <p className="bg-red-500 text-white hover:text-gray-300" onClick={signOut}>Sign Out</p>
-                ) : (
-                    <Link to="/signIn" className="text-white hover:text-gray-300">Sign In</Link>
-                )}
-            </li>
-        </ul>
-    </nav>
-  );
-};
+    <>
+      {(!props.signedIn && location.pathname !== '/signin') && (
+        <div className="button-container flex mt-5">
+          <button className="bg-blue-500 rounded-md px-4 text-center text-sm hover:bg-sky-500 ml-auto justify-end"
+            onClick={signIn}>
+            SignIn
+          </button>
+          {!props.showSignIn && <button className="bg-blue-500 rounded-md px-4 text-center text-sm hover:bg-sky-500 ml-2"
+            onClick={signUp}
+          >
+            SignUp
+          </button>}
+        </div>
+      )}
+      {props.signedIn && (
+        <button className="m-5 bg-red-500 rounded-md px-4 text-center hover:bg-sky-500 ml-auto justify-end"
+          onClick={signOut}>
+          Sign Out
+        </button>
+      )}
+      <h1 className='text-4xl text-center text-bold mb-4 '>KF6012 Course Work</h1>
+      <Menu {...props}/>
+      {props.showSignIn &&
+        <SignIn
+          {...props}
+        />
+      }
+      {props.showSignUp && !props.signedIn &&
+        <SignUp
+          {...props}
+        />
+      }
+    </>
+  )
 
-export default Header;
+}
+
+export default Header

@@ -19,9 +19,10 @@
  * @author Ghulam Hassan Hassani <w20017074>
  */
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
+import {jwtDecode } from 'jwt-decode'
 
 function SignIn(props) {
 
@@ -30,16 +31,9 @@ function SignIn(props) {
   const passwordRef = useRef(null)
   const [signinError, setSigninError] = useState(null)
   const notifySignIn = () => toast.success('You have successfully signed in!')
-  const notifySignOut = () => toast.success('You have successfully signed out!')
   const notifySignInError = () => toast.error('Invalid credentials. Please check your username and password.')
   const notiySignInCancel = () => toast.success('Sign in cancelled.')
   const notifyEmptyFields = () => toast.error('Please enter your username and password.')
-
-  useEffect(() => {
-    if (localStorage.getItem('token')) {
-      props.setSignedIn(true)
-    }
-  }, [props.signedIn])
 
   const cancel = () => {
     navigate('/')
@@ -53,11 +47,12 @@ function SignIn(props) {
     } else {
       const encodedString = btoa(usernameRef.current.value.toLowerCase() + ':' + passwordRef.current.value)
       fetchToken(encodedString)
+      navigate('/')
     }
   }
 
   const fetchToken = (encodedString) => {
-    fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/token`,{
+    fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/token`, {
       method: 'GET',
       headers: new Headers({ Authorization: 'Basic ' + encodedString }),
     })
@@ -77,10 +72,12 @@ function SignIn(props) {
           localStorage.setItem('token', data.token)
           if (localStorage.getItem('token')) {
             props.setSignedIn(true)
+            navigate('/')
           }
           notifySignIn()
           setSigninError(null)
-          navigate('/')
+          console.log('ready to navigate')
+          
         } else {
           setSigninError('Invalid response from the server.')
           notifySignInError()
@@ -89,14 +86,10 @@ function SignIn(props) {
       .catch(() => { })
   }
 
-  const signOut = () => {
-    localStorage.removeItem('token')
-    props.setSignedIn(false)
-    notifySignOut()
-  }
-
   const signUp = () => {
     navigate('/signUp')
+    props.setShowSignIn(false)
+    props.setShowSignUp(true)
   }
 
   return (
@@ -127,8 +120,8 @@ function SignIn(props) {
             <button
               className="py-1 px-4 bg-blue-500 hover:bg-sky-500 rounded-md text-white ml-2"
               onClick={signUp}>
-                Sign Up
-              </button>
+              Sign Up
+            </button>
             <button
               className="py-1 px-4 bg-blue-500 hover:bg-sky-500 rounded-md text-white ml-2"
               onClick={cancel}

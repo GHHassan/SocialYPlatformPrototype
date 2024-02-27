@@ -1,42 +1,83 @@
 import HomePages from "./components/HomePages";
-import Headers from "./components/pageFractions/Header";
-import { jwtDecode } from "jwt-decode"
+import Footer from "./components/pageFractions/Footer";
+import Header from "./components/pageFractions/Header";
+import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
-import toast, {Toaster} from "react-hot-toast";
+import {Toaster} from "react-hot-toast";
 
 function App() {
 
-  const [postOwnerUserID, setPostOwnerUserID] = useState("");
   const [signedIn, setSignedIn] = useState(false);
-  const [user, setUser] = useState({});//[userID, setUserID] = useState(null);
+  const [user, setUser] = useState(null);
+  const [showSignIn, setShowSignIn] = useState(false)
+  const [showSignUp, setShowSignUp] = useState(false)
+  const [initialized, setInitialized] = useState(false);
 
-  const token = localStorage.getItem('token');
-  
-  useEffect(() => {
-    if (token) {
-      const decodedToken = jwtDecode(token);
-      if (decodedToken.exp * 1000 < new Date().getTime()) {
-        localStorage.removeItem('token');
-        setSignedIn(false);
-      } else {
-        setUser(decodedToken);
-        setSignedIn(true);
+  const userDetails = async () => {
+    try {
+      let userID = '';
+      if (localStorage.getItem('token') !== null) {
+        const token = localStorage.getItem('token');
+        userID = jwtDecode(token).sub;
+      }
+      console.log('userID:', userID);
+      console.log('settinn user');
+      const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/profile?userID=' + userID);
+      const data = await response.json();
+      console.log('fetched')
+      if (data.message === 'success') {
+        console.log(data.message)
+        setUser(data[0]);
+        console.log(userID)
+        console.log("user" + data);
+        return data[0];
       }
     }
-  }, [token]);
+    catch (error) {
+      console.log('Error:', error);
+    }
+  }
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (token && !initialized) {
+        userDetails();
+        setSignedIn(true);
+        setInitialized(true);
+    } else if (token && signedIn) {
+        userDetails();
+    }
+}, [signedIn, initialized]);
+  
   return (
     <>
       <div className="bg-gray-100 font-sans">
-        {/* Header */}
-        <header className="bg-white p-4 shadow-md">
-          <Headers 
-            signedIn={signedIn}
-            setSignedIn={setSignedIn}
-          />
-        </header>
-
-        {/* Main Content */}
+      <Header
+        signedIn={signedIn}
+        setSignedIn={setSignedIn}
+        showSignIn={showSignIn}
+        setShowSignIn={setShowSignIn}
+        showSignUp={showSignUp}
+        setShowSignUp={setShowSignUp}
+        user={user}
+        setUser={setUser}
+        initialized={initialized}
+        setInitialized={setInitialized}
+      />
+      <div>
+        <Toaster
+          toastOptions={
+            {
+              className: '',
+              style: {
+                background: '#3a80c9',
+                color: '#fff',
+              }
+            }
+          }
+        />
+      </div>
         <main className="mt-8 lg:mt-8 sm:mx-5 md:mx-5 lg:m-auto max-w-7xl grid gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {/* hot toast notifications */}
             <div>
@@ -48,16 +89,18 @@ function App() {
               signedIn={signedIn}
               setSignedIn={setSignedIn}
               user={user}
+              setUser={setUser}
+              showSignIn={showSignIn}
+              setShowSignIn={setShowSignIn}
             />
           </div>
           <div className="bg-white p-4 rounded-lg shadow-md hidden sm:hidden md:block md:col-start-2 lg:col-start-3">
             Chat
           </div>
-        </main>
-
+        </main> 
         {/* footer goes here */}
-        <footer className="bg-white p-4 mt-8 shadow-md">
-          Footer
+        <footer className="bg-white p-4 m-8 shadow-md">
+          <Footer />
         </footer>
       </div>
     </>

@@ -2,7 +2,7 @@
 import ProfileTemplate from '../utils/ProfileViewTemplate';
 import { useParams } from 'react-router-dom';
 
-const SingleProfile = () => {
+const OtherUsersProfile = () => {
     const { userID } = useParams();
     return (
         <div>
@@ -11,4 +11,4 @@ const SingleProfile = () => {
     );
 }
 
-export default SingleProfile;
+export default OtherUsersProfile;
