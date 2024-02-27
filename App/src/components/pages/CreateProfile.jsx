@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import Select from '../pageFractions/Select';
 import { jwtDecode } from "jwt-decode"
+import  {useNavigate } from 'react-router-dom';
+
 const CreateProfile = () => {
 
   const [firstName, setFirstName] = useState('');
@@ -12,12 +14,10 @@ const CreateProfile = () => {
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
+  const [relationshipStatus, setRelationshipStatus] = useState('');
   const [profilePicturePath, setProfilePicturePath] = useState('');
   const [coverPicturePath, setCoverPicturePath] = useState('');
-  const [relationshipStatus, setRelationshipStatus] = useState('');
-  const [profilePictureFile, setProfilePictureFile] = useState(null);
-  const [coverPictureFile, setCoverPictureFile] = useState(null);
-
+  // setting states for visibility
   const [dateOfBirthVisibility, setDateOfBirthVisibility] = useState('Private');
   const [genderVisibility, setGenderVisibility] = useState('Private');
   const [emailVisibility, setEmailVisibility] = useState('Private');
@@ -25,29 +25,59 @@ const CreateProfile = () => {
   const [addressVisibility, setAddressVisibility] = useState('Private');
   const [relationshipStatusVisibility, setRelationshipStatusVisibility] = useState('Private');
   const [profileVisibility, setProfileVisibility] = useState('Private');
-  const [profilePictureURL, setProfilePictureURL] = useState('');
-  const [coverPictureURL, setCoverPictureURL] = useState('');
   const options = ['Private', 'Friends', 'Public']
+  const navigate = useNavigate();
+
+  let profilePicture = null;
+  let coverPicture = null;
+  let profilePicturePathTemp = null;
+  let coverPicturePathTemp = null;
+
   let user = null;
   if (localStorage.getItem('token')) {
     user = jwtDecode(localStorage.getItem('token'))
   }
 
-  const uploadFile = async (imageFile, setURL) => {
+  const uploadFile = async (imageFile, type) => {
     const body = new FormData();
     body.append('image', imageFile);
     const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload', {
-        method: 'POST',
-        body: body,
+      method: 'POST',
+      body: body,
     })
     const data = await response.json();
     if (data.message === 'success') {
-      setURL(data.url);
+      if (type === 'profilePicture') {
+        profilePicturePathTemp = data.imageURL;
+      } else if (type === 'coverPicture') {
+        coverPicturePathTemp = data.imageURL;
+      }
+      console.log('Image uploaded successfully:', data.imageURL);
     }
-}
+  }
 
-console.log('User:', user);
   const updateProfile = async () => {
+    //upload profile and cover pictures
+    let imageResponses = {};
+
+    if (profilePicture && coverPicture) {
+      imageResponses['profilePicture'] = await uploadFile(profilePicture, 'profilePicture');
+      imageResponses['coverPicture'] = await uploadFile(coverPicture, 'coverPicture');
+    } else if (profilePicture) {
+      imageResponses['profilePicture'] = await uploadFile(profilePicture, 'profilePicture');
+    } else if (coverPicture) {
+      imageResponses['coverPicture'] = await uploadFile(coverPicture, 'coverPicture');
+    }
+
+    if (imageResponses['profilePicture'] || imageResponses['profilePicture']) {
+      console.log('Profile picture uploaded successfully:');
+      console.log('Cover picture: ' + imageResponses['coverPicture']?.message);
+      console.log('Profile picture: ' + imageResponses['profilePicture']?.message);
+    } else {
+      console.error('Error uploading profile picture:', imageResponses['profilePicture']?.message);
+    }
+
+
     // Send a POST request to the server with the updated profile data
     const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/profile',
       {
@@ -63,8 +93,8 @@ console.log('User:', user);
           "email": email,
           "phoneNumber": phoneNumber,
           "address": address,
-          "profilePicturePath": profilePicturePath,
-          "coverPicturePath": coverPicturePath,
+          "profilePicturePath": profilePicturePathTemp,
+          "coverPicturePath": coverPicturePathTemp,
           "relationshipStatus": relationshipStatus,
 
           "profileVisibility": profileVisibility,
@@ -81,6 +111,8 @@ console.log('User:', user);
     if (data.message === 'success') {
       console.log('Profile updated successfully');
       resetFormFields();
+    }else if(data.message === "user already exists (Forbidden)"){
+      navigate('/profile');
     }
   }
 
@@ -104,8 +136,9 @@ console.log('User:', user);
     setDateOfBirth(e.target.value);
   };
 
-  const handleGenderChange = (e) => {
-    setGender(e.target.value);
+  const handleGenderChange = (identifier, value) => {
+    console.log(identifier, value);
+    setGender(value);
   };
 
   const handleEmailChange = (e) => {
@@ -123,14 +156,18 @@ console.log('User:', user);
   const handleProfilePictureChange = (e) => {
     // Ensure that a file was selected
     if (e.target.files.length > 0) {
-      uploadFile(e.target.files[0], setProfilePictureURL);
+      profilePicture = e.target.files[0];
+      setProfilePicturePath(URL.createObjectURL(e.target.files[0]));
+      console.log(profilePicturePath);
     }
   };
 
   const handleCoverPictureChange = (e) => {
     // Ensure that a file was selected
     if (e.target.files.length > 0) {
-      uploadFile(e.target.files[0], setCoverPictureURL);
+      setCoverPicturePath(URL.createObjectURL(e.target.files[0]));
+      coverPicture = e.target.files[0];
+      console.log(coverPicturePath);
     }
   };
 
@@ -166,6 +203,11 @@ console.log('User:', user);
   const handleRelationshipStatusVisibilityChange = (identifier, value) => {
     console.log(identifier, value);
     setRelationshipStatusVisibility(value);
+  }
+
+  const handleProfileVisibilityChange = (identifier, value) => {
+    console.log(identifier, value);
+    setProfileVisibility(value);
   }
 
   const handleSubmit = (e) => {
@@ -210,6 +252,7 @@ console.log('User:', user);
 
   return (
     <form onSubmit={handleSubmit} className=" mx-auto mt-8 p-6 bg-white rounded-md shadow-md">
+      {/* profile and cover Pictures */}
       <div>
         <label htmlFor="coverPictureInput" className="block text-sm font-medium text-gray-600">
           Cover Picture:
@@ -225,7 +268,7 @@ console.log('User:', user);
           htmlFor="coverPictureInput"
           className="cursor-pointer block mb-4 relative w-full h-44 bg-cover bg-center rounded-md"
           style={{
-            backgroundImage: `url(${coverPictureURL})`, // Use the cover picture path here
+            backgroundImage: `url(${coverPicturePath})`, // Use the cover picture path here
           }}
         >
           <div className="absolute inset-0 bg-black bg-opacity-30"></div>
@@ -245,12 +288,13 @@ console.log('User:', user);
           htmlFor="profilePictureInput"
           className="cursor-pointer block w-16 h-16 bg-cover bg-center rounded-full border-4 border-black -mt-8 mx-auto"
           style={{
-            backgroundImage: `url(${profilePictureURL})`, // Use the profile picture path here
+            backgroundImage: `url(${profilePicturePath})`, // Use the profile picture path here
           }}
         >
         </label>
       </div>
 
+      {/* Profile form fields */}
       <div className="mb-4">
         <label htmlFor="firstNameInput" className="block text-sm font-medium text-gray-600">
           First Name:
@@ -264,6 +308,7 @@ console.log('User:', user);
           className="mt-1 p-2 border rounded-md w-full"
         />
       </div>
+
       <div className="mb-4">
         <label htmlFor="lastNameInput" className="block text-sm font-medium text-gray-600">
           Last Name:
@@ -277,6 +322,7 @@ console.log('User:', user);
           className="mt-1 p-2 border rounded-md w-full"
         />
       </div>
+
       <div className="mb-4">
         <label htmlFor="bioInput" className="block text-sm font-medium text-gray-600">
           Bio:
@@ -289,6 +335,7 @@ console.log('User:', user);
           className="mt-1 p-2 border rounded-md w-full"
         />
       </div>
+
       <div className="mb-4">
         <label htmlFor="websiteInput" className="block text-sm font-medium text-gray-600">
           Website:
@@ -301,35 +348,31 @@ console.log('User:', user);
           className="mt-1 p-2 border rounded-md w-full"
         />
       </div>
+
       <div className="mb-4">
         <label htmlFor="dateOfBirthInput" className="block text-sm font-medium text-gray-600">
           Date of Birth:
         </label>
         <input
-          type="text"
+          type="date"
           id="dateOfBirthInput"
           value={dateOfBirth}
           onChange={handleDateOfBirthChange}
           className="mt-1 p-2 border rounded-md w-full"
         />
+        {visibilityDropdown(options, dateOfBirthVisibility, 'Date of Birth Visibility', handleDateOfBirthVisibilityChange)}
       </div>
-
-      {visibilityDropdown(options, dateOfBirthVisibility, 'Date of Birth Visibility', handleDateOfBirthVisibilityChange)}
 
       <div className="mb-4">
         <label htmlFor="genderInput" className="block text-sm font-medium text-gray-600">
           Gender:
         </label>
-        <input
-          type="text"
-          id="genderInput"
-          value={gender}
-          onChange={handleGenderChange}
-          className="mt-1 p-2 border rounded-md w-full"
-        />
+        <div className="mt-1 p-2 border rounded-md w-full">
+          {visibilityDropdown(['Male', 'Female', 'LGBTQ', 'Prefer Not to say'], gender, '', handleGenderChange)}
+        </div>
+        {visibilityDropdown(options, genderVisibility, 'Gender Visibility', handleGenderVisibilityChange)}
       </div>
 
-      {visibilityDropdown(options, genderVisibility, 'Gender Visibility', handleGenderVisibilityChange)}
       <div className="mb-4">
         <label htmlFor="emailInput" className="block text-sm font-medium text-gray-600">
           Email:
@@ -340,9 +383,10 @@ console.log('User:', user);
           value={email}
           onChange={handleEmailChange}
           className="mt-1 p-2 border rounded-md w-full"
-        />
+          />
+          {visibilityDropdown(options, emailVisibility, 'Email Visibility', handleEmailVisibilityChange)}
       </div>
-      {visibilityDropdown(options, emailVisibility, 'Email Visibility', handleEmailVisibilityChange)}
+
       <div className="mb-4">
         <label htmlFor="phoneNumberInput" className="block text-sm font-medium text-gray-600">
           Phone Number:
@@ -354,8 +398,9 @@ console.log('User:', user);
           onChange={handlePhoneNumberChange}
           className="mt-1 p-2 border rounded-md w-full"
         />
+        {visibilityDropdown(options, phoneNumberVisibility, 'Phone Number Visibility', handlePhoneNumberVisibilityChange)}
       </div>
-      {visibilityDropdown(options, phoneNumberVisibility, 'Phone Number Visibility', handlePhoneNumberVisibilityChange)}
+
       <div className="mb-4">
         <label htmlFor="addressInput" className="block text-sm font-medium text-gray-600">
           Address:
@@ -367,8 +412,9 @@ console.log('User:', user);
           onChange={handleAddressChange}
           className="mt-1 p-2 border rounded-md w-full"
         />
+        {visibilityDropdown(options, addressVisibility, 'Address Visibility', handleAddressVisibilityChange)}
       </div>
-      {visibilityDropdown(options, addressVisibility, 'Address Visibility', handleAddressVisibilityChange)}
+
       <div className="mb-4">
         <label htmlFor="relationshipStatusInput" className="block text-sm font-medium text-gray-600">
           Relationship Status:
@@ -380,9 +426,21 @@ console.log('User:', user);
           onChange={handleRelationshipStatusChange}
           className="mt-1 p-2 border rounded-md w-full"
         />
+        {visibilityDropdown(options, relationshipStatusVisibility, 'Relationship Status Visibility', handleRelationshipStatusVisibilityChange)}
       </div>
-      {visibilityDropdown(options, relationshipStatusVisibility, 'Relationship Status Visibility', handleRelationshipStatusVisibilityChange)}
+
+      <div className="mb-4">
+        <label htmlFor="genderInput" className="block text-sm font-medium text-gray-600">
+          Profile Visibility:
+        </label>
+        <div className="mt-1 p-2 border rounded-md w-full">
+          {visibilityDropdown(options, profileVisibility, '', handleProfileVisibilityChange)}
+        </div>
+      </div>
+
+
       <button type="submit" className="bg-blue-500 text-white rounded-md p-2">Submit</button>
+
     </form>
   );
 };

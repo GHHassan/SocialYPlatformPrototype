@@ -26,6 +26,7 @@ function SignUp(props) {
   const [emptyFields, setEmptyFields] = useState(false)
   const [matched, setMatched] = useState(false)
   const [modified, setModified] = useState(true)
+  const [showCreateProfile, setShowCreateProfile] = useState(false)
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
   const notifySignUp = () => toast.success('You have successfully signed up!')
@@ -48,7 +49,7 @@ function SignUp(props) {
       .then(response => response.json())
       if (data.message === 'success') {
         notifySignUp()
-        navigate('/createProfile')
+        setShowCreateProfile(true)
         setSignUpSuccess(true)
       } else if (data.message === 'matched (Conflict)') {
         setSignUpSuccess(false)
@@ -94,8 +95,13 @@ function SignUp(props) {
     setName(e.target.value)
     modify()
   }
-  const handleEmail1Change = (e) => {
+  const handleEmailChange = (e) => {
     setEmail(e.target.value)
+    modify()
+  }
+
+  const handlepasswordChange = (e) => {
+    setPassword(e.target.value)
     modify()
   }
 
@@ -104,10 +110,6 @@ function SignUp(props) {
     modify()
   }
 
-  const handlepasswordChange = (e) => {
-    setPassword(e.target.value)
-    modify()
-  }
 
   return (
     <div className="bg-stone-300 p-2 flex-grow mt-10 mb-10 w-10/12 lg:w-8/12 md:w-9/12 text-md text-center m-10 rounded-xl">
@@ -127,7 +129,7 @@ function SignUp(props) {
             placeholder="Email"
             className="p-2 my-2 w-9/12 lg:w-80 block md:w-80 bg-slate-100 rounded-md text-black m-auto"
             value={email}
-            onChange={handleEmail1Change}
+            onChange={handleEmailChange}
           />
           <p className="text-red-500 text-sm">
             {invalidEmail && "Please enter a valid email address."}
@@ -137,14 +139,14 @@ function SignUp(props) {
           </p>
           <input
             type="password"
-            placeholder="Re-enter password"
+            placeholder="enter password"
             className="p-2 w-9/12 lg:w-80 block md:w-80 bg-slate-100 rounded-md text-black m-auto"
             value={password}
             onChange={handlepasswordChange}
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Re-enter password"
             className="p-2 my-2 w-9/12 lg:w-80 md:w-80 bg-slate-100 rounded-md text-black m-auto"
             value={password2}
             onChange={handlepassword2Change}

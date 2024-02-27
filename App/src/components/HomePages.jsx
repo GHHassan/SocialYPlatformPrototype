@@ -39,6 +39,10 @@ const HomePages = (props) => {
             user={props.user}
             signedIn={props.signedIn}
           />} />
+          <Route path='/createProfile' element={<CreateProfile
+            user={props.user}
+            setUser={props.setUser}
+          />} />
           <Route path='/otherUsersProfile/:userID' element={<OtherUsersProfile />} />
           <Route path="*" element={<div>Not Found</div>} />
         </Routes>
