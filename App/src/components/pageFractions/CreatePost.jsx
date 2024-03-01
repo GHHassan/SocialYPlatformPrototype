@@ -19,7 +19,7 @@ import { useRef, useState } from 'react';
 import Select from './Select';
 import { toast } from 'react-hot-toast';
 
-const CreatePost = ({ user, setReloadPage, post, setShowEditPost }) => {
+const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }) => {
 
     const [postContent, setPostContent] = useState(post ? post.textContent :'');
     const [postImage, setPostImage] = useState(null);
@@ -35,12 +35,13 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost }) => {
     let videoURL = '';
 
     const uploadFile = async () => {
+        const method = showEditPost ? 'PUT' : 'POST';
         const body = new FormData();
         body.append('image', postImage ? postImage : '');
         body.append('video', postVideo ? postVideo : '');
 
         const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload', {
-            method: 'POST',
+            method: method,
             body: body,
         });
 
@@ -69,8 +70,10 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost }) => {
     };
 
     const uploadData = async () => {
+        const method = showEditPost ? 'PUT' : 'POST';
         console.log('Uploading data, post visibility' + postVisibility);
         const body = {
+            "postID": post ? post.postID : '',
             "userID": user.userID,
             "firstName": user.firstName,
             "lastName": user.lastName,
@@ -80,9 +83,8 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost }) => {
             "visibility": postVisibility
         }
         try {
-            setReloadPage(false);
             const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post', {
-                method: 'POST',
+                method: method,
                 body: JSON.stringify(body),
             })
             const data = await response.json();
@@ -120,24 +122,21 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost }) => {
         }
         await uploadData();
         resetPostForm();
-        // setShowEditPost(false);
-        resetPostForm();
     }
 
 
     const handlePostSubmit = async (e) => {
         e.preventDefault();
-        handleMessageChange(message)
         if (!postContent && !postImage && !postVideo) {
             toast.error('Empty Post, Please input some Text or medis file');
             return;
         }
+        handleMessageChange(message)
         setToBeSubmitted(true);
 
     };
 
     const resetPostForm = () => {
-        console.log('Resetting post form');
         setPostContent('');
         setPostImage(null);
         setPostVideo(null);

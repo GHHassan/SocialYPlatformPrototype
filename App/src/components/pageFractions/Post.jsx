@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import CreatePost from './CreatePost';
 import { toast } from 'react-hot-toast';
 
-const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, setShowEditPost, postTobeEdited, setPostToBeEdited }) => {
+const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, setShowEditPost, postToBeEdited, setPostToBeEdited }) => {
 
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const visibilityOptions = ['Public', 'Friends', 'Private'];
@@ -64,10 +64,8 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, 
     }
 
     const handleEditPost = (post) => {
-        setPostToBeEdited((prev) => ({...prev, ...post}));
+        setPostToBeEdited({...post});
         setShowEditPost(true);
-        console.log('Post to be edited', post);
-        console.log('showEditPost', showEditPost);
     }
 
     const handleDeletePost = (post) => {
@@ -132,12 +130,11 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, 
     return (
         <div>
             {postJSX}
-            {showEditPost && (
+            {showEditPost && postToBeEdited && (
                 <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
                 <div className='bg-white p-6 rounded-lg max-h-full'>
-                    {console.log('Post to be edited', postTobeEdited)}
                     <CreatePost
-                        post={postTobeEdited}
+                        post={postToBeEdited}
                         reloadPage={reloadPage}
                         setReloadPage={setReloadPage}
                         user={user}
