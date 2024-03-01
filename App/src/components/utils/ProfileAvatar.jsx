@@ -1,5 +1,6 @@
 import React from 'react';
 import {useNavigate} from 'react-router-dom';
+import OtherUsersProfile from '../pages/OtherUsersProfile';
 
 const ProfileAvatar = ({ imagePath, userID, firstName, lastName, w, h }) => {
   
@@ -9,7 +10,6 @@ const ProfileAvatar = ({ imagePath, userID, firstName, lastName, w, h }) => {
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
   const image = hasImage ? (
     <img
-      className="object-cover w-full h-full"
       src={imagePath}
       alt={fullName}
     />
@@ -23,11 +23,11 @@ const ProfileAvatar = ({ imagePath, userID, firstName, lastName, w, h }) => {
     if(userID === null || userID === undefined || userID === '') {
       return;
     }
-    navigate(`/singleProfile/${userID}`);
+    navigate(`/profileViewTemplate/${userID}`);
   }
   
   return (
-      <div className={`relative w-${w} h-${h} overflow-hidden rounded-full m-2 cursor-pointer`}
+      <div 
         onClick={handleClick}
       >
         {image} 

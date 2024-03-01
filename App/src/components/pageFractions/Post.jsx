@@ -1,12 +1,10 @@
-import React from 'react';
-import ProfileAvatar from '../utils/ProfileAvatar';
-import Select from './Select';
+import PostTemplate from '../utils/PostTemplate';
 import { useState, useEffect } from 'react';
+import CreatePost from './CreatePost';
+import { toast } from 'react-hot-toast';
 
-const Post = ({ reloadPage, setReloadPage, posts, setPosts, user}) => {
+const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, setShowEditPost, postTobeEdited, setPostToBeEdited }) => {
 
-    // const [posts, setPosts] = useState([]);
-    const [isDropdownVisible, setDropdownVisibility] = useState(false);
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const visibilityOptions = ['Public', 'Friends', 'Private'];
 
@@ -26,10 +24,34 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user}) => {
     }
 
     const deletePost = async (post) => {
-        console.log('Deleting post:', post);
         try {
             const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post?postID=' + post.postID, {
                 method: 'DELETE',
+            })
+            const data = await response.json();
+            if (data.message === 'success') {
+                toast.success('Post deleted successfully');
+                setReloadPage(true);
+            }
+        }
+        catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    useEffect(() => {
+        if (reloadPage) {
+            fetchPost();
+            console.log('Reloading page', posts);
+            setReloadPage(false);
+        }
+    }, [reloadPage]);
+
+    const updatePostVisibility = async (post) => {
+        try {
+            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post', {
+                method: 'PUT',
+                body: JSON.stringify(post),
             })
             const data = await response.json();
             if (data.message === 'success') {
@@ -41,8 +63,11 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user}) => {
         }
     }
 
-    const handleUpdatePost = (post) => {
-        console.log('Update post:', post);
+    const handleEditPost = (post) => {
+        setPostToBeEdited((prev) => ({...prev, ...post}));
+        setShowEditPost(true);
+        console.log('Post to be edited', post);
+        console.log('showEditPost', showEditPost);
     }
 
     const handleDeletePost = (post) => {
@@ -54,100 +79,48 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user}) => {
         setDropdownIndex(dropdownIndex === index ? null : index);
     };
 
-    const handVisibility = (key, value) => {
-        console.log(key, value);
-    }
+    const handVisibility = (post, key) => {
+        const myPost = { ...post, visibility: key };
+        updatePostVisibility(myPost);
+    };
 
     useEffect(() => {
-        console.log('Reload page:', reloadPage);
         if (reloadPage) {
             fetchPost();
             setReloadPage(false);
         }
     }, [reloadPage]);
 
-    useEffect(() => {
-        fetchPost();
-    }, []);
+    const handleLikeClick = () => {
+        console.log('Like clicked');
+    }
+
+    const handleCommentClick = () => {
+        console.log('Comment clicked');
+    }
+
+    const handleShareClick = () => {
+        console.log('Share clicked');
+    }
 
     const postJSX = posts[0] !== 'No posts found' ? (
         posts.map((post, index) => (
-            <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 my-4" key={index}>
-                { (
-                    <div className="relative">
-                        <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg p-2"
-                            onClick={() => handleDropdownToggle(index)}>...</button>
-                        {dropdownIndex === index && (
-                            <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg p-2">
-                                <button className="text-blue-500" onClick={() => handleUpdatePost(post)}>Update</button>
-                                <button className="text-red-500 ml-2" onClick={() => handleDeletePost(post)}>Delete</button>
-                            </div>
-                        )}
-                    </div>
-                )}
-                {/* Post body */}
-                <div className="flex items-start">
-                    <div className="mr-4">
-                        <ProfileAvatar
-                            imagePath={post.profilePicturePath}
-                            firstName={post.firstName}
-                            lastName={post.lastName}
-                            userID={post.userID}
-                        />
-                    </div>
-                    <div className="flex-1">
-                        <div className="flex justify-between items-center mb-2">
-                            <div>
-                                <p className="text-sm text-gray-500">{post.postDateTime}</p>
-                                {user.userID === post.userID && (
-                                <p className="text-sm text-gray-500" >Audience: 
-                                    <span className="text-sm text-gray-500 ml-4" >
-                                        <Select 
-                                            options={visibilityOptions}
-                                            value={post.visibility}
-                                            identifier={post.postID}
-                                            onChange={handVisibility}
-                                        />
-                                    </span>
-                                </p>)}
-                                <p className="text-sm text-gray-500">{post.location}</p>
-                            </div>
-                            {/* Add any additional post meta info here */}
-                        </div>
-                    </div>
-                </div>
-                <div className='m-2 bg-blue-200'>
-                    <h1 className="text-lg font-semibold mb-2">{post.textContent}</h1>
-
-                    {post.videoPath &&
-                        <div className="video-container mb-2">
-                            <video controls width="100%" height="auto">
-                                <source src={post.videoPath} type="video/mp4" />
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                    }
-
-                    {post.photoPath &&
-                        <div className="image-container mb-2">
-                            <img src={post.photoPath} alt="Post Image" style={{ width: '100%', height: 'auto' }} />
-                        </div>
-                    }
-                </div>
-
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                        <button className="text-blue-500">Like</button>
-                        <button className="text-blue-500 ml-2">Comment</button>
-                        <button className="text-blue-500 ml-2">Share</button>
-                    </div>
-                </div>
-                <div className="flex items-center">
-                    <input type="text" className="border border-gray-300 rounded-lg p-2 w-full mr-2" placeholder="Write a comment..." />
-                    <button className="bg-blue-500 text-white rounded-lg p-2">Post</button>
-                </div>
-                {/* Post comments */}
-
+            // className="bg-gray-100 border border-gray-300 rounded-lg p-4 my-4"
+            <div className='my-4 p-5 border border-gray-300 rounded-lg' key={index}>
+                <PostTemplate
+                    post={post}
+                    index={index}
+                    user={user}
+                    handleDropdownToggle={handleDropdownToggle}
+                    dropdownIndex={dropdownIndex}
+                    handleEditPost={handleEditPost}
+                    handleDeletePost={handleDeletePost}
+                    handleVisibility={handVisibility}
+                    handleLikeClick={handleLikeClick}
+                    handleCommentClick={handleCommentClick}
+                    handleShareClick={handleShareClick}
+                    visibilityOptions={visibilityOptions}
+                />
             </div>
         ))
     ) : (
@@ -156,15 +129,24 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user}) => {
         </div>
     );
 
-
-    console.log('Posts:', postJSX.length);
     return (
         <div>
-            {postJSX.length > 0 && postJSX[0] === 'No posts found' ? (
-                <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 my-4">
-                    <h1 className="text-xl font-semibold">No posts found</h1>
+            {postJSX}
+            {showEditPost && (
+                <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
+                <div className='bg-white p-6 rounded-lg max-h-full'>
+                    {console.log('Post to be edited', postTobeEdited)}
+                    <CreatePost
+                        post={postTobeEdited}
+                        reloadPage={reloadPage}
+                        setReloadPage={setReloadPage}
+                        user={user}
+                        showEditPost={showEditPost}
+                        setShowEditPost={setShowEditPost}
+                    />
                 </div>
-            ) : postJSX}
+            </div>            
+            )}
         </div>
     );
 };

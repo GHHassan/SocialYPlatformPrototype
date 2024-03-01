@@ -1,28 +1,32 @@
 import Post from '../pageFractions/Post';
 import CreatePost from '../pageFractions/CreatePost';
+import CreateProfile from './CreateProfile';
 import { useState } from 'react';
-import { useEffect } from 'react';
 
 const Home = (props) => {
+    // props.setReloadPage(true);
+    const [isDropdownVisible, setDropdownVisibility] = useState(false);
 
-    const [reloadPage, setReloadPage] = useState(true);
-    const [posts, setPosts] = useState([]);
+    if(!props.user || props.user.userID == null){
+
+        return (
+            <CreateProfile 
+                {...props}
+                isDropdownVisible={isDropdownVisible}
+                setDropdownVisibility={setDropdownVisibility}    
+            />
+        )
+    }
 
     return (
        <>
-       <CreatePost
-            signedIn={props.signedIn}
-            user={props.user}
-            setReloadPage={setReloadPage}
+       <CreatePost 
+        {...props}
+        isDropdownVisible={isDropdownVisible}
+        setDropdownVisibility={setDropdownVisibility}
         />
 
-        <Post 
-            signedIn={props.signedIn}
-            user={props.user}
-            setReloadPage={setReloadPage}
-            reloadPage={reloadPage}
-            posts={posts}
-            setPosts={setPosts}
+        <Post {...props}
         />
        </>
     );

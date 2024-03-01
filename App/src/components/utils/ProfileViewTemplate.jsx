@@ -1,12 +1,11 @@
 
 import Table from './ProfileViewTable';
-import ProfileAvatar from './ProfileAvatar';
+import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
-const ProfileTemplate = (props) => {
-    const { userID } = props;
+const ProfileTemplate = () => {
+    const { userID } = useParams();
     const [profile, setProfile] = useState(null);
-    const [profilePicture, setProfilePicture] = useState(null);
 
 
     // Fetch Profile is repeated in ProfileViewTemplate.jsx
@@ -21,14 +20,6 @@ const ProfileTemplate = (props) => {
             console.log(data);
             const firstProfile = data[0];
             setProfile(firstProfile);
-            setProfilePicture(
-                <ProfileAvatar
-                    imagePath={firstProfile.profilePicturePath}
-                    firstName={firstProfile.firstName}
-                    lastName={firstProfile.lastName}
-                    userID={firstProfile.userID}
-                />
-            );
         } catch (error) {
             console.error('Error:', error);
         }
@@ -43,12 +34,6 @@ const ProfileTemplate = (props) => {
     } else {
         return (
             <>
-                <div>
-                    <h1 className="flex justify-center">{profile.firstName} {profile.lastName}</h1>
-                </div>
-                <div className="flex justify-center">
-                    {profilePicture}
-                </div>
                 <div>
                     <Table
                         profile={profile}

@@ -19,10 +19,10 @@
  * @author Ghulam Hassan Hassani <w20017074>
  */
 
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
-import {jwtDecode } from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 
 function SignIn(props) {
 
@@ -71,12 +71,17 @@ function SignIn(props) {
         if (data.message === 'success') {
           localStorage.setItem('token', data.token)
           if (localStorage.getItem('token')) {
+            const decodedToken = jwtDecode(data.token)
+            if (decodedToken && decodedToken.exp > Date.now() / 1000) {
+              props.setUser(decodedToken)
+              props.setSignedIn(true)
+              navigate('/')
+            }
             props.setSignedIn(true)
             navigate('/')
           }
           notifySignIn()
           setSigninError(null)
-          console.log('ready to navigate')
           
         } else {
           setSigninError('Invalid response from the server.')

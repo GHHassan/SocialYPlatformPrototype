@@ -15,20 +15,25 @@
 
 
 
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import Select from './Select';
+import { toast } from 'react-hot-toast';
 
-const CreatePost = ({ user, setReloadPage }) => {
+const CreatePost = ({ user, setReloadPage, post, setShowEditPost }) => {
 
-    const [postContent, setPostContent] = useState('');
+    const [postContent, setPostContent] = useState(post ? post.textContent :'');
     const [postImage, setPostImage] = useState(null);
     const [postVideo, setPostVideo] = useState(null);
-    const [postImageURL, setPostImageURL] = useState('');
-    const [postVideoURL, setPostVideoURL] = useState('');
-
+    const [postImageURL, setPostImageURL] = useState(post ? post.photoPath :'');
+    const [postVideoURL, setPostVideoURL] = useState(post ? post.videoPath :'');
+    const [postVisibility, setPostVisibility] = useState(post ? post.visibility : 'Friends');
+    const [toBeSubmitted, setToBeSubmitted] = useState(false);
+    const [message, setMessage] = useState(post? post.visibility : 'Friends');
     const imageInputRef = useRef(null);
     const videoInputRef = useRef(null);
     let imageURL = '';
     let videoURL = '';
+
     const uploadFile = async () => {
         const body = new FormData();
         body.append('image', postImage ? postImage : '');
@@ -40,8 +45,6 @@ const CreatePost = ({ user, setReloadPage }) => {
         });
 
         const result = await response.json();
-
-        console.log('File upload result:', result);
         if (result.imageUpload && result.videoUpload) {
             imageURL = result.imageUpload.url;
             videoURL = result.videoUpload.url;
@@ -66,10 +69,7 @@ const CreatePost = ({ user, setReloadPage }) => {
     };
 
     const uploadData = async () => {
-        console.log('imageURL variable: ', imageURL)
-        console.log('videoURL variable: ', videoURL)
-        console.log('postImageURL:', postImageURL);
-        console.log('postVideoURL:', postVideoURL);
+        console.log('Uploading data, post visibility' + postVisibility);
         const body = {
             "userID": user.userID,
             "firstName": user.firstName,
@@ -77,9 +77,9 @@ const CreatePost = ({ user, setReloadPage }) => {
             "textContent": postContent,
             "photoPath": imageURL,
             "videoPath": videoURL,
+            "visibility": postVisibility
         }
         try {
-            console.log('Uploading post data:', body);
             setReloadPage(false);
             const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post', {
                 method: 'POST',
@@ -87,6 +87,8 @@ const CreatePost = ({ user, setReloadPage }) => {
             })
             const data = await response.json();
             if (data.message === 'success') {
+                resetPostForm();
+                toast.success('Post created successfully');
                 setReloadPage(true);
             }
         }
@@ -111,19 +113,27 @@ const CreatePost = ({ user, setReloadPage }) => {
         setPostVideo(file);
     };
 
-    const handlePostSubmit = async (e) => {
-        e.preventDefault();
-        if (!postContent && !postImage && !postVideo) {
-            console.log('Post content is required');
-            return;
-        }
-        console.log('Post submitted');
+    const postAnyWay = async () => {
+        setToBeSubmitted(false);
         if (postImage || postVideo) {
             await uploadFile();
         }
         await uploadData();
-        setReloadPage(true);
         resetPostForm();
+        // setShowEditPost(false);
+        resetPostForm();
+    }
+
+
+    const handlePostSubmit = async (e) => {
+        e.preventDefault();
+        handleMessageChange(message)
+        if (!postContent && !postImage && !postVideo) {
+            toast.error('Empty Post, Please input some Text or medis file');
+            return;
+        }
+        setToBeSubmitted(true);
+
     };
 
     const resetPostForm = () => {
@@ -133,6 +143,7 @@ const CreatePost = ({ user, setReloadPage }) => {
         setPostVideo(null);
         setPostImageURL('');
         setPostVideoURL('');
+        setShowEditPost(false);
         if (imageInputRef.current) {
             imageInputRef.current.value = '';
         }
@@ -141,9 +152,37 @@ const CreatePost = ({ user, setReloadPage }) => {
         }
     }
 
+    const handleMessageChange = (value) => {
+        if (!value) return;
+        if (value === 'Private' ) {
+            setMessage('This post will only be visible to you, Are you sure, you want to continue?');
+        } else if (value === 'Friends' ) {
+            setMessage('This post will only be visible to your friends on SocialY, Are you sure, you want to continue?');
+        } else {
+            setMessage('This post will be visible to everyone, Are you sure, you want to continue?');
+        }
+    }
+
+    const handlePostVisibilityChange = (userID, value) => {
+        handleMessageChange(value);
+        setPostVisibility(value);
+    }
+
     return (
         <div>
             <h2>Create Post</h2>
+            <div className="flex justify-between items-center mb-2 mr-2 float-end">
+                <p className=' mr-2'>Select your Audience</p>
+                <div className="flex mr-0"> 
+                    <Select
+                        options={['Public', 'Friends', 'Private']}
+                        value={postVisibility}
+                        identifier={user.userID}
+                        onChange={handlePostVisibilityChange}
+                    />
+                </div>
+            </div>
+
             <form onSubmit={handlePostSubmit}>
                 <div>
                     <textarea
@@ -183,12 +222,34 @@ const CreatePost = ({ user, setReloadPage }) => {
                         onChange={handleVideoChange}
                     />
                 </div>
-
-                <button type="submit" className="bg-blue-500 text-white rounded-lg p-2"
-                    onClick={handlePostSubmit}>
-                    Post
-                </button>
+                { (postContent || postImage || postVideo) &&
+                <div className='flex justify-center'>
+                    <button type="submit" className="bg-blue-500 text-white rounded-lg p-2 w-20 mt-2 mr-2"
+                        onClick={handlePostSubmit}>
+                        Post
+                    </button>
+                    <button className="bg-blue-500 text-white rounded-lg p-2 w-20 mt-2"
+                        onClick={resetPostForm}>
+                        Cancel
+                    </button>
+                </div>
+                }
             </form>
+            {}
+            {toBeSubmitted && <div className="fixed top-1/4 left-1/4 right-1/4 bg-red-500 text-white p-4 text-center">
+                <p className="font-bold">Consider the audience of your post!</p>
+                <p>{message}</p>
+                <p>Remember to be mindful of your content and its impact on your privacy.</p>
+                <button className="bg-white text-red-500 p-2 rounded-lg mt-2 mr-4"
+                    onClick={() => setToBeSubmitted(false)}>
+                    updateVisibility
+                </button>
+                <button className="bg-white text-red-500 p-2 rounded-lg mt-2"
+                    onClick={postAnyWay}>
+                    Post Anyway
+                </button>
+
+            </div>}
         </div>
     );
 };

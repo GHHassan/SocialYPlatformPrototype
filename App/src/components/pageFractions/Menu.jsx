@@ -35,7 +35,7 @@ function Menu(props) {
                 Home
             </li>
           </Link>
-          <Link to="/profile">
+          <Link to="/settings">
             <li onClick={hideSignInAndUp} 
               className="mb-3 bg-stone-200 rounded-md px-4 text-center hover:bg-sky-500">
                 Setting

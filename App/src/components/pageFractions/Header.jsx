@@ -18,7 +18,6 @@ import SignUp from './SignUp'
 
 function Header(props) {
 
-  console.log('props:', props)
   const location = useLocation()
 
   const signUp = () => {
@@ -35,6 +34,7 @@ function Header(props) {
 
   const signOut = () => {
     localStorage.removeItem('token')
+    props.setUser(null)
     notifySignOut()
     props.setShowSignIn(false)
     props.setSignedIn(false)

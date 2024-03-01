@@ -12,6 +12,10 @@ function App() {
   const [showSignIn, setShowSignIn] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
   const [initialized, setInitialized] = useState(false);
+  const [reloadPage, setReloadPage] = useState(true);
+  const [posts, setPosts] = useState([]);
+  const [showEditPost, setShowEditPost] = useState(false);
+  const [postToBeEdited, setPostToBeEdited] = useState(null);
 
   const userDetails = async () => {
     try {
@@ -20,16 +24,11 @@ function App() {
         const token = localStorage.getItem('token');
         userID = jwtDecode(token).sub;
       }
-      console.log('userID:', userID);
-      console.log('settinn user');
       const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/profile?userID=' + userID);
       const data = await response.json();
-      console.log('fetched')
       if (data.message === 'success') {
-        console.log(data.message)
         setUser(data[0]);
-        console.log(userID)
-        console.log("user" + data);
+        setInitialized(true);
         return data[0];
       }
     }
@@ -92,6 +91,14 @@ function App() {
               setUser={setUser}
               showSignIn={showSignIn}
               setShowSignIn={setShowSignIn}
+              posts={posts}
+              setPosts={setPosts}
+              reloadPage={reloadPage}
+              setReloadPage={setReloadPage}
+              showEditPost={showEditPost}
+              setShowEditPost={setShowEditPost}
+              postToBeEdited={postToBeEdited}
+              setPostToBeEdited={setPostToBeEdited}
             />
           </div>
           <div className="bg-white p-4 rounded-lg shadow-md hidden sm:hidden md:block md:col-start-2 lg:col-start-3">

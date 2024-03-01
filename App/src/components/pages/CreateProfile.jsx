@@ -3,7 +3,14 @@ import Select from '../pageFractions/Select';
 import { jwtDecode } from "jwt-decode"
 import  {useNavigate } from 'react-router-dom';
 
-const CreateProfile = () => {
+const CreateProfile = ({ signedIn, user }) => {
+
+ if (signedIn && !user){
+    const token = localStorage.getItem('token');
+    user = jwtDecode(token);
+  }else{
+    console.log('user from create profile = not found')
+  }
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -11,7 +18,7 @@ const CreateProfile = () => {
   const [website, setWebsite] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(user.email);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [address, setAddress] = useState('');
   const [relationshipStatus, setRelationshipStatus] = useState('');
@@ -32,11 +39,6 @@ const CreateProfile = () => {
   let coverPicture = null;
   let profilePicturePathTemp = null;
   let coverPicturePathTemp = null;
-
-  let user = null;
-  if (localStorage.getItem('token')) {
-    user = jwtDecode(localStorage.getItem('token'))
-  }
 
   const uploadFile = async (imageFile, type) => {
     const body = new FormData();
@@ -76,7 +78,6 @@ const CreateProfile = () => {
     } else {
       console.error('Error uploading profile picture:', imageResponses['profilePicture']?.message);
     }
-
 
     // Send a POST request to the server with the updated profile data
     const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/profile',
@@ -253,6 +254,7 @@ const CreateProfile = () => {
   return (
     <form onSubmit={handleSubmit} className=" mx-auto mt-8 p-6 bg-white rounded-md shadow-md">
       {/* profile and cover Pictures */}
+      <h2 className="text-3xl font-semibold text-center mb-4">Please, complete your Profile to Continue</h2>
       <div>
         <label htmlFor="coverPictureInput" className="block text-sm font-medium text-gray-600">
           Cover Picture:
@@ -296,8 +298,9 @@ const CreateProfile = () => {
 
       {/* Profile form fields */}
       <div className="mb-4">
+        <h3 className='text-red-500 text-center'>Inputs with Astrisk * indicates Mandatory field</h3>
         <label htmlFor="firstNameInput" className="block text-sm font-medium text-gray-600">
-          First Name:
+          First Name: *
         </label>
         <input
           type="text"
@@ -311,7 +314,7 @@ const CreateProfile = () => {
 
       <div className="mb-4">
         <label htmlFor="lastNameInput" className="block text-sm font-medium text-gray-600">
-          Last Name:
+          Last Name: *
         </label>
         <input
           type="text"
@@ -351,7 +354,7 @@ const CreateProfile = () => {
 
       <div className="mb-4">
         <label htmlFor="dateOfBirthInput" className="block text-sm font-medium text-gray-600">
-          Date of Birth:
+          Date of Birth: *
         </label>
         <input
           type="date"
@@ -375,7 +378,7 @@ const CreateProfile = () => {
 
       <div className="mb-4">
         <label htmlFor="emailInput" className="block text-sm font-medium text-gray-600">
-          Email:
+          Email: *
         </label>
         <input
           type="email"
@@ -437,8 +440,6 @@ const CreateProfile = () => {
           {visibilityDropdown(options, profileVisibility, '', handleProfileVisibilityChange)}
         </div>
       </div>
-
-
       <button type="submit" className="bg-blue-500 text-white rounded-md p-2">Submit</button>
 
     </form>

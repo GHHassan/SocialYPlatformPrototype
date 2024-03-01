@@ -8,7 +8,7 @@
  * @author Ghulam Hassan Hassani <w20017074>
  */
 
-function Select({ options, value, identifier, onChange }) {
+function Select({ options, value, identifier = '', onChange }) {
   
   return (
     < >
