@@ -1,11 +1,24 @@
 import ProfileAvatar from '../utils/ProfileAvatar';
 import Select from '../pageFractions/Select';
 
-const PostTemplate = ({post, index, visibilityOptions, user, handleDropdownToggle, dropdownIndex, handleEditPost, handleDeletePost, handleVisibility, handleLikeClick, handleShareClick, handleCommentClick }) => {
+const PostTemplate = ({
+    post,
+    index,
+    visibilityOptions,
+    user,
+    handleDropdownToggle,
+    dropdownIndex,
+    handleEditPost,
+    handleDeletePost,
+    handleVisibility,
+    handleLikeClick,
+    handleShareClick,
+    handleCommentClick
+}) => {
     return (
         <div >
             <div className="bg-gray-100 border-b-2 border-double border-gray300 pt-4">
-                {(
+                {user.userID === post.userID && (
                     <div className="relative">
                         <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg p-2"
                             onClick={() => handleDropdownToggle(index)}>...</button>

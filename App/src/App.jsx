@@ -12,10 +12,10 @@ function App() {
   const [showSignIn, setShowSignIn] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
   const [initialized, setInitialized] = useState(false);
-  const [reloadPage, setReloadPage] = useState(true);
-  const [posts, setPosts] = useState([]);
-  const [showEditPost, setShowEditPost] = useState(false);
-  const [postToBeEdited, setPostToBeEdited] = useState(null);
+  // const [reloadPage, setReloadPage] = useState(true);
+  // const [posts, setPosts] = useState([]);
+  // const [showEditPost, setShowEditPost] = useState(false);
+  // const [postToBeEdited, setPostToBeEdited] = useState(null);
 
   const userDetails = async () => {
     try {
@@ -91,14 +91,6 @@ function App() {
               setUser={setUser}
               showSignIn={showSignIn}
               setShowSignIn={setShowSignIn}
-              posts={posts}
-              setPosts={setPosts}
-              reloadPage={reloadPage}
-              setReloadPage={setReloadPage}
-              showEditPost={showEditPost}
-              setShowEditPost={setShowEditPost}
-              postToBeEdited={postToBeEdited}
-              setPostToBeEdited={setPostToBeEdited}
             />
           </div>
           <div className="bg-white p-4 rounded-lg shadow-md hidden sm:hidden md:block md:col-start-2 lg:col-start-3">

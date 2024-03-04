@@ -3,25 +3,10 @@ import { useState, useEffect } from 'react';
 import CreatePost from './CreatePost';
 import { toast } from 'react-hot-toast';
 
-const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, setShowEditPost, postToBeEdited, setPostToBeEdited }) => {
+const Post = ({ reloadPage, setReloadPage, posts, user, showEditPost, setShowEditPost, postToBeEdited, setPostToBeEdited }) => {
 
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const visibilityOptions = ['Public', 'Friends', 'Private'];
-
-    const fetchPost = async () => {
-        try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post');
-            const data = await response.json();
-            if (data && data.message === 'success' && Object.keys(data).length > 0) {
-                delete data.message;
-                setPosts(Object.values(data));
-            } else {
-                setPosts(['No posts found']);
-            }
-        } catch (error) {
-            setPosts(['Error fetching posts']);
-        }
-    }
 
     const deletePost = async (post) => {
         try {
@@ -38,14 +23,6 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, 
             console.error('Error:', error);
         }
     }
-
-    useEffect(() => {
-        if (reloadPage) {
-            fetchPost();
-            console.log('Reloading page', posts);
-            setReloadPage(false);
-        }
-    }, [reloadPage]);
 
     const updatePostVisibility = async (post) => {
         try {
@@ -64,7 +41,7 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, 
     }
 
     const handleEditPost = (post) => {
-        setPostToBeEdited({...post});
+        setPostToBeEdited({ ...post });
         setShowEditPost(true);
     }
 
@@ -81,13 +58,6 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, 
         const myPost = { ...post, visibility: key };
         updatePostVisibility(myPost);
     };
-
-    useEffect(() => {
-        if (reloadPage) {
-            fetchPost();
-            setReloadPage(false);
-        }
-    }, [reloadPage]);
 
     const handleLikeClick = () => {
         console.log('Like clicked');
@@ -130,9 +100,9 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, 
     return (
         <div>
             {postJSX}
-            {showEditPost && postToBeEdited && (
+            {(showEditPost && postToBeEdited) && (
                 <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
-                <div className='bg-white p-6 rounded-lg max-h-full'>
+                <div className='bg-white p-6 rounded-lg max-h-screen max-w-[60%] overflow-y-auto'>
                     <CreatePost
                         post={postToBeEdited}
                         reloadPage={reloadPage}
@@ -145,6 +115,7 @@ const Post = ({ reloadPage, setReloadPage, posts, setPosts, user, showEditPost, 
             </div>            
             )}
         </div>
+
     );
 };
 
