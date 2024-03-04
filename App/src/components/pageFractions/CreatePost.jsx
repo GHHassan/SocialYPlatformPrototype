@@ -119,8 +119,8 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
             "firstName": user.firstName,
             "lastName": user.lastName,
             "textContent": postContent,
-            "photoPath": imageURL,
-            "videoPath": videoURL,
+            "photoPath": postImageURL,
+            "videoPath": postVideoURL,
             "visibility": postVisibility
         }
         try {
@@ -180,7 +180,6 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
             }
 
             await uploadData();
-            console.log('oldphotoPath recieved :', oldphotoPath);
             if (showEditPost && oldphotoPath) {
                 await deleteImage(oldphotoPath);
             }
