@@ -184,11 +184,9 @@ const CreateProfile = ({ user }) => {
     const handleProfilePictureChange = (e) => {
         // Ensure that a file was selected
         if (e.target.files.length > 0) {
-            setProfilePicture((prevProfilePicture) => {
+            setProfilePicture(() => {
                 setNewProfilePicture(e.target.files[0])
-                console.log('Previous Profile Picture:', prevProfilePicture);
                 const newProfilePicture = e.target.files[0];
-                console.log('New Profile Picture:', newProfilePicture);
                 setProfilePicturePath(URL.createObjectURL(newProfilePicture));
                 return newProfilePicture;
             });
@@ -306,6 +304,21 @@ const CreateProfile = ({ user }) => {
                     className="mt-1 p-2 border rounded-md w-full"
                 />
             </div>
+
+            {/* username */}
+            <div className="mb-4">
+            <label htmlFor="username">
+                Username:
+            </label>
+            <input
+                type="text" readOnly
+                id="username"
+                value={user.username}
+                disabled
+                className="mt-1 p-2 border rounded-md w-full"
+            />
+            </div>
+            
 
             <div className="mb-4">
                 <label htmlFor="bioInput" className="block text-sm font-medium text-gray-600">

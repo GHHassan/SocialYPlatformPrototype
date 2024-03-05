@@ -325,6 +325,18 @@ const CreateProfile = ({ signedIn, user }) => {
           className="mt-1 p-2 border rounded-md w-full"
         />
       </div>
+      <div className="mb-4">
+        <label htmlFor="usernameInput" className="block text-sm font-medium text-gray-600">
+          Username:
+        </label>
+        <input
+          type="text" readOnly
+          disabled
+          id="usernameInput"
+          value={user.username}
+          className="mt-1 p-2 border rounded-md w-full"
+        />
+      </div>
 
       <div className="mb-4">
         <label htmlFor="bioInput" className="block text-sm font-medium text-gray-600">

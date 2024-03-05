@@ -58,12 +58,12 @@ useEffect(() => {
           <Route path="/settings"
             element={<Settings {...props}
             />} />
-          <Route path='/post' element={<Post 
+          {/* <Route path='/post' element={<Post 
             {...props}
             posts={posts}
           />} />
           <Route path='/createProfile' element={<CreateProfile {...props}
-          />} />
+          />} /> */}
           <Route path='/profileViewTemplate/:userID' element={<OtherUsersProfile {...props} />} />
           <Route path="*" element={<div>Not Found</div>} />
         </Routes>

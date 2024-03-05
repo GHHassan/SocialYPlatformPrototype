@@ -25,16 +25,16 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
     const [postVideo, setPostVideo] = useState(null);
     const [postImageURL, setPostImageURL] = useState(post ? post.photoPath : '');
     const [postVideoURL, setPostVideoURL] = useState(post ? post.videoPath : '');
-    const [oldphotoPath, setOldphotoPath] = useState(null);
-    const [oldvideoPath, setOldvideoPath] = useState(null);
+    const [oldphotoPath, setOldphotoPath] = useState(post ? post.postImageURL : '');
+    const [oldvideoPath, setOldvideoPath] = useState(post ? post.postVideoURL : '');
+    const [newImagePath, setNewImagePath] = useState(null);
+    const [newVideoPath, setNewVideoPath] = useState(null);
     const [postVisibility, setPostVisibility] = useState(post ? post.visibility : 'Friends');
     const [toBeSubmitted, setToBeSubmitted] = useState(false);
     const [mediaUploaded, setMediaUploaded] = useState(false);
     const [message, setMessage] = useState(post ? post.visibility : 'Friends');
     const imageInputRef = useRef(null);
     const videoInputRef = useRef(null);
-    let imageURL = '';
-    let videoURL = '';
 
     const deleteImage = async (imageName) => {
         console.log('imageName:', imageName);
@@ -53,7 +53,6 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
             console.error('Error during deleteImage:', error);
         }
     };
-
 
     const deleteVideo = async (videoName) => {
         try {
@@ -86,21 +85,20 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
         if (result.imageUpload && result.videoUpload) {
             if (result.imageUpload.message === 'success') {
                 toast.success('Image uploaded successfully');
-                setPostImageURL(result.imageUpload.imageURL);
+                setNewImagePath(result.imageUpload.imageURL);
             }
             if (result.videoUpload.message === 'success') {
                 toast.success('Video uploaded successfully');
-                setPostVideoURL(result.videoUpload.videoURL);
+                setNewVideoPath(result.videoUpload.videoURL);
             }
             setMediaUploaded(true);
         } else if (result.message) {
             if (result.imageURL) {
-                setPostImageURL(result.imageURL)
-                imageURL = result.imageURL;
+                setNewImagePath((prevUrl) => result.imageURL || prevUrl);
             }
             if (result.videoURL) {
                 videoURL = result.videoURL;
-                setPostVideoURL(result.videoURL);
+                setNewVideoPath((prevUrl) => result.videoURL || prevUrl);
             }
             setMediaUploaded(true);
         }
@@ -110,29 +108,33 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
     }
 
     const uploadData = async () => {
-        console.log(imageURL)
-        console.log(videoURL)
-        const method = showEditPost ? 'PUT' : 'POST';
-        const body = {
-            "postID": post ? post.postID : '',
-            "userID": user.userID,
-            "firstName": user.firstName,
-            "lastName": user.lastName,
-            "textContent": postContent,
-            "photoPath": postImageURL,
-            "videoPath": postVideoURL,
-            "visibility": postVisibility
-        }
         try {
             const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post', {
-                method: method,
-                body: JSON.stringify(body),
+                method: showEditPost ? 'PUT' : 'POST',
+                body: JSON.stringify(
+                    {
+                        "postID": showEditPost ? post.postID : '',
+                        "userID": user.userID,
+                        "firstName": user.firstName,
+                        "lastName": user.lastName,
+                        "textContent": postContent,
+                        "photoPath":  newImagePath ? newImagePath : postImageURL,
+                        "videoPath": newVideoPath ? newVideoPath : postVideoURL,
+                        "visibility": postVisibility
+                    }
+                ),
             })
             const data = await response.json();
             if (data.message === 'success') {
                 resetPostForm();
                 toast.success('Post created successfully');
                 setReloadPage(true);
+            }
+            if (showEditPost && oldphotoPath) {
+                deleteImage(oldphotoPath);
+            }
+            if (showEditPost && oldvideoPath) {
+                deleteVideo(oldvideoPath);
             }
         }
         catch (error) {
@@ -155,8 +157,8 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
         const file = e.target.files[0];
         checkFileSize(file);
         if (showEditPost) {
-            setOldphotoPath(post.photoPath);  
-        } 
+            setOldphotoPath(post.photoPath);
+        }
         setPostImage(file);
         setPostImageURL(URL.createObjectURL(file));
     };
@@ -179,18 +181,22 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
                 await uploadFile();
             }
 
-            await uploadData();
-            if (showEditPost && oldphotoPath) {
-                await deleteImage(oldphotoPath);
+            if (postContent) {
+                setMediaUploaded(true);
             }
 
-            if (showEditPost && oldvideoPath) {
-                await deleteVideo(oldvideoPath);
-            }
+
         } catch (error) {
             console.error('Error during postAnyWay:', error);
         }
     };
+
+    useEffect(() => {
+        if (mediaUploaded) {
+            uploadData();
+            setMediaUploaded(false);
+        }
+    }, [mediaUploaded]);
 
     const handlePostSubmit = async (e) => {
         e.preventDefault();
@@ -264,6 +270,7 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
                             <button
                                 className="absolute top-0 right-0 p-1 bg-gray-300 rounded-full"
                                 onClick={() => {
+                                    setOldphotoPath(postImageURL);
                                     setPostImage(null);
                                     setPostImageURL('');
                                     imageInputRef.current.value = '';
@@ -280,6 +287,7 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
                             <button
                                 className="absolute top-0 right-0 p-1 bg-gray-300 rounded-full"
                                 onClick={() => {
+                                    setOldvideoPath(postVideoURL);
                                     setPostVideo(null);
                                     setPostVideoURL('');
                                     videoInputRef.current.value = '';

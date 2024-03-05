@@ -12,21 +12,21 @@ function App() {
   const [showSignIn, setShowSignIn] = useState(false)
   const [showSignUp, setShowSignUp] = useState(false)
   const [initialized, setInitialized] = useState(false);
-  // const [reloadPage, setReloadPage] = useState(true);
-  // const [posts, setPosts] = useState([]);
-  // const [showEditPost, setShowEditPost] = useState(false);
-  // const [postToBeEdited, setPostToBeEdited] = useState(null);
 
   const userDetails = async () => {
     try {
       let userID = '';
+      let username = '';
       if (localStorage.getItem('token') !== null) {
         const token = localStorage.getItem('token');
         userID = jwtDecode(token).sub;
+        username = jwtDecode(token).username;
       }
       const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/profile?userID=' + userID);
       const data = await response.json();
       if (data.message === 'success') {
+        const user = data[0];
+        user.username = username;
         setUser(data[0]);
         setInitialized(true);
         return data[0];

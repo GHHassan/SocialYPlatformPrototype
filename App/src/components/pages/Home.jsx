@@ -4,7 +4,6 @@ import CreateProfile from './CreateProfile';
 import { useState, useEffect } from 'react';
 
 const Home = (props) => {
-    // props.setReloadPage(true);
     const [isDropdownVisible, setDropdownVisibility] = useState(false);
 
     const fetchPost = async () => {
@@ -21,7 +20,6 @@ const Home = (props) => {
             props.setPosts(['Error fetching posts']);
         }
     }
-
 
     useEffect(() => {
         if (props.reloadPage) {
@@ -47,7 +45,7 @@ const Home = (props) => {
         }
     }
 
-    if(!props.user || props.user.userID == null){
+    if(!props.user || props.user.userID === null){
 
         return (
             <CreateProfile 
@@ -62,13 +60,14 @@ const Home = (props) => {
     return (
        <>
        <CreatePost 
-        {...props}
-        isDropdownVisible={isDropdownVisible}
-        setDropdownVisibility={setDropdownVisibility}
-        deletePost={deletePost}
+            {...props}
+            setDropdownVisibility={setDropdownVisibility}
+            deletePost={deletePost}
         />
 
-        <Post {...props}
+        <Post 
+            {...props}
+            deletePost={deletePost}
         />
        </>
     );
