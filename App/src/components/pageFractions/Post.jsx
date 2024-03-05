@@ -1,7 +1,8 @@
 import PostTemplate from '../utils/PostTemplate';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import CreatePost from './CreatePost';
 import { toast } from 'react-hot-toast';
+import { API_ROOT } from '../../Config';
 
 const Post = ({
     reloadPage,
@@ -18,9 +19,11 @@ const Post = ({
     const visibilityOptions = ['Public', 'Friends', 'Private'];
 
     const deleteImage = async (imageName) => {
-        console.log('imageName:', imageName);
+        if (imageName === '' || imageName === null) {
+            return;
+        }
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload?image=' + imageName, {
+            const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
                 method: 'DELETE',
             });
             const data = await response.json();
@@ -37,7 +40,7 @@ const Post = ({
 
     const deleteVideo = async (videoName) => {
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload?video=' + videoName, {
+            const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
                 method: 'DELETE',
             })
             const data = await response.json();
@@ -53,20 +56,20 @@ const Post = ({
 
     const deletePost = async (post) => {
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post?postID=' + post.postID, {
+            const response = await fetch(`${API_ROOT}/post?postID=${post.postID}`, {
                 method: 'DELETE',
             })
             const data = await response.json();
             if (data.message === 'success') {
                 toast.success('Post deleted successfully');
-
                 if (post.photoPath) {
+                    console.log('deleting photo');
                     const photoDeleted = await deleteImage(post.photoPath)
                     if (photoDeleted.message === 'success') {
                         toast.success('Post photo deleted successfully');
                     }
                 }
-                if (post.videoPath) {
+                if (post.videoPath ) {
                     videoDeleted = await deleteVideo(post.videoPath)
                     if (videoDeleted.message === 'success') {
                         toast.success('Post video deleted successfully');
@@ -82,7 +85,7 @@ const Post = ({
 
     const updatePostVisibility = async (post) => {
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post', {
+            const response = await fetch(`${API_ROOT}/post`, {
                 method: 'PUT',
                 body: JSON.stringify(post),
             })

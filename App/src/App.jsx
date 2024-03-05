@@ -4,6 +4,7 @@ import Header from "./components/pageFractions/Header";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import {Toaster} from "react-hot-toast";
+import { API_ROOT } from "./Config";
 
 function App() {
 
@@ -22,7 +23,7 @@ function App() {
         userID = jwtDecode(token).sub;
         username = jwtDecode(token).username;
       }
-      const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/profile?userID=' + userID);
+      const response = await fetch(`${API_ROOT}/profile?userID=${userID}`);
       const data = await response.json();
       if (data.message === 'success') {
         const user = data[0];

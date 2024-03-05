@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Select from '../pageFractions/Select';
 import { jwtDecode } from "jwt-decode"
 import  {useNavigate } from 'react-router-dom';
+import { API_ROOT } from '../../Config';
 
 const CreateProfile = ({ signedIn, user }) => {
 
@@ -43,7 +44,7 @@ const CreateProfile = ({ signedIn, user }) => {
   const uploadFile = async (imageFile, type) => {
     const body = new FormData();
     body.append('image', imageFile);
-    const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload', {
+    const response = await fetch(`${API_ROOT}/upload`, {
       method: 'POST',
       body: body,
     })
@@ -80,7 +81,7 @@ const CreateProfile = ({ signedIn, user }) => {
     }
 
     // Send a POST request to the server with the updated profile data
-    const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/profile',
+    const response = await fetch(`${API_ROOT}/profile`,
       {
         method: 'POST',
         body: JSON.stringify({

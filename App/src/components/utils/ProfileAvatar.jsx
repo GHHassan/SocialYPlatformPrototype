@@ -1,6 +1,5 @@
 import React from 'react';
 import {useNavigate} from 'react-router-dom';
-import OtherUsersProfile from '../pages/OtherUsersProfile';
 
 const ProfileAvatar = ({ imagePath, userID, firstName, lastName, w, h }) => {
   

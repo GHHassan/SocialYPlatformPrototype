@@ -2,12 +2,13 @@
 import { useEffect } from 'react';
 import ProfileTemplate from '../utils/ProfileViewTemplate';
 import { useParams } from 'react-router-dom';
+import { API_ROOT } from '../../Config';
 
 const OtherUsersProfile = () => {
     const { userID } = useParams();
     let user = null;
     const prospectiveUser = async () => {
-        const response = await fetch (`https://w20017074.nuwebspace.co.uk/kf6003API/profile?userID=${userID}`, {
+        const response = await fetch (`${API_ROOT}/profile?userID=${userID}`, {
             method: 'GET'
         })
         const data = await response.json();

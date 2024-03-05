@@ -12,11 +12,10 @@
  * @author G H Hassani <w20017074>
  */
 
-
-
 import { useEffect, useRef, useState } from 'react';
 import Select from './Select';
 import { toast } from 'react-hot-toast';
+import { API_ROOT } from '../../Config';
 
 const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }) => {
 
@@ -39,7 +38,7 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
     const deleteImage = async (imageName) => {
         console.log('imageName:', imageName);
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload?image=' + imageName, {
+            const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
                 method: 'DELETE',
             });
             const data = await response.json();
@@ -56,7 +55,7 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
 
     const deleteVideo = async (videoName) => {
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload?video=' + videoName, {
+            const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
                 method: 'DELETE',
             })
             const data = await response.json();
@@ -76,7 +75,7 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
         body.append('image', postImage ? postImage : '');
         body.append('video', postVideo ? postVideo : '');
 
-        const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload', {
+        const response = await fetch(`${API_ROOT}/upload`, {
             method: 'POST',
             body: body,
         });
@@ -109,7 +108,7 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
 
     const uploadData = async () => {
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post', {
+            const response = await fetch(`${API_ROOT}/post`, {
                 method: showEditPost ? 'PUT' : 'POST',
                 body: JSON.stringify(
                     {

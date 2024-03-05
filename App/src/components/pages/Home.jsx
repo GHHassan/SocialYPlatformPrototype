@@ -2,13 +2,14 @@ import Post from '../pageFractions/Post';
 import CreatePost from '../pageFractions/CreatePost';
 import CreateProfile from './CreateProfile';
 import { useState, useEffect } from 'react';
+import { API_ROOT } from '../../Config';
 
 const Home = (props) => {
     const [isDropdownVisible, setDropdownVisibility] = useState(false);
 
     const fetchPost = async () => {
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post');
+            const response = await fetch(`${API_ROOT}/post`);
             const data = await response.json();
             if (data && data.message === 'success' && Object.keys(data).length > 0) {
                 delete data.message;
@@ -31,7 +32,7 @@ const Home = (props) => {
 
     const deletePost = async (post) => {
         try {
-            const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/post?postID=' + post.postID, {
+            const response = await fetch(`${API_ROOT}/post?postID= ${post.postID}`, {
                 method: 'DELETE',
             })
             const data = await response.json();
@@ -50,9 +51,6 @@ const Home = (props) => {
         return (
             <CreateProfile 
                 {...props}
-                isDropdownVisible={isDropdownVisible}
-                setDropdownVisibility={setDropdownVisibility}    
-                deletePost={deletePost}
             />
         )
     }

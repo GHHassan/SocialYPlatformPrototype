@@ -13,6 +13,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
+import { API_ROOT } from '../../Config'
 
 function SignUp(props) {
 
@@ -42,7 +43,7 @@ function SignUp(props) {
         notifyEmptyFields()
         return
       }
-      const data = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/register', {
+      const data = await fetch(`${API_ROOT}/register`, {
         method: 'POST',
         body: JSON.stringify({ "username": name, "email": email, "password": password })
     })

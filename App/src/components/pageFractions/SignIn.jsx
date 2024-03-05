@@ -23,6 +23,7 @@ import React, { useRef, useState} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import { jwtDecode } from 'jwt-decode'
+import { API_ROOT } from '../../Config'
 
 function SignIn(props) {
 
@@ -52,7 +53,7 @@ function SignIn(props) {
   }
 
   const fetchToken = (encodedString) => {
-    fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/token`, {
+    fetch(`${API_ROOT}/token`, {
       method: 'GET',
       headers: new Headers({ Authorization: 'Basic ' + encodedString }),
     })

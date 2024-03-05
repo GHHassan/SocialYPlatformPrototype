@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Select from '../pageFractions/Select';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast'
+import { API_ROOT } from '../../Config';
 const CreateProfile = ({ user }) => {
 
     if (!user) {
@@ -41,7 +42,7 @@ const CreateProfile = ({ user }) => {
     const uploadFile = async (imageFile, type) => {
         const body = new FormData();
         body.append('image', imageFile);
-        const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/upload', {
+        const response = await fetch(`${API_ROOT}/upload`, {
             method: 'POST',
             body: body,
         })
@@ -52,7 +53,6 @@ const CreateProfile = ({ user }) => {
             } else if (type === 'coverPicture') {
                 coverPicturePathURL = data.imageURL;
             }
-            console.log('Image uploaded successfully:', data.imageURL);
         }
     }
 
@@ -69,7 +69,7 @@ const CreateProfile = ({ user }) => {
             toast.success('Cover Picture Updated');
         }
         // Send a POST request to the server with the updated profile data
-        const response = await fetch('https://w20017074.nuwebspace.co.uk/kf6003API/profile',
+        const response = await fetch(`${API_ROOT}/profile`,
             {
                 method: 'PUT',
                 body: JSON.stringify({
