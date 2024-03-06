@@ -15,6 +15,7 @@ const PostTemplate = ({
     handleShareClick,
     handleCommentClick
 }) => {
+    console.log('Post:', post);
     return (
         <div >
             <div className="bg-gray-100 border-b-2 border-double border-gray300 pt-4">
@@ -69,7 +70,8 @@ const PostTemplate = ({
                     </div>
                 </div>
 
-                <h1 className="text-lg font-semibold text-gray-500 m-2">{post.firstName} {post.lastName}</h1>
+                <p className="text-lg font-semibold text-gray-500">{post.firstName} {post.lastName}</p>
+                <p className="text-sm text-gray-500">@{post.username}</p>
             </div>
             <div className='m-2 bg-white'>
                 <h1 className="text-lg font-semibold mb-2">{post.textContent}</h1>

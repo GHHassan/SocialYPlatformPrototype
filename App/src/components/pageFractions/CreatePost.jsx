@@ -114,6 +114,7 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
                     {
                         "postID": showEditPost ? post.postID : '',
                         "userID": user.userID,
+                        "username": user.username,
                         "firstName": user.firstName,
                         "lastName": user.lastName,
                         "textContent": postContent,
@@ -124,6 +125,7 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
                 ),
             })
             const data = await response.json();
+            console.log('Data:', data);
             if (data.message === 'success') {
                 resetPostForm();
                 toast.success('Post created successfully');

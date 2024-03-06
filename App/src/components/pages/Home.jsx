@@ -14,6 +14,7 @@ const Home = (props) => {
             if (data && data.message === 'success' && Object.keys(data).length > 0) {
                 delete data.message;
                 props.setPosts(Object.values(data));
+                console.log('Posts:', data);
             } else {
                 props.setPosts(['No posts found']);
             }

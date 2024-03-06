@@ -88,6 +88,7 @@ const CreateProfile = ({ signedIn, user }) => {
           "userID": user['sub'],
           "firstName": firstName,
           "lastName": lastName,
+          "username": user.username,
           "bio": bio,
           "website": website,
           "dateOfBirth": dateOfBirth,
