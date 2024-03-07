@@ -1,8 +1,69 @@
 import PostTemplate from '../utils/PostTemplate';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CreatePost from './CreatePost';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
+
+const SUCCESS_MESSAGE = 'success';
+
+const handleApiResponse = async (response, successMessage) => {
+    const data = await response.json();
+    if (data.message === SUCCESS_MESSAGE) {
+        toast.success(successMessage);
+        setReloadPage(true);
+    } else {
+        console.error('Unexpected response:', data);
+    }
+};
+
+const deleteImage = async (imageName) => {
+    if (!imageName) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
+            method: 'DELETE',
+        });
+        handleApiResponse(response, 'Old image deleted successfully');
+    } catch (error) {
+        console.error('Error during deleteImage:', error);
+    }
+};
+
+const deleteVideo = async (videoName) => {
+    try {
+        const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
+            method: 'DELETE',
+        });
+        handleApiResponse(response, 'Old video deleted successfully');
+    } catch (error) {
+        console.error('Error during deleteVideo:', error);
+    }
+};
+
+const deleteComments = async (postID) => {
+    try {
+        const response = await fetch(`${API_ROOT}/comment?postID=${postID}`, {
+            method: 'DELETE',
+        });
+        handleApiResponse(response, 'Comments deleted successfully');
+    } catch (error) {
+        console.error('Error during deleteComments:', error);
+    }
+};
+
+const updatePostVisibility = async (post) => {
+    try {
+        const response = await fetch(`${API_ROOT}/post`, {
+            method: 'PUT',
+            body: JSON.stringify(post),
+        });
+        handleApiResponse(response, 'Post visibility updated successfully');
+    } catch (error) {
+        console.error('Error during updatePostVisibility:', error);
+    }
+};
 
 const Post = ({
     reloadPage,
@@ -14,125 +75,150 @@ const Post = ({
     postToBeEdited,
     setPostToBeEdited,
 }) => {
-
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const visibilityOptions = ['Public', 'Friends', 'Private'];
-
-    const deleteImage = async (imageName) => {
-        if (imageName === '' || imageName === null) {
-            return;
-        }
-        try {
-            const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
-                method: 'DELETE',
-            });
-            const data = await response.json();
-            if (data.message === 'success') {
-                toast.success('oldImage deleted successfully');
-                setReloadPage(true);
-            } else {
-                console.error('Unexpected response:', data);
-            }
-        } catch (error) {
-            console.error('Error during deleteImage:', error);
-        }
-    };
-
-    const deleteVideo = async (videoName) => {
-        try {
-            const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
-                method: 'DELETE',
-            })
-            const data = await response.json();
-            if (data.message === 'success') {
-                toast.success('oldVideo deleted successfully');
-                setReloadPage(true);
-            }
-        }
-        catch (error) {
-            console.error('Error:', error);
-        }
-    }
+    const [commentContent, setCommentContent] = useState('');
+    const [showComment, setShowComment] = useState({});
+    const [comments, setComments] = useState([]);
+    const [postID, setPostID] = useState('');
 
     const deletePost = async (post) => {
         try {
             const response = await fetch(`${API_ROOT}/post?postID=${post.postID}`, {
                 method: 'DELETE',
-            })
-            const data = await response.json();
-            if (data.message === 'success') {
-                toast.success('Post deleted successfully');
-                if (post.photoPath) {
-                    console.log('deleting photo');
-                    const photoDeleted = await deleteImage(post.photoPath)
-                    if (photoDeleted.message === 'success') {
-                        toast.success('Post photo deleted successfully');
-                    }
-                }
-                if (post.videoPath ) {
-                    videoDeleted = await deleteVideo(post.videoPath)
-                    if (videoDeleted.message === 'success') {
-                        toast.success('Post video deleted successfully');
-                    }
-                }
-                setReloadPage(true);
-            }
-        }
-        catch (error) {
-            console.error('Error:', error);
-        }
-    }
+            });
+            handleApiResponse(response, 'Post deleted successfully');
 
-    const updatePostVisibility = async (post) => {
-        try {
-            const response = await fetch(`${API_ROOT}/post`, {
-                method: 'PUT',
-                body: JSON.stringify(post),
-            })
-            const data = await response.json();
-            if (data.message === 'success') {
-                setReloadPage(true);
+            if (post.photoPath) {
+                await deleteImage(post.photoPath);
             }
+
+            if (post.videoPath) {
+                await deleteVideo(post.videoPath);
+            }
+
+            await deleteComments(post.postID);
+        } catch (error) {
+            console.error('Error during deletePost:', error);
         }
-        catch (error) {
-            console.error('Error:', error);
+    };
+
+    const postComment = async (post) => {
+        const body = {
+            "postID": post.postID,
+            "userID": user.userID,
+            "username": user.username,
+            "profilePath": user.profilePicturePath,
+            "name": `${user.firstName} ${user.lastName}`,
+            "commentContent": commentContent,
+        };
+
+        try {
+            const response = await fetch(`${API_ROOT}/comment`, {
+                method: 'POST',
+                body: JSON.stringify(body),
+            });
+            handleApiResponse(response, 'Comment posted successfully');
+            fetchComments(post.postID);
+            setCommentContent('');
+        } catch (error) {
+            console.error('Error during postComment:', error);
         }
-    }
+    };
+
+    const postLike = async (post) => {
+        const body = {
+            "postID": post.postID,
+            "userID": user.userID,
+            "username": user.username,
+            "name": `${user.firstName} ${user.lastName}`,
+            "ReactionType": ":Like:",
+        };
+
+        try {
+            const response = await fetch(`${API_ROOT}/reaction`, {
+                method: 'POST',
+                body: JSON.stringify(body),
+            });
+            handleApiResponse(response, 'Like posted successfully');
+        } catch (error) {
+            console.error('Error during postLike:', error);
+        }
+    };
+
+    const fetchComments = async (postID) => {
+        try {
+            const response = await fetch(`${API_ROOT}/comment?postID=${postID}`);
+            const data = await response.json();
+            if (data.message === SUCCESS_MESSAGE) {
+                delete data.message;
+                setComments(Object.values(data));
+            }
+        } catch (error) {
+            console.error('Error during fetchComments:', error);
+        }
+    };
 
     const handleEditPost = (post) => {
         setPostToBeEdited({ ...post });
         setShowEditPost(true);
-    }
+    };
 
     const handleDeletePost = (post) => {
         deletePost(post);
-    }
+    };
 
-    // Function to toggle the dropdown visibility
     const handleDropdownToggle = (index) => {
         setDropdownIndex(dropdownIndex === index ? null : index);
     };
 
-    const handVisibility = (post, key) => {
+    const handleVisibility = (post, key) => {
         const myPost = { ...post, visibility: key };
         updatePostVisibility(myPost);
     };
 
-    const handleLikeClick = () => {
-        console.log('Like clicked');
-    }
+    const handleLikeClick = async (post) => {
+        postLike(post);
+    };
 
-    const handleCommentClick = () => {
-        console.log('Comment clicked');
-    }
+    const handleCommentChange = (e) => {
+        setCommentContent(e.target.value);
+    };
+
+    const handleCommentClick = (post) => {
+        setShowComment((prevShowComment) => ({
+            ...prevShowComment,
+            [post.postID]: !prevShowComment[post.postID],
+        }));
+
+        // Fetch comments only if the clicked post's comments are not already loaded
+        if (!showComment[post.postID]) {
+            setPostID(post.postID);
+            fetchComments(post.postID);
+        }
+    };
+    useEffect(() => {
+        if (showComment[postID]) {
+            fetchComments(postID);
+        }
+    }, [showComment, postID]);
+
+    //   const handleCommentClick = (post) => {
+    //     setShowComment((prevShowComment) => ({
+    //       ...prevShowComment,
+    //       [post.postID]: !prevShowComment[post.postID],
+    //     }));
+
+    //     // Set the postID for the current post
+    //     setPostID(post.postID);
+    //   };
 
     const handleShareClick = () => {
         console.log('Share clicked');
-    }
+    };
 
     const postJSX = posts[0] !== 'No posts found' ? (
         posts.map((post, index) => (
-            // className="bg-gray-100 border border-gray-300 rounded-lg p-4 my-4"
             <div className='my-4 p-5 border border-gray-300 rounded-lg' key={index}>
                 <PostTemplate
                     post={post}
@@ -142,11 +228,17 @@ const Post = ({
                     dropdownIndex={dropdownIndex}
                     handleEditPost={handleEditPost}
                     handleDeletePost={handleDeletePost}
-                    handleVisibility={handVisibility}
+                    handleVisibility={handleVisibility}
                     handleLikeClick={handleLikeClick}
-                    handleCommentClick={handleCommentClick}
+                    handleCommentClick={() => handleCommentClick(post)} // Pass post to handleCommentClick
                     handleShareClick={handleShareClick}
                     visibilityOptions={visibilityOptions}
+                    handleCommentChange={handleCommentChange}
+                    handleSubmitComment={postComment}
+                    showComment={showComment[post?.postID]} // Show comment based on the clicked post
+                    comments={comments}
+                    commentContent={commentContent}
+                    postID={post.postID}
                 />
             </div>
         ))
@@ -174,7 +266,6 @@ const Post = ({
                 </div>
             )}
         </div>
-
     );
 };
 

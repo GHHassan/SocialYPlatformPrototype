@@ -8,7 +8,7 @@ const ProfileAvatar = ({ imagePath, userID, firstName, lastName, w, h }) => {
   const fullName = `${firstName} ${lastName}`;
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
   const image = hasImage ? (
-    <img
+    <img className={`w-${w} h-${h} rounded-full cursor-pointer`}
       src={imagePath}
       alt={fullName}
     />
