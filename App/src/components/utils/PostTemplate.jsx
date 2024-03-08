@@ -48,7 +48,6 @@ const PostHeader = ({ post, user, visibilityOptions, handleVisibility }) => (
 const PostContent = ({ post }) => (
   <div className='m-2 bg-white'>
     <h1 className="text-lg font-semibold mb-2">{post.textContent}</h1>
-
     {post.videoPath &&
       <div className="video-container mb-2">
         <video controls width="100%" height="auto">
@@ -82,13 +81,14 @@ const PostActions = ({ handleLikeClick, handleCommentClick, handleShareClick, po
   </div>
 );
 
-const CommentInput = ({ commentContent, handleCommentChange, handleSubmitComment, post }) => (
+const CommentInput = ({ commentContent, handleCommentChange, handleSubmitComment, post, handleCommentClick }) => (
   <div className="flex items-center mb-4">
     <input type="text"
       className="border border-gray-300 rounded-lg p-2 w-full mr-2"
       placeholder="Write a comment..."
       value={commentContent}
-      onChange={(e) => handleCommentChange(e)}
+      onChange={(e) => handleCommentChange(e, post)}
+      onClick={() => {handleCommentClick(post)}}
     />
     <button
       className="bg-blue-500 text-white rounded-lg p-2"
@@ -117,6 +117,7 @@ const PostTemplate = ({
   showComment,
   comments,
   commentContent,
+  showActions,
 }) => (
   <div>
     <div className="bg-white border-b-2 border-double border-gray300">
@@ -124,7 +125,7 @@ const PostTemplate = ({
         <div className="relative">
           <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
             onClick={() => handleDropdownToggle(index)}>...</button>
-          {dropdownIndex === index && (
+          {(dropdownIndex === index && showActions) && (
             <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
               <button className="text-blue-500 text-xs" onClick={() => handleEditPost(post)}>Edit</button>
               <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeletePost(post)}>Delete</button>
@@ -150,6 +151,8 @@ const PostTemplate = ({
       commentContent={commentContent}
       handleCommentChange={handleCommentChange}
       handleSubmitComment={() => handleSubmitComment(post)}
+      handleCommentClick={() => handleCommentClick(post)}
+      showActions={showActions}
     />
 
     {/* Post comments */}

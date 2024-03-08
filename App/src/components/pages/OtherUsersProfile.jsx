@@ -1,6 +1,6 @@
 
 import { useEffect } from 'react';
-import ProfileTemplate from '../utils/ProfileViewTemplate';
+import ProfileTemplate from '../utils/ProfileView';
 import { useParams } from 'react-router-dom';
 import { API_ROOT } from '../../Config';
 
@@ -12,7 +12,6 @@ const OtherUsersProfile = () => {
             method: 'GET'
         })
         const data = await response.json();
-        console.log(data);
         if (data.message === 'success') {
             user = data[0];
         }else {

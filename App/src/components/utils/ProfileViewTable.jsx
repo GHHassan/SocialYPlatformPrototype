@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ProfileView = (profile) => {
+const ProfileViewTable = (profile) => {
     const newProfile = profile.profile;
     const privateParams = [
         "firstName",
@@ -106,4 +106,4 @@ const ProfileView = (profile) => {
     );
 };
 
-export default ProfileView;
+export default ProfileViewTable;

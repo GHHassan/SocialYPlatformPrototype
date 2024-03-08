@@ -6,16 +6,6 @@ import { API_ROOT } from '../../Config';
 
 const SUCCESS_MESSAGE = 'success';
 
-const handleApiResponse = async (response, successMessage) => {
-    const data = await response.json();
-    if (data.message === SUCCESS_MESSAGE) {
-        toast.success(successMessage);
-        setReloadPage(true);
-    } else {
-        console.error('Unexpected response:', data);
-    }
-};
-
 const deleteImage = async (imageName) => {
     if (!imageName) {
         return;
@@ -76,11 +66,22 @@ const Post = ({
     setPostToBeEdited,
 }) => {
     const [dropdownIndex, setDropdownIndex] = useState(null);
+    const [showActions, setShowActions] = useState(false);
     const visibilityOptions = ['Public', 'Friends', 'Private'];
     const [commentContent, setCommentContent] = useState('');
     const [showComment, setShowComment] = useState({});
     const [comments, setComments] = useState([]);
     const [postID, setPostID] = useState('');
+
+    const handleApiResponse = async (response, successMessage) => {
+        const data = await response.json();
+        if (data.message === SUCCESS_MESSAGE) {
+            toast.success(successMessage);
+            setReloadPage(true);
+        } else {
+            console.error('Unexpected response:', data);
+        }
+    };
 
     const deletePost = async (post) => {
         try {
@@ -104,6 +105,7 @@ const Post = ({
     };
 
     const postComment = async (post) => {
+        if (!commentContent) return;
         const body = {
             "postID": post.postID,
             "userID": user.userID,
@@ -152,24 +154,30 @@ const Post = ({
             const data = await response.json();
             if (data.message === SUCCESS_MESSAGE) {
                 delete data.message;
-                setComments(Object.values(data));
+                setComments((prevComments) => ({
+                    ...prevComments,
+                    [postID]: Object.values(data),
+                }));
             }
         } catch (error) {
             console.error('Error during fetchComments:', error);
         }
-    };
+    }
 
     const handleEditPost = (post) => {
         setPostToBeEdited({ ...post });
         setShowEditPost(true);
+        setShowActions(false);
     };
 
     const handleDeletePost = (post) => {
         deletePost(post);
+        setShowActions(false);
     };
 
     const handleDropdownToggle = (index) => {
         setDropdownIndex(dropdownIndex === index ? null : index);
+        setShowActions(true);
     };
 
     const handleVisibility = (post, key) => {
@@ -191,7 +199,6 @@ const Post = ({
             [post.postID]: !prevShowComment[post.postID],
         }));
 
-        // Fetch comments only if the clicked post's comments are not already loaded
         if (!showComment[post.postID]) {
             setPostID(post.postID);
             fetchComments(post.postID);
@@ -202,16 +209,6 @@ const Post = ({
             fetchComments(postID);
         }
     }, [showComment, postID]);
-
-    //   const handleCommentClick = (post) => {
-    //     setShowComment((prevShowComment) => ({
-    //       ...prevShowComment,
-    //       [post.postID]: !prevShowComment[post.postID],
-    //     }));
-
-    //     // Set the postID for the current post
-    //     setPostID(post.postID);
-    //   };
 
     const handleShareClick = () => {
         console.log('Share clicked');
@@ -230,15 +227,17 @@ const Post = ({
                     handleDeletePost={handleDeletePost}
                     handleVisibility={handleVisibility}
                     handleLikeClick={handleLikeClick}
-                    handleCommentClick={() => handleCommentClick(post)} // Pass post to handleCommentClick
+                    handleCommentClick={() => handleCommentClick(post)}
                     handleShareClick={handleShareClick}
                     visibilityOptions={visibilityOptions}
                     handleCommentChange={handleCommentChange}
                     handleSubmitComment={postComment}
-                    showComment={showComment[post?.postID]} // Show comment based on the clicked post
-                    comments={comments}
+                    showComment={showComment[post?.postID]}
+                    comments={comments[post?.postID] || []} // Use comments for the specific post
                     commentContent={commentContent}
                     postID={post.postID}
+                    showActions={showActions}
+                    
                 />
             </div>
         ))

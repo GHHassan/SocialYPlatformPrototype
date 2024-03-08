@@ -1,23 +1,19 @@
 
-import Table from './ProfileViewTable';
+import ProfileViewTable from './ProfileViewTable';
 import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
+import { API_ROOT } from '../../Config';
 
 const ProfileTemplate = () => {
     const { userID } = useParams();
     const [profile, setProfile] = useState(null);
 
-
-    // Fetch Profile is repeated in ProfileViewTemplate.jsx
-    // This is a good candidate for a custom hook
     const fetchProfile = async () => {
         try {
-            const response = await fetch(`https://w20017074.nuwebspace.co.uk/kf6003API/profile?userID=${userID}`, {
+            const response = await fetch(`${API_ROOT}/profile?userID=${userID}`, {
                 method: "GET"
             });
             const data = await response.json();
-            console.log(typeof(data))
-            console.log(data);
             const firstProfile = data[0];
             setProfile(firstProfile);
         } catch (error) {
@@ -35,7 +31,7 @@ const ProfileTemplate = () => {
         return (
             <>
                 <div>
-                    <Table
+                    <ProfileViewTable
                         profile={profile}
                     />
                 </div>

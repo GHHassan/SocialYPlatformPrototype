@@ -3,10 +3,11 @@ import CreatePost from '../pageFractions/CreatePost';
 import CreateProfile from './CreateProfile';
 import { useState, useEffect } from 'react';
 import { API_ROOT } from '../../Config';
+import { useNavigate } from 'react-router-dom';
 
 const Home = (props) => {
-    const [isDropdownVisible, setDropdownVisibility] = useState(false);
 
+    const navigate = useNavigate();
     const fetchPost = async () => {
         try {
             const response = await fetch(`${API_ROOT}/post`);
@@ -14,7 +15,6 @@ const Home = (props) => {
             if (data && data.message === 'success' && Object.keys(data).length > 0) {
                 delete data.message;
                 props.setPosts(Object.values(data));
-                console.log('Posts:', data);
             } else {
                 props.setPosts(['No posts found']);
             }
@@ -26,7 +26,6 @@ const Home = (props) => {
     useEffect(() => {
         if (props.reloadPage) {
             fetchPost();
-            console.log('Reloading page', props.posts);
             props.setReloadPage(false);
         }
     }, [props.reloadPage]);
@@ -48,19 +47,13 @@ const Home = (props) => {
     }
 
     if(!props.user || props.user.userID === null){
-
-        return (
-            <CreateProfile 
-                {...props}
-            />
-        )
+        navigate('/settings');
     }
 
     return (
        <>
        <CreatePost 
             {...props}
-            setDropdownVisibility={setDropdownVisibility}
             deletePost={deletePost}
         />
 

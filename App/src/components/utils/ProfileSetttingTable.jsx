@@ -3,12 +3,11 @@ import Select from '../pageFractions/Select';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast'
 import { API_ROOT } from '../../Config';
-const CreateProfile = ({ user }) => {
+const ProfileSettingTable = ({ user }) => {
 
     if (!user) {
         return <div>user Not found</div>;
     }
-    // console.log('user from create profile = '+ user.userID + ' ' + user.profileID)
     const [firstName, setFirstName] = useState(user.firstName ?? '');
     const [lastName, setLastName] = useState(user.lastName ?? '');
     const [bio, setBio] = useState(user.bio ?? '');
@@ -182,7 +181,6 @@ const CreateProfile = ({ user }) => {
     }
 
     const handleProfilePictureChange = (e) => {
-        // Ensure that a file was selected
         if (e.target.files.length > 0) {
             setProfilePicture(() => {
                 setNewProfilePicture(e.target.files[0])
@@ -194,7 +192,6 @@ const CreateProfile = ({ user }) => {
     };
 
     const handleCoverPictureChange = (e) => {
-        // Ensure that a file was selected
         if (e.target.files.length > 0) {
             setCoverPicture((prevCoverPicture) => {
                 setNewCoverPicture(e.target.files[0])
@@ -231,34 +228,59 @@ const CreateProfile = ({ user }) => {
         )
     }
 
+    const handleRemoveProfilePicture = () => {
+        setProfilePicturePath('');
+        setProfilePicture(null);
+        setNewProfilePicture(null);
+    }
+
+    const handleRemoveCoverPicture = () => {
+        setCoverPicturePath('');
+        setCoverPicture(null);
+        setNewCoverPicture(null);
+    }
+
+
 
     return (
         <form onSubmit={handleSubmit} className=" mx-auto mt-8 p-6 bg-white rounded-md shadow-md">
-            {/* profile and cover Pictures */}
             <div>
+                {/* Cover Picture */}
                 <label htmlFor="coverPictureInput" className="block text-sm font-medium text-gray-600">
                     Cover Picture:
                 </label>
-                <input
-                    type="file"
-                    id="coverPictureInput"
-                    onChange={handleCoverPictureChange}
-                    accept="image/*"
-                    className="hidden"
-                />
-                <label
-                    htmlFor="coverPictureInput"
-                    className="cursor-pointer block mb-4 relative w-full h-44 bg-cover bg-center rounded-md"
-                    style={{
-                        backgroundImage: `url(${coverPicturePath})`, // Use the cover picture path here
-                    }}
-                >
-                    <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-                    <span className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-white font-semibold">Change Cover Picture</span>
-                    </span>
-                </label>
+                <div className="relative w-full h-36 overflow-hidden border border-gray-300 rounded-t-lg">
+                    <input
+                        type="file"
+                        id="coverPictureInput"
+                        onChange={handleCoverPictureChange}
+                        accept="image/*"
+                        className="hidden"
+                    />
+                    <label
+                        htmlFor="coverPictureInput"
+                        className="cursor-pointer block w-full h-full bg-cover bg-center relative"
+                        style={{
+                            backgroundImage: `url(${coverPicturePath})`,
+                        }}
+                    >
+                        {coverPicturePath !== '' && (
+                            <div className="absolute inset-0 bg-black bg-opacity-30">
+                                <span className="absolute inset-0 flex items-center justify-center font-semibold">
+                                    Change Cover Picture
+                                </span>
+                                <button
+                                    className="absolute top-2 right-2 text-white"
+                                    onClick={() => handleRemoveCoverPicture()}
+                                >
+                                    x
+                                </button>
+                            </div>
+                        )}
+                    </label>
+                </div>
 
+                {/* Profile Picture */}
                 <input
                     type="file"
                     id="profilePictureInput"
@@ -268,13 +290,27 @@ const CreateProfile = ({ user }) => {
                 />
                 <label
                     htmlFor="profilePictureInput"
-                    className="cursor-pointer block w-16 h-16 bg-cover bg-center rounded-full border-4 border-black -mt-8 mx-auto"
+                    className="cursor-pointer block w-16 h-16 bg-cover bg-center rounded-full border-2 -mt-8 mx-auto relative z-10"
                     style={{
-                        backgroundImage: `url(${profilePicturePath})`, // Use the profile picture path here
+                        backgroundImage: `url(${profilePicturePath})`,
                     }}
                 >
+                    {!profilePicturePath && (
+                        <span className="absolute inset-0 flex items-center justify-center text-white font-bold">
+                            {newProfile.firstName?.charAt(0) || ''}{newProfile.lastName?.charAt(0) || ''}
+                        </span>
+                    )}
+                    {profilePicturePath && (
+                        <button
+                            className="absolute top-2 right-2 text-white"
+                            onClick={() => handleRemoveProfilePicture()}
+                        >
+                            x
+                        </button>
+                    )}
                 </label>
             </div>
+
 
             {/* Profile form fields */}
             <div className="mb-4">
@@ -307,18 +343,18 @@ const CreateProfile = ({ user }) => {
 
             {/* username */}
             <div className="mb-4">
-            <label htmlFor="username">
-                Username:
-            </label>
-            <input
-                type="text" readOnly
-                id="username"
-                value={user.username}
-                disabled
-                className="mt-1 p-2 border rounded-md w-full"
-            />
+                <label htmlFor="username">
+                    Username:
+                </label>
+                <input
+                    type="text" readOnly
+                    id="username"
+                    value={user.username}
+                    disabled
+                    className="mt-1 p-2 border rounded-md w-full"
+                />
             </div>
-            
+
 
             <div className="mb-4">
                 <label htmlFor="bioInput" className="block text-sm font-medium text-gray-600">
@@ -442,4 +478,4 @@ const CreateProfile = ({ user }) => {
     );
 };
 
-export default CreateProfile;
+export default ProfileSettingTable;
