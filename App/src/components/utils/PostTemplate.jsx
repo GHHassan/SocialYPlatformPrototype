@@ -155,7 +155,6 @@ const PostTemplate = ({
       showActions={showActions}
     />
 
-    {/* Post comments */}
     {showComment && (
       <CommentSection comments={comments} />
     )}

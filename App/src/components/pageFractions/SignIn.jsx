@@ -48,7 +48,6 @@ function SignIn(props) {
     } else {
       const encodedString = btoa(usernameRef.current.value.toLowerCase() + ':' + passwordRef.current.value)
       fetchToken(encodedString)
-      navigate('/')
     }
   }
 

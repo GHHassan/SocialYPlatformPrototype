@@ -1,30 +1,3 @@
-// import ProfileSettingTable from '../utils/ProfileSetttingTable';
-
-// const Settings = ({ signedIn, user }) => {
-
-//   return (
-//     <>
-//       {signedIn ? (
-//         <div>
-//           <div className="flex flex-col items-center">
-//           <h1 className="text-3xl font-bold text-gray-800">Settings</h1> 
-//           </div>
-//             <>
-//               <ProfileSettingTable user={user} />
-//             </>
-//         </div>
-//       ) : (
-//         <div>
-//           <h1>Not signed in</h1>
-//         </div>
-//       )}
-//     </>
-
-//   )
-// }
-// export default Settings;
-
-
 import React, { useState } from 'react';
 import Select from '../pageFractions/Select';
 import { useNavigate } from 'react-router-dom';

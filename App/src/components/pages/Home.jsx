@@ -1,13 +1,10 @@
 import Post from '../pageFractions/Post';
 import CreatePost from '../pageFractions/CreatePost';
-import CreateProfile from './CreateProfile';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { API_ROOT } from '../../Config';
-import { useNavigate } from 'react-router-dom';
 
 const Home = (props) => {
 
-    const navigate = useNavigate();
     const fetchPost = async () => {
         try {
             const response = await fetch(`${API_ROOT}/post`);
@@ -28,38 +25,16 @@ const Home = (props) => {
             fetchPost();
             props.setReloadPage(false);
         }
-    }, [props.reloadPage]);
-
-    const deletePost = async (post) => {
-        try {
-            const response = await fetch(`${API_ROOT}/post?postID= ${post.postID}`, {
-                method: 'DELETE',
-            })
-            const data = await response.json();
-            if (data.message === 'success') {
-                toast.success('Post deleted successfully');
-                setReloadPage(true);
-            }
-        }
-        catch (error) {
-            console.error('Error:', error);
-        }
-    }
-
-    if(!props.user || props.user.userID === null){
-        navigate('/settings');
-    }
+    }, [props.reloadPage])
 
     return (
        <>
        <CreatePost 
             {...props}
-            deletePost={deletePost}
         />
 
         <Post 
             {...props}
-            deletePost={deletePost}
         />
        </>
     );

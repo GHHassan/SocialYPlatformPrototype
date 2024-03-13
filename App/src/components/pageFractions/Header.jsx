@@ -61,7 +61,7 @@ function Header(props) {
           Sign Out
         </button>
       )}
-      <h1 className='text-4xl text-center text-bold mb-4 '>KF6012 Course Work</h1>
+      <h1 className='text-4xl text-center text-bold mb-4 '>KF6003 Course Work</h1>
       <Menu {...props}/>
       {props.showSignIn &&
         <SignIn

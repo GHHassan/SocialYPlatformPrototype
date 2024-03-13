@@ -6,54 +6,7 @@ import { API_ROOT } from '../../Config';
 
 const SUCCESS_MESSAGE = 'success';
 
-const deleteImage = async (imageName) => {
-    if (!imageName) {
-        return;
-    }
 
-    try {
-        const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
-            method: 'DELETE',
-        });
-        handleApiResponse(response, 'Old image deleted successfully');
-    } catch (error) {
-        console.error('Error during deleteImage:', error);
-    }
-};
-
-const deleteVideo = async (videoName) => {
-    try {
-        const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
-            method: 'DELETE',
-        });
-        handleApiResponse(response, 'Old video deleted successfully');
-    } catch (error) {
-        console.error('Error during deleteVideo:', error);
-    }
-};
-
-const deleteComments = async (postID) => {
-    try {
-        const response = await fetch(`${API_ROOT}/comment?postID=${postID}`, {
-            method: 'DELETE',
-        });
-        handleApiResponse(response, 'Comments deleted successfully');
-    } catch (error) {
-        console.error('Error during deleteComments:', error);
-    }
-};
-
-const updatePostVisibility = async (post) => {
-    try {
-        const response = await fetch(`${API_ROOT}/post`, {
-            method: 'PUT',
-            body: JSON.stringify(post),
-        });
-        handleApiResponse(response, 'Post visibility updated successfully');
-    } catch (error) {
-        console.error('Error during updatePostVisibility:', error);
-    }
-};
 
 const Post = ({
     reloadPage,
@@ -72,6 +25,54 @@ const Post = ({
     const [showComment, setShowComment] = useState({});
     const [comments, setComments] = useState([]);
     const [postID, setPostID] = useState('');
+
+    const deleteImage = async (imageName) => {
+        if (!imageName) {
+            return;
+        }
+        try {
+            const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
+                method: 'DELETE',
+            });
+            handleApiResponse(response, 'Old image deleted successfully');
+        } catch (error) {
+            console.error('Error during deleteImage:', error);
+        }
+    };
+    
+    const deleteVideo = async (videoName) => {
+        try {
+            const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
+                method: 'DELETE',
+            });
+            handleApiResponse(response, 'Old video deleted successfully');
+        } catch (error) {
+            console.error('Error during deleteVideo:', error);
+        }
+    };
+    
+    const deleteComments = async (postID) => {
+        try {
+            const response = await fetch(`${API_ROOT}/comment?postID=${postID}`, {
+                method: 'DELETE',
+            });
+            handleApiResponse(response, 'Comments deleted successfully');
+        } catch (error) {
+            console.error('Error during deleteComments:', error);
+        }
+    };
+    
+    const updatePostVisibility = async (post) => {
+        try {
+            const response = await fetch(`${API_ROOT}/post`, {
+                method: 'PUT',
+                body: JSON.stringify(post),
+            });
+            handleApiResponse(response, 'Post visibility updated successfully');
+        } catch (error) {
+            console.error('Error during updatePostVisibility:', error);
+        }
+    };
 
     const handleApiResponse = async (response, successMessage) => {
         const data = await response.json();
@@ -248,6 +249,8 @@ const Post = ({
     );
 
     return (
+        <>
+        {user &&(
         <div>
             {postJSX}
             {(showEditPost && postToBeEdited) && (
@@ -265,6 +268,8 @@ const Post = ({
                 </div>
             )}
         </div>
+        )}
+        </>
     );
 };
 
