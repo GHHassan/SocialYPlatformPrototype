@@ -34,6 +34,7 @@ const Settings = ({ user }) => {
     const [coverPicture, setCoverPicture] = useState(user.coverPicturePath ?? '');
     const options = ['Private', 'Friends', 'Public']
     const navigate = useNavigate();
+    let token = localStorage.getItem('token');
 
     let profilePictureURL = null;
     let coverPicturePathURL = null;
@@ -43,6 +44,9 @@ const Settings = ({ user }) => {
         body.append('image', imageFile);
         const response = await fetch(`${API_ROOT}/upload`, {
             method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+            },
             body: body,
         })
         const data = await response.json();

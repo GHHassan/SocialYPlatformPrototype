@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ProfileAvatar from '../utils/ProfileAvatar';
+import { useState } from 'react';
+import { API_ROOT } from '../../Config';
+import toast from 'react-hot-toast';
+let token = localStorage.getItem('token');
 
-function CommentSection({ comments }) {
+function CommentItems({ comments }) {
   const commentsJSX = comments.length > 0 ? (
     comments.map((comment, index) => (
       <div key={index} className="mb-4 p-4 bg-white border border-gray-300 rounded-md">
@@ -36,6 +40,78 @@ function CommentSection({ comments }) {
       {commentsJSX}
     </div>
   );
+}
+
+function CommentSection({ post, user, showComment, setShowComment, fetchComments, comments }) {
+  const [commentContent, setCommentContent] = useState('');
+
+  const handleCommentInputClick = () => {
+    fetchComments(post.postID);
+    setShowComment((prevShowComment) => (!prevShowComment));
+  }
+  const handleCommentChange = (e) => {
+    setCommentContent(e.target.value);
+  }
+
+  const postComment = async (post) => {
+    if (!commentContent) return;
+    const body = {
+      "postID": post.postID,
+      "userID": user.userID,
+      "username": user.username,
+      "profilePath": user.profilePicturePath,
+      "name": `${user.firstName} ${user.lastName}`,
+      "commentContent": commentContent,
+    };
+
+    try {
+      const response = await fetch(`${API_ROOT}/comment`, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await response.json();
+      if (data.message === 'success') {
+        toast.success('Comment posted successfully');
+      } else {
+        console.error('Unexpected response:', data);
+      }
+      setCommentContent('');
+    } catch (error) {
+      toast.error('Error posting comment');
+    }
+  }
+
+  const inputJSX = (
+    <div className="flex items-center mb-4">
+      <input type="text"
+        className="border border-gray-300 rounded-lg p-2 w-full mr-2"
+        placeholder="Write a comment..."
+        value={commentContent}
+        onChange={handleCommentChange}
+        onClick={handleCommentInputClick}
+      />
+      <button
+        type='submit'
+        className="bg-blue-500 text-white rounded-lg p-2"
+        onClick={() => postComment(post)}
+      >
+        Submit
+      </button>
+    </div>
+  )
+  return (
+    <div>
+      {inputJSX}
+      {showComment && (
+        <CommentItems
+          comments={comments}
+        />
+      )}
+    </div>
+  )
 }
 
 export default CommentSection;

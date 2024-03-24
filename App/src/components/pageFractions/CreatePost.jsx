@@ -34,12 +34,15 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
     const [message, setMessage] = useState(post ? post.visibility : 'Friends');
     const imageInputRef = useRef(null);
     const videoInputRef = useRef(null);
+    let token = localStorage.getItem('token');
 
 const deleteImage = async (imageName) => {
-    console.log('imageName:', imageName);
     try {
         const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
             method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
         });
         const data = await response.json();
         if (data.message === 'success') {
@@ -57,6 +60,9 @@ const deleteVideo = async (videoName) => {
     try {
         const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
             method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
         })
         const data = await response.json();
         if (data.message === 'success') {
@@ -74,9 +80,12 @@ const uploadFile = async () => {
     const body = new FormData();
     body.append('image', postImage ? postImage : '');
     body.append('video', postVideo ? postVideo : '');
-
+    let uploaded = false;
     const response = await fetch(`${API_ROOT}/upload`, {
         method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
         body: body,
     });
 
@@ -91,7 +100,7 @@ const uploadFile = async () => {
             setNewVideoPath(result.videoUpload.videoURL);
         }
         setMediaUploaded(true);
-    } else if (result.message) {
+    } else if (result.message === 'success') {
         if (result.imageURL) {
             setNewImagePath((prevUrl) => result.imageURL || prevUrl);
         }
@@ -107,22 +116,25 @@ const uploadFile = async () => {
 }
 
 const uploadData = async () => {
+    console.log('showEditPost:', showEditPost);
+    const body = {
+        "postID": showEditPost ? post?.postID : '',
+        "userID": user.userID,
+        "username": user.username,
+        "firstName": user.firstName,
+        "lastName": user.lastName,
+        "textContent": postContent,
+        "photoPath": newImagePath ? newImagePath : postImageURL,
+        "videoPath": newVideoPath ? newVideoPath : postVideoURL,
+        "visibility": postVisibility
+    };
     try {
         const response = await fetch(`${API_ROOT}/post`, {
             method: showEditPost ? 'PUT' : 'POST',
-            body: JSON.stringify(
-                {
-                    "postID": showEditPost ? post.postID : '',
-                    "userID": user.userID,
-                    "username": user.username,
-                    "firstName": user.firstName,
-                    "lastName": user.lastName,
-                    "textContent": postContent,
-                    "photoPath": newImagePath ? newImagePath : postImageURL,
-                    "videoPath": newVideoPath ? newVideoPath : postVideoURL,
-                    "visibility": postVisibility
-                }
-            ),
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(body),
         })
         const data = await response.json();
         console.log('Data:', data);
@@ -180,13 +192,9 @@ const postAnyWay = async () => {
 
         if (postImage || postVideo) {
             await uploadFile();
-        }
-
-        if (postContent) {
+        } else {
             setMediaUploaded(true);
         }
-
-
     } catch (error) {
         console.error('Error during postAnyWay:', error);
     }

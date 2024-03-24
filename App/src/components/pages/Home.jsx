@@ -9,9 +9,10 @@ const Home = (props) => {
         try {
             const response = await fetch(`${API_ROOT}/post`);
             const data = await response.json();
-            if (data && data.message === 'success' && Object.keys(data).length > 0) {
+            if (data.message === 'success' && Object.keys(data).length > 0) {
                 delete data.message;
                 props.setPosts(Object.values(data));
+
             } else {
                 props.setPosts(['No posts found']);
             }

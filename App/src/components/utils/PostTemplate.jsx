@@ -2,6 +2,9 @@ import React from 'react';
 import ProfileAvatar from '../utils/ProfileAvatar';
 import Select from '../pageFractions/Select';
 import CommentSection from '../pageFractions/CommentSection';
+import { API_ROOT } from '../../Config';
+import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 const PostHeader = ({ post, user, visibilityOptions, handleVisibility }) => (
   <div className="flex items-start">
@@ -81,25 +84,7 @@ const PostActions = ({ handleLikeClick, handleCommentClick, handleShareClick, po
   </div>
 );
 
-const CommentInput = ({ commentContent, handleCommentChange, handleSubmitComment, post, handleCommentClick }) => (
-  <div className="flex items-center mb-4">
-    <input type="text"
-      className="border border-gray-300 rounded-lg p-2 w-full mr-2"
-      placeholder="Write a comment..."
-      value={commentContent}
-      onChange={(e) => handleCommentChange(e, post)}
-      onClick={() => {handleCommentClick(post)}}
-    />
-    <button
-      className="bg-blue-500 text-white rounded-lg p-2"
-      onClick={() => handleSubmitComment(post)}
-    >
-      Submit
-    </button>
-  </div>
-);
-
-const PostTemplate = ({
+const PostTemplate =({
   post,
   index,
   visibilityOptions,
@@ -111,54 +96,66 @@ const PostTemplate = ({
   handleVisibility,
   handleLikeClick,
   handleShareClick,
-  handleCommentClick,
-  handleCommentChange,
-  handleSubmitComment,
-  showComment,
-  comments,
-  commentContent,
   showActions,
-}) => (
-  <div>
-    <div className="bg-white border-b-2 border-double border-gray300">
-      {user.userID === post.userID && (
-        <div className="relative">
-          <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
-            onClick={() => handleDropdownToggle(index)}>...</button>
-          {(dropdownIndex === index && showActions) && (
-            <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
-              <button className="text-blue-500 text-xs" onClick={() => handleEditPost(post)}>Edit</button>
-              <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeletePost(post)}>Delete</button>
-            </div>
-          )}
-        </div>
-      )}
-      <PostHeader post={post} user={user} visibilityOptions={visibilityOptions} handleVisibility={handleVisibility} />
-      <p className="text-sm font-semibold text-gray-500">{post.firstName} {post.lastName}</p>
-      <p className="text-xs text-gray-500">@{post.username}</p>
+}) => {
+
+  const [showComment, setShowComment] = useState(false);
+  const [comments, setComments] = useState({});
+
+  const fetchComments = async (postID) => {
+    try {
+      const response = await fetch(`${API_ROOT}/comment?postID=${postID}`);
+      const data = await response.json();
+      if (data.message === 'success') {
+        delete data.message;
+        setComments(Object.values(data));
+      }else {
+        setComments({'message': 'No comments found'});
+      }
+      setShowComment(!showComment);
+    } catch (error) {
+      toast.error('Error fetching comments');
+    }
+  }
+
+  return (
+    <div>
+      <div className="bg-white border-b-2 border-double border-gray300">
+        {user.userID === post.userID && (
+          <div className="relative">
+            <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
+              onClick={() => handleDropdownToggle(index)}>...</button>
+            {(dropdownIndex === index && showActions) && (
+              <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
+                <button className="text-blue-500 text-xs" onClick={() => handleEditPost(post)}>Edit</button>
+                <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeletePost(post)}>Delete</button>
+              </div>
+            )}
+          </div>
+        )}
+        <PostHeader post={post} user={user} visibilityOptions={visibilityOptions} handleVisibility={handleVisibility} />
+        <p className="text-sm font-semibold text-gray-500">{post.firstName} {post.lastName}</p>
+        <p className="text-xs text-gray-500">@{post.username}</p>
+      </div>
+
+      <PostContent post={post} />
+
+      <PostActions
+        handleLikeClick={() => handleLikeClick(post)}
+        handleCommentClick={() => fetchComments(post.postID)}
+        handleShareClick={() => handleShareClick(post)}
+        post={post}
+      />
+      <CommentSection
+        post={post}
+        user={user}
+        comments={comments}
+        showComment={showComment}
+        setShowComment={setShowComment}
+        fetchComments={fetchComments}
+      />
     </div>
-
-    <PostContent post={post} />
-
-    <PostActions
-      handleLikeClick={() => handleLikeClick(post)}
-      handleCommentClick={() => handleCommentClick(post)}
-      handleShareClick={() => handleShareClick(post)}
-      post={post}
-    />
-
-    <CommentInput
-      commentContent={commentContent}
-      handleCommentChange={handleCommentChange}
-      handleSubmitComment={() => handleSubmitComment(post)}
-      handleCommentClick={() => handleCommentClick(post)}
-      showActions={showActions}
-    />
-
-    {showComment && (
-      <CommentSection comments={comments} />
-    )}
-  </div>
-);
+  );
+}
 
 export default PostTemplate;

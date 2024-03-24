@@ -25,6 +25,7 @@ const Post = ({
     const [showComment, setShowComment] = useState({});
     const [comments, setComments] = useState([]);
     const [postID, setPostID] = useState('');
+    let token = localStorage.getItem('token');
 
     const deleteImage = async (imageName) => {
         if (!imageName) {
@@ -33,6 +34,9 @@ const Post = ({
         try {
             const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                },
             });
             handleApiResponse(response, 'Old image deleted successfully');
         } catch (error) {
@@ -44,6 +48,9 @@ const Post = ({
         try {
             const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                },
             });
             handleApiResponse(response, 'Old video deleted successfully');
         } catch (error) {
@@ -66,6 +73,9 @@ const Post = ({
         try {
             const response = await fetch(`${API_ROOT}/post`, {
                 method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                },
                 body: JSON.stringify(post),
             });
             handleApiResponse(response, 'Post visibility updated successfully');
@@ -80,17 +90,13 @@ const Post = ({
             toast.success(successMessage);
             setReloadPage(true);
         } else {
+            console.error('Unexpected response:', response);
             console.error('Unexpected response:', data);
         }
     };
 
     const deletePost = async (post) => {
         try {
-            const response = await fetch(`${API_ROOT}/post?postID=${post.postID}`, {
-                method: 'DELETE',
-            });
-            handleApiResponse(response, 'Post deleted successfully');
-
             if (post.photoPath) {
                 await deleteImage(post.photoPath);
             }
@@ -98,8 +104,16 @@ const Post = ({
             if (post.videoPath) {
                 await deleteVideo(post.videoPath);
             }
+            if(comments.length > 0 ) await deleteComments(post.postID);
+            const response = await fetch(`${API_ROOT}/post?postID=${post.postID}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                },
+            });
+            handleApiResponse(response, 'Post deleted successfully');
 
-            await deleteComments(post.postID);
+
         } catch (error) {
             console.error('Error during deletePost:', error);
         }
@@ -119,6 +133,9 @@ const Post = ({
         try {
             const response = await fetch(`${API_ROOT}/comment`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                },
                 body: JSON.stringify(body),
             });
             handleApiResponse(response, 'Comment posted successfully');
@@ -141,6 +158,9 @@ const Post = ({
         try {
             const response = await fetch(`${API_ROOT}/reaction`, {
                 method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                },
                 body: JSON.stringify(body),
             });
             handleApiResponse(response, 'Like posted successfully');
