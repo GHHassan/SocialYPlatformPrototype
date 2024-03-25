@@ -17,7 +17,6 @@ function App() {
   const [showSignIn, setShowSignIn] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const [reloadPage, setReloadPage] = useState(true);
   const [posts, setPosts] = useState([]);
 
   const fetchUserDetails = async () => {
@@ -92,8 +91,6 @@ function App() {
                     user={user}
                     posts={posts}
                     setPosts={setPosts}
-                    reloadPage={reloadPage}
-                    setReloadPage={setReloadPage}
                   />
                 }
               />

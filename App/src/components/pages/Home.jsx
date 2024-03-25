@@ -7,6 +7,7 @@ const Home = (props) => {
 
 
     const [showEditPost, setShowEditPost] = useState(false);
+    const [reloadPosts, setReloadPosts] = useState(true);
 
     const fetchPost = async () => {
         try {
@@ -25,11 +26,11 @@ const Home = (props) => {
     }
 
     useEffect(() => {
-        if (props.reloadPage) {
+        if (reloadPosts) {
             fetchPost();
-            props.setReloadPage(false);
+            setReloadPosts(false);
         }
-    }, [props.reloadPage])
+    }, [reloadPosts])
 
 
     return (
@@ -39,12 +40,16 @@ const Home = (props) => {
                     {...props}
                     showEditPost={showEditPost}
                     setShowEditPost={setShowEditPost}
-            />}
+                    setReloadPosts={setReloadPosts}
+                    reloadPosts={reloadPosts}
+                />}
 
             <Post
                 {...props}
                 showEditPost={showEditPost}
                 setShowEditPost={setShowEditPost}
+                setReloadPosts={setReloadPosts}
+                reloadPosts={reloadPosts}
             />
         </>
     );

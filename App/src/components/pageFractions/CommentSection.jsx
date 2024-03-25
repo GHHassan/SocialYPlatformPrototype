@@ -42,7 +42,7 @@ function CommentItems({ comments }) {
   );
 }
 
-function CommentSection({ post, user, showComment, fetchComments, comments, setComments }) {
+function CommentSection({ post, user, showComment, comments, setReloadComments, setShowComment}) {
   const [commentContent, setCommentContent] = useState('');
 
   const handleCommentChange = (e) => {
@@ -70,6 +70,7 @@ function CommentSection({ post, user, showComment, fetchComments, comments, setC
       const data = await response.json();
       if (data.message === 'success') {
         toast.success('Comment posted successfully');
+        setReloadComments(true);
       } else {
         console.error('Unexpected response:', data);
       }
@@ -86,7 +87,7 @@ function CommentSection({ post, user, showComment, fetchComments, comments, setC
         placeholder="Write a comment..."
         value={commentContent}
         onChange={handleCommentChange}
-        onClick={fetchComments}
+        onClick={()=> setShowComment(!showComment)}
       />
       <button
         type='submit'

@@ -17,7 +17,7 @@ import Select from './Select';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
 
-const CreatePost = ({ user, setReloadPage, post, showEditPost, setShowEditPost}) => {
+const CreatePost = ({ user, setReloadPosts, post, showEditPost, setShowEditPost}) => {
 
     const [postContent, setPostContent] = useState(post ? post.textContent : '');
     const [postImage, setPostImage] = useState(null);
@@ -47,7 +47,7 @@ const deleteImage = async (imageName) => {
         const data = await response.json();
         if (data.message === 'success') {
             toast.success('oldImage deleted successfully');
-            setReloadPage(true);
+            setReloadPosts(true);
         } else {
             console.error('Unexpected response:', data);
         }
@@ -67,7 +67,7 @@ const deleteVideo = async (videoName) => {
         const data = await response.json();
         if (data.message === 'success') {
             toast.success('oldVideo deleted successfully');
-            setReloadPage(true);
+            setReloadPosts(true);
         }
     }
     catch (error) {
@@ -144,7 +144,7 @@ const uploadData = async () => {
         if (data.message === 'success') {
             resetPostForm();
             toast.success('Post created successfully');
-            setReloadPage(true);
+            setReloadPosts(true);
         }
         if (showEditPost && oldphotoPath) {
             deleteImage(oldphotoPath);

@@ -1,5 +1,5 @@
 import PostTemplate from '../utils/PostTemplate';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import CreatePost from './CreatePost';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
@@ -9,8 +9,8 @@ const SUCCESS_MESSAGE = 'success';
 
 
 const Post = ({
-    reloadPage,
-    setReloadPage,
+    reloadPosts,
+    setReloadPosts,
     posts,
     user,
 }) => {
@@ -20,6 +20,7 @@ const Post = ({
     const [allComments, setAllComments] = useState([]);
     const [showEditPost, setShowEditPost] = useState(false);
     const [postToBeEdited, setPostToBeEdited] = useState(null);
+
     let token = localStorage.getItem('token');
     const deleteImage = async (imageName) => {
         if (!imageName) {
@@ -82,7 +83,7 @@ const Post = ({
         const data = await response.json();
         if (data.message === SUCCESS_MESSAGE) {
             toast.success(successMessage);
-            setReloadPage(true);
+            setReloadPosts(true);
         } else {
             console.error('Unexpected response:', response);
             console.error('Unexpected response:', data);
@@ -127,7 +128,8 @@ const Post = ({
             console.error('Error during fetchComments:', error);
         }
     }
-    
+
+    console.log('All comments:', allComments);
     const handleEditPost = (post) => {
         setPostToBeEdited({ ...post });
         setShowEditPost(true);
@@ -181,8 +183,8 @@ const Post = ({
                         <div className='bg-white p-6 rounded-lg max-h-screen max-w-[60%] overflow-y-auto'>
                             <CreatePost
                                 post={postToBeEdited}
-                                reloadPage={reloadPage}
-                                setReloadPage={setReloadPage}
+                                reloadPosts={reloadPosts}
+                                setReloadPosts={setReloadPosts}
                                 user={user}
                                 showEditPost={showEditPost}
                                 setShowEditPost={setShowEditPost}
