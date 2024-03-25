@@ -128,8 +128,6 @@ const Post = ({
             console.error('Error during fetchComments:', error);
         }
     }
-
-    console.log('All comments:', allComments);
     const handleEditPost = (post) => {
         setPostToBeEdited({ ...post });
         setShowEditPost(true);

@@ -1,14 +1,20 @@
+import { createContext } from "react";
 import Footer from "./components/pageFractions/Footer";
-import Header from "./components/pageFractions/Header";
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
-import { Toaster } from "react-hot-toast";
 import { API_ROOT } from "./Config";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/pages/Home";
 import Chat from "./components/pages/Chat";
 import Settings from "./components/pages/Settings";
 import OtherUsersProfile from "./components/pages/OtherUsersProfile";
+import Navbar from "./components/pageFractions/Navbar";
+import toast, { Toaster } from "react-hot-toast";
+import { SignIn, useUser } from "@clerk/clerk-react";
+import Login from "./components/pageFractions/SignIn";
+export const AuthContext = createContext(null);
+
+
 
 function App() {
 
@@ -18,6 +24,84 @@ function App() {
   const [showSignUp, setShowSignUp] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [posts, setPosts] = useState([]);
+  const [signedInUser, setSignedInUser] = useState();
+  const ssoUser = useUser();
+  const [authState, setAuthState] = useState();
+
+  useEffect(() => {
+    if (signedIn === true && signedInUser && signedInUser.username) {
+      setAuthState({
+        isAuthenticated: true,
+        user: signedInUser,
+        token: localStorage.getItem("token"),
+      });
+    } else if (signedIn === false) {
+      setAuthState({
+        isAuthenticated: false,
+        user: null,
+        token: null,
+      });
+    }
+  }, [signedIn, signedInUser]);
+
+  useEffect(() => {
+    if (ssoUser.isLoaded && ssoUser.isSignedIn) {
+      console.log(ssoUser.user);
+      let user = {
+        id: ssoUser.user.id,
+        email: ssoUser.user.primaryEmailAddress?.emailAddress,
+        username:
+          ssoUser.user.username ??
+          (ssoUser.user.primaryEmailAddress?.emailAddress || ssoUser.user.firstName + ssoUser.user.id.slice(-4)),
+        imageUrl: ssoUser.user.imageUrl,
+      };
+      setSignedIn(true);
+      setSignedInUser(user);
+    } else if (localStorage.getItem("token")) {
+      let token = jwtDecode(localStorage.getItem("token"));
+      if (token.exp < Date.now() / 1000) {
+        localStorage.removeItem("token");
+      } else {
+        let user = {
+          id: token.sub,
+          email: token.email,
+          username: token.username
+        };
+        setSignedInUser(user);
+        setSignedIn(true);
+      }
+    }
+  }, [ssoUser.isSignedIn]);
+
+	const getUser = async (userID) => {
+		try {
+			const response = await fetch(`${API_ROOT}/register?userID=${userID}`);
+      const data = await response.json();
+			if (data.message === "success") {
+				setSignedInUser({
+					...signedInUser,
+					role: data[0].role,
+					job_title: data[0].job_title,
+					country: data[0].country,
+					bio: data[0].bio,
+				});
+			} 
+		} catch (error) {
+			toast.error("Error getting user data");
+		}
+	};
+
+	useEffect(() => {
+		if (signedInUser && signedInUser.id) {
+			getUser(signedInUser.id);
+		}
+	}, [signedIn]);
+
+  useEffect(() => {
+    if (signedInUser && signedInUser.role === "0") {
+      setShowSetRole(true);
+    }
+  }, [signedInUser]);
 
   const fetchUserDetails = async () => {
     try {
@@ -51,19 +135,11 @@ function App() {
   }, [signedIn, initialized]);
 
   return (
+    <AuthContext.Provider value={{ authState, setSignedIn, setAuthState }}>
     <div className="bg-gray-100 font-sans">
-      <Header
-        signedIn={signedIn}
-        setSignedIn={setSignedIn}
-        showSignIn={showSignIn}
-        setShowSignIn={setShowSignIn}
-        showSignUp={showSignUp}
-        setShowSignUp={setShowSignUp}
-        user={user}
-        setUser={setUser}
-        initialized={initialized}
-        setInitialized={setInitialized}
-      />
+      <header>
+        <Navbar signedIn={signedIn} setSignedIn={setSignedIn} />
+      </header>
       <div>
         <Toaster
           toastOptions={{
@@ -122,6 +198,19 @@ function App() {
                   />
                 }
               />
+               <Route
+              path="/login"
+              element={
+                <Login
+                  signedIn={signedIn}
+                  setSignedIn={setSignedIn}
+                />
+              }
+            />
+            <Route
+              path="/signup"
+              element={<SignIn />}
+            />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           )}
@@ -135,6 +224,7 @@ function App() {
         <Footer />
       </footer>
     </div>
+    </AuthContext.Provider>
   );
 }
 

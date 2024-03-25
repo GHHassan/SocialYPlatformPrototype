@@ -116,7 +116,6 @@ const uploadFile = async () => {
 }
 
 const uploadData = async () => {
-    console.log('showEditPost:', showEditPost);
     const body = {
         "postID": showEditPost ? post?.postID : '',
         "userID": user.userID,
@@ -128,9 +127,7 @@ const uploadData = async () => {
         "videoPath": newVideoPath ? newVideoPath : postVideoURL,
         "visibility": postVisibility
     };
-    console.log('Body:', body);
     const method = showEditPost ? 'PUT' : 'POST';
-    console.log('Method:', method);
     try {
         const response = await fetch(`${API_ROOT}/post`, {
             method: method,
@@ -140,7 +137,6 @@ const uploadData = async () => {
             body: JSON.stringify(body),
         })
         const data = await response.json();
-        console.log('Data:', data);
         if (data.message === 'success') {
             resetPostForm();
             toast.success('Post created successfully');
@@ -155,7 +151,7 @@ const uploadData = async () => {
         setShowEditPost(false);
     }
     catch (error) {
-        console.log('Error:', error);
+        toast.error('Error creating post');
     }
 }
 
