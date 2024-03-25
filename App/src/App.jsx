@@ -131,6 +131,9 @@ function App() {
                   />
                 }
               />
+              {/* <Route path="/post/:postID" 
+                element={<Post />} 
+              /> */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           )}

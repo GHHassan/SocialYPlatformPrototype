@@ -45,10 +45,6 @@ function CommentItems({ comments }) {
 function CommentSection({ post, user, showComment, setShowComment, fetchComments, comments }) {
   const [commentContent, setCommentContent] = useState('');
 
-  const handleCommentInputClick = () => {
-    fetchComments(post.postID);
-    setShowComment((prevShowComment) => (!prevShowComment));
-  }
   const handleCommentChange = (e) => {
     setCommentContent(e.target.value);
   }
@@ -91,7 +87,7 @@ function CommentSection({ post, user, showComment, setShowComment, fetchComments
         placeholder="Write a comment..."
         value={commentContent}
         onChange={handleCommentChange}
-        onClick={handleCommentInputClick}
+        onClick={fetchComments}
       />
       <button
         type='submit'
@@ -104,7 +100,7 @@ function CommentSection({ post, user, showComment, setShowComment, fetchComments
   )
   return (
     <div>
-      {inputJSX}
+      {user && inputJSX}
       {showComment && (
         <CommentItems
           comments={comments}

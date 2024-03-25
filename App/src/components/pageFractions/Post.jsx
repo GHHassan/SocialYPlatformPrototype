@@ -13,10 +13,6 @@ const Post = ({
     setReloadPage,
     posts,
     user,
-    showEditPost,
-    setShowEditPost,
-    postToBeEdited,
-    setPostToBeEdited,
 }) => {
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const [showActions, setShowActions] = useState(false);
@@ -25,8 +21,9 @@ const Post = ({
     const [showComment, setShowComment] = useState({});
     const [comments, setComments] = useState([]);
     const [postID, setPostID] = useState('');
+    const [showEditPost, setShowEditPost] = useState(false);
+    const [postToBeEdited, setPostToBeEdited] = useState(null);
     let token = localStorage.getItem('token');
-
     const deleteImage = async (imageName) => {
         if (!imageName) {
             return;
@@ -254,9 +251,7 @@ const Post = ({
                     handleCommentChange={handleCommentChange}
                     handleSubmitComment={postComment}
                     showComment={showComment[post?.postID]}
-                    comments={comments[post?.postID] || []} // Use comments for the specific post
                     commentContent={commentContent}
-                    postID={post.postID}
                     showActions={showActions}
                     
                 />
@@ -270,10 +265,9 @@ const Post = ({
 
     return (
         <>
-        {user &&(
         <div>
             {postJSX}
-            {(showEditPost && postToBeEdited) && (
+            {(user && showEditPost && postToBeEdited) && (
                 <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
                     <div className='bg-white p-6 rounded-lg max-h-screen max-w-[60%] overflow-y-auto'>
                         <CreatePost
@@ -288,7 +282,6 @@ const Post = ({
                 </div>
             )}
         </div>
-        )}
         </>
     );
 };

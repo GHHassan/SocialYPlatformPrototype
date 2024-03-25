@@ -17,7 +17,7 @@ import Select from './Select';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
 
-const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }) => {
+const CreatePost = ({ user, setReloadPage, post, showEditPost, setShowEditPost}) => {
 
     const [postContent, setPostContent] = useState(post ? post.textContent : '');
     const [postImage, setPostImage] = useState(null);
@@ -28,7 +28,7 @@ const CreatePost = ({ user, setReloadPage, post, setShowEditPost, showEditPost }
     const [oldvideoPath, setOldvideoPath] = useState(post ? post.postVideoURL : '');
     const [newImagePath, setNewImagePath] = useState(null);
     const [newVideoPath, setNewVideoPath] = useState(null);
-    const [postVisibility, setPostVisibility] = useState(post ? post.visibility : 'Friends');
+    const [postVisibility, setPostVisibility] = useState( post?.visibility );
     const [toBeSubmitted, setToBeSubmitted] = useState(false);
     const [mediaUploaded, setMediaUploaded] = useState(false);
     const [message, setMessage] = useState(post ? post.visibility : 'Friends');
@@ -128,9 +128,12 @@ const uploadData = async () => {
         "videoPath": newVideoPath ? newVideoPath : postVideoURL,
         "visibility": postVisibility
     };
+    console.log('Body:', body);
+    const method = showEditPost ? 'PUT' : 'POST';
+    console.log('Method:', method);
     try {
         const response = await fetch(`${API_ROOT}/post`, {
-            method: showEditPost ? 'PUT' : 'POST',
+            method: method,
             headers: {
                 'Authorization': `Bearer ${token}`,
             },
@@ -149,6 +152,7 @@ const uploadData = async () => {
         if (showEditPost && oldvideoPath) {
             deleteVideo(oldvideoPath);
         }
+        setShowEditPost(false);
     }
     catch (error) {
         console.log('Error:', error);
@@ -189,7 +193,6 @@ const handleVideoChange = (e) => {
 const postAnyWay = async () => {
     try {
         setToBeSubmitted(false);
-
         if (postImage || postVideo) {
             await uploadFile();
         } else {

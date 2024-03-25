@@ -5,6 +5,20 @@ import CommentSection from '../pageFractions/CommentSection';
 import { API_ROOT } from '../../Config';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+let token = localStorage.getItem('token');
+
+const SUCCESS_MESSAGE = 'success';
+const handleApiResponse = async (response, successMessage) => {
+  const data = await response.json();
+  if (data.message === SUCCESS_MESSAGE) {
+      toast.success(successMessage);
+      setReloadPage(true);
+  } else {
+      console.error('Unexpected response:', response);
+      console.error('Unexpected response:', data);
+  }
+};
+
 
 const PostHeader = ({ post, user, visibilityOptions, handleVisibility }) => (
   <div className="flex items-start">
@@ -20,7 +34,7 @@ const PostHeader = ({ post, user, visibilityOptions, handleVisibility }) => (
       <div className="flex justify-between items-center">
         <div>
           <p className="text-xs text-gray-500">{post.postDateTime}</p>
-          {user.userID === post.userID ? (
+          {user?.userID === post.userID ? (
             <p className="text-xs text-gray-500">Audience:
               <span className="text-xs text-gray-500 ml-4">
                 <Select
@@ -68,23 +82,26 @@ const PostContent = ({ post }) => (
   </div>
 );
 
-const PostActions = ({ handleLikeClick, handleCommentClick, handleShareClick, post }) => (
-  <div className="flex justify-between items-center">
-    <div className="flex items-center">
-      <button className="text-blue-500"
-        onClick={() => handleLikeClick(post)}
-      >Like</button>
-      <button className="text-blue-500 ml-2"
-        onClick={() => handleCommentClick(post)}
-      >Comment</button>
-      <button className="text-blue-500 ml-2"
-        onClick={() => handleShareClick(post)}
-      >Share</button>
-    </div>
-  </div>
-);
 
-const PostTemplate =({
+const PostActions = ({ post, handleCommentClick, handleLikeClick, handleShareClick }) => {
+
+  return (
+    <div className="flex justify-between items-center">
+      <div className="flex items-center">
+        <button className="text-blue-500"
+          onClick={() => handleLikeClick(post)}
+        >Like</button>
+        <button className="text-blue-500 ml-2"
+          onClick={() => handleCommentClick(post)}
+        >Comment</button>
+        <button className="text-blue-500 ml-2"
+          onClick={() => handleShareClick(post)}
+        >Share</button>
+      </div>
+    </div>
+  );
+}
+const PostTemplate = ({
   post,
   index,
   visibilityOptions,
@@ -94,14 +111,84 @@ const PostTemplate =({
   handleEditPost,
   handleDeletePost,
   handleVisibility,
-  handleLikeClick,
-  handleShareClick,
   showActions,
 }) => {
 
   const [showComment, setShowComment] = useState(false);
   const [comments, setComments] = useState({});
 
+  const sendLike = async (post) => {
+    if (!user) {
+      toast.error('Please login to like the post');
+      return;
+    }
+    const body = {
+      "postID": post.postID,
+      "userID": user.userID,
+      "username": user.username,
+      "name": `${user.firstName} ${user.lastName}`,
+      "ReactionType": ":Like:",
+    };
+
+    try {
+      const response = await fetch(`${API_ROOT}/reaction`, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token,
+        },
+        body: JSON.stringify(body),
+      });
+      handleApiResponse(response, 'Like posted successfully');
+    } catch (error) {
+      console.error('Error during postLike:', error);
+    }
+  };
+
+  // handle share click
+  // open a popup wiht option to share on homepage or facebook, twitter, linkedin or copy link
+  // handle share click
+  const handleShareClick = (post) => {
+    console.log('Share clicked:', post);
+
+    const postUrl = `${window.location.origin}/post/${post.postID}`;
+    // Assuming post.url is the URL you want to share
+    // and post.title is the title of the post
+    const url = encodeURIComponent(postUrl);
+    const title = encodeURIComponent(post.title);
+
+    // Construct sharing URLs
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+    const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`;
+
+    // Prompt for the user's choice
+    const choice = prompt('Choose an option to share:\n1. Homepage\n2. Facebook\n3. Twitter\n4. LinkedIn\n5. Copy Link');
+
+    switch (choice) {
+      case '1':
+        // Implement the logic to share on Homepage if applicable
+        console.log('Sharing on Homepage is not implemented.');
+        break;
+      case '2':
+        window.open(facebookUrl, '_blank');
+        break;
+      case '3':
+        window.open(twitterUrl, '_blank');
+        break;
+      case '4':
+        window.open(linkedInUrl, '_blank');
+        break;
+      case '5':
+        // Copy link to clipboard
+        navigator.clipboard.writeText(postUrl)
+          .then(() => alert('Link copied to clipboard!'))
+          .catch(err => console.error('Error copying link:', err));
+        break;
+      default:
+        alert('Invalid choice.');
+    }
+  };
+  
   const fetchComments = async (postID) => {
     try {
       const response = await fetch(`${API_ROOT}/comment?postID=${postID}`);
@@ -109,8 +196,8 @@ const PostTemplate =({
       if (data.message === 'success') {
         delete data.message;
         setComments(Object.values(data));
-      }else {
-        setComments({'message': 'No comments found'});
+      } else {
+        setComments({ 'message': 'No comments found' });
       }
       setShowComment(!showComment);
     } catch (error) {
@@ -121,7 +208,7 @@ const PostTemplate =({
   return (
     <div>
       <div className="bg-white border-b-2 border-double border-gray300">
-        {user.userID === post.userID && (
+        {user?.userID === post?.userID && (
           <div className="relative">
             <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
               onClick={() => handleDropdownToggle(index)}>...</button>
@@ -141,10 +228,10 @@ const PostTemplate =({
       <PostContent post={post} />
 
       <PostActions
-        handleLikeClick={() => handleLikeClick(post)}
-        handleCommentClick={() => fetchComments(post.postID)}
-        handleShareClick={() => handleShareClick(post)}
         post={post}
+        handleCommentClick={fetchComments}
+        handleLikeClick={sendLike}
+        handleShareClick={handleShareClick}
       />
       <CommentSection
         post={post}
