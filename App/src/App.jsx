@@ -19,8 +19,6 @@ function App() {
   const [initialized, setInitialized] = useState(false);
   const [reloadPage, setReloadPage] = useState(true);
   const [posts, setPosts] = useState([]);
-  const [showEditPost, setShowEditPost] = useState(false);
-  const [postToBeEdited, setPostToBeEdited] = useState(null);
 
   const fetchUserDetails = async () => {
     try {
@@ -96,10 +94,6 @@ function App() {
                     setPosts={setPosts}
                     reloadPage={reloadPage}
                     setReloadPage={setReloadPage}
-                    showEditPost={showEditPost}
-                    setShowEditPost={setShowEditPost}
-                    postToBeEdited={postToBeEdited}
-                    setPostToBeEdited={setPostToBeEdited}
                   />
                 }
               />
@@ -131,9 +125,6 @@ function App() {
                   />
                 }
               />
-              {/* <Route path="/post/:postID" 
-                element={<Post />} 
-              /> */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           )}

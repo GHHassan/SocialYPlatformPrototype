@@ -5,7 +5,7 @@ import { API_ROOT } from '../../Config';
 
 const Home = (props) => {
 
-    const [reloadPage, setReloadPage] = useState(true);
+
     const [showEditPost, setShowEditPost] = useState(false);
 
     const fetchPost = async () => {
@@ -14,7 +14,7 @@ const Home = (props) => {
             const data = await response.json();
             if (data.message === 'success' && Object.keys(data).length > 0) {
                 delete data.message;
-                props.setPosts(() => Object.values(data));
+                props.setPosts(Object.values(data));
 
             } else {
                 props.setPosts(['No posts found']);
@@ -29,25 +29,22 @@ const Home = (props) => {
             fetchPost();
             props.setReloadPage(false);
         }
-    }, [reloadPage])
+    }, [props.reloadPage])
 
-    useEffect(() => {
-        fetchPost();
-    }, [])
 
-    console.log(props.posts);
     return (
         <>
-            <CreatePost
-                {...props}
-                setReloadPage={setReloadPage}
-                showEditPost={showEditPost}
-                setShowEditPost={setShowEditPost}
-            />
+            {props.signedIn &&
+                <CreatePost
+                    {...props}
+                    showEditPost={showEditPost}
+                    setShowEditPost={setShowEditPost}
+            />}
 
             <Post
                 {...props}
-                setReloadPage={setReloadPage}
+                showEditPost={showEditPost}
+                setShowEditPost={setShowEditPost}
             />
         </>
     );
