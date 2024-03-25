@@ -11,57 +11,60 @@ const SUCCESS_MESSAGE = 'success';
 const handleApiResponse = async (response, successMessage) => {
   const data = await response.json();
   if (data.message === SUCCESS_MESSAGE) {
-      toast.success(successMessage);
-      setReloadPage(true);
+    toast.success(successMessage);
+    setReloadPage(true);
   } else {
-      console.error('Unexpected response:', response);
-      console.error('Unexpected response:', data);
+    console.error('Unexpected response:', response);
+    console.error('Unexpected response:', data);
   }
 };
 
 
-const PostHeader = ({ post, user, visibilityOptions, handleVisibility }) => (
-  <div className="flex items-start">
-    <div className={` w-10 h-10 rounded-full m-2 cursor-pointer`}>
-      <ProfileAvatar
-        imagePath={post.profilePicturePath}
-        firstName={post.firstName}
-        lastName={post.lastName}
-        userID={post.userID}
-      />
-    </div>
-    <div className="flex-1">
-      <div className="flex justify-between items-center">
-        <div>
-          <p className="text-xs text-gray-500">{post.postDateTime}</p>
-          {user?.userID === post.userID ? (
-            <p className="text-xs text-gray-500">Audience:
-              <span className="text-xs text-gray-500 ml-4">
-                <Select
-                  options={visibilityOptions}
-                  value={post.visibility}
-                  identifier={post}
-                  onChange={handleVisibility}
-                />
-              </span>
-            </p>) : (
-            <p className="text-xs text-gray-500 mr-4">Audience:
-              <span className="text-xs text-gray-500 ml-4">
-                {post.visibility}
+const PostHeader = ({ post, user, visibilityOptions, handleVisibility }) => {
+
+  return (
+    <div className="flex items-start">
+      <div className={` w-10 h-10 rounded-full m-2 cursor-pointer`}>
+        <ProfileAvatar
+          imagePath={post.profilePicturePath}
+          firstName={post.firstName}
+          lastName={post.lastName}
+          userID={post.userID}
+        />
+      </div>
+      <div className="flex-1">
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-xs text-gray-500">{post.postDateTime}</p>
+            {user?.userID === post.userID ? (
+              <p className="text-xs text-gray-500">Audience:
+                <span className="text-xs text-gray-500 ml-4">
+                  {console.log('post.visibility:', post.visibility)}
+                  <Select
+                    options={visibilityOptions}
+                    value={post.visibility || ''}
+                    identifier={post}
+                    onChange={handleVisibility}
+                  />
+                </span>
+              </p>) : (
+              <p className="text-xs text-gray-500 mr-4">Audience:
+                <span className="text-xs text-gray-500 ml-4">
+                  {post.visibility}
+                </span>
+              </p>
+            )}
+            <p className="text-sm text-gray-500">Location:
+              <span className="text-sm text-gray-500 ml-4">
+                {post.location}
               </span>
             </p>
-          )}
-          <p className="text-sm text-gray-500">Location:
-            <span className="text-sm text-gray-500 ml-4">
-              {post.location}
-            </span>
-          </p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
-
+  );
+}
 const PostContent = ({ post }) => (
   <div className='m-2 bg-white'>
     <h1 className="text-lg font-semibold mb-2">{post.textContent}</h1>
@@ -187,7 +190,7 @@ const PostTemplate = ({
         alert('Invalid choice.');
     }
   };
-  
+
   const fetchComments = async () => {
     try {
       const response = await fetch(`${API_ROOT}/comment?postID=${post.postID}`);

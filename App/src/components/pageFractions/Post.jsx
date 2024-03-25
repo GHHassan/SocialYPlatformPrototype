@@ -17,10 +17,7 @@ const Post = ({
     const [dropdownIndex, setDropdownIndex] = useState(null);
     const [showActions, setShowActions] = useState(false);
     const visibilityOptions = ['Public', 'Friends', 'Private'];
-    const [commentContent, setCommentContent] = useState('');
-    const [showComment, setShowComment] = useState({});
-    const [comments, setComments] = useState([]);
-    const [postID, setPostID] = useState('');
+    const [allComments, setAllComments] = useState([]);
     const [showEditPost, setShowEditPost] = useState(false);
     const [postToBeEdited, setPostToBeEdited] = useState(null);
     let token = localStorage.getItem('token');
@@ -40,7 +37,7 @@ const Post = ({
             console.error('Error during deleteImage:', error);
         }
     };
-    
+
     const deleteVideo = async (videoName) => {
         try {
             const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
@@ -54,7 +51,7 @@ const Post = ({
             console.error('Error during deleteVideo:', error);
         }
     };
-    
+
     const deleteComments = async (postID) => {
         try {
             const response = await fetch(`${API_ROOT}/comment?postID=${postID}`, {
@@ -65,7 +62,7 @@ const Post = ({
             console.error('Error during deleteComments:', error);
         }
     };
-    
+
     const updatePostVisibility = async (post) => {
         try {
             const response = await fetch(`${API_ROOT}/post`, {
@@ -101,7 +98,7 @@ const Post = ({
             if (post.videoPath) {
                 await deleteVideo(post.videoPath);
             }
-            if(comments.length > 0 ) await deleteComments(post.postID);
+            if (allComments.length > 0) await deleteComments(post.postID);
             const response = await fetch(`${API_ROOT}/post?postID=${post.postID}`, {
                 method: 'DELETE',
                 headers: {
@@ -109,79 +106,28 @@ const Post = ({
                 },
             });
             handleApiResponse(response, 'Post deleted successfully');
-
-
         } catch (error) {
             console.error('Error during deletePost:', error);
         }
     };
 
-    const postComment = async (post) => {
-        if (!commentContent) return;
-        const body = {
-            "postID": post.postID,
-            "userID": user.userID,
-            "username": user.username,
-            "profilePath": user.profilePicturePath,
-            "name": `${user.firstName} ${user.lastName}`,
-            "commentContent": commentContent,
-        };
-
+    const fetchAllComments = async () => {
         try {
-            const response = await fetch(`${API_ROOT}/comment`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                },
-                body: JSON.stringify(body),
-            });
-            handleApiResponse(response, 'Comment posted successfully');
-            fetchComments(post.postID);
-            setCommentContent('');
-        } catch (error) {
-            console.error('Error during postComment:', error);
-        }
-    };
-
-    const postLike = async (post) => {
-        const body = {
-            "postID": post.postID,
-            "userID": user.userID,
-            "username": user.username,
-            "name": `${user.firstName} ${user.lastName}`,
-            "ReactionType": ":Like:",
-        };
-
-        try {
-            const response = await fetch(`${API_ROOT}/reaction`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                },
-                body: JSON.stringify(body),
-            });
-            handleApiResponse(response, 'Like posted successfully');
-        } catch (error) {
-            console.error('Error during postLike:', error);
-        }
-    };
-
-    const fetchComments = async (postID) => {
-        try {
-            const response = await fetch(`${API_ROOT}/comment?postID=${postID}`);
+            const response = await fetch(`${API_ROOT}/comment`);
             const data = await response.json();
             if (data.message === SUCCESS_MESSAGE) {
                 delete data.message;
-                setComments((prevComments) => ({
+                setAllComments((prevComments) => ({
                     ...prevComments,
-                    [postID]: Object.values(data),
+                    data,
                 }));
+                console.log('All comments:', allComments);
             }
         } catch (error) {
             console.error('Error during fetchComments:', error);
         }
     }
-
+    
     const handleEditPost = (post) => {
         setPostToBeEdited({ ...post });
         setShowEditPost(true);
@@ -203,35 +149,6 @@ const Post = ({
         updatePostVisibility(myPost);
     };
 
-    const handleLikeClick = async (post) => {
-        postLike(post);
-    };
-
-    const handleCommentChange = (e) => {
-        setCommentContent(e.target.value);
-    };
-
-    const handleCommentClick = (post) => {
-        setShowComment((prevShowComment) => ({
-            ...prevShowComment,
-            [post.postID]: !prevShowComment[post.postID],
-        }));
-
-        if (!showComment[post.postID]) {
-            setPostID(post.postID);
-            fetchComments(post.postID);
-        }
-    };
-    useEffect(() => {
-        if (showComment[postID]) {
-            fetchComments(postID);
-        }
-    }, [showComment, postID]);
-
-    const handleShareClick = () => {
-        console.log('Share clicked');
-    };
-
     const postJSX = posts[0] !== 'No posts found' ? (
         posts.map((post, index) => (
             <div className='my-4 p-5 border border-gray-300 rounded-lg' key={index}>
@@ -244,16 +161,8 @@ const Post = ({
                     handleEditPost={handleEditPost}
                     handleDeletePost={handleDeletePost}
                     handleVisibility={handleVisibility}
-                    handleLikeClick={handleLikeClick}
-                    handleCommentClick={() => handleCommentClick(post)}
-                    handleShareClick={handleShareClick}
                     visibilityOptions={visibilityOptions}
-                    handleCommentChange={handleCommentChange}
-                    handleSubmitComment={postComment}
-                    showComment={showComment[post?.postID]}
-                    commentContent={commentContent}
                     showActions={showActions}
-                    
                 />
             </div>
         ))
@@ -265,23 +174,23 @@ const Post = ({
 
     return (
         <>
-        <div>
-            {postJSX}
-            {(user && showEditPost && postToBeEdited) && (
-                <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
-                    <div className='bg-white p-6 rounded-lg max-h-screen max-w-[60%] overflow-y-auto'>
-                        <CreatePost
-                            post={postToBeEdited}
-                            reloadPage={reloadPage}
-                            setReloadPage={setReloadPage}
-                            user={user}
-                            showEditPost={showEditPost}
-                            setShowEditPost={setShowEditPost}
-                        />
+            <div>
+                {postJSX}
+                {(user && showEditPost && postToBeEdited) && (
+                    <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
+                        <div className='bg-white p-6 rounded-lg max-h-screen max-w-[60%] overflow-y-auto'>
+                            <CreatePost
+                                post={postToBeEdited}
+                                reloadPage={reloadPage}
+                                setReloadPage={setReloadPage}
+                                user={user}
+                                showEditPost={showEditPost}
+                                setShowEditPost={setShowEditPost}
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
         </>
     );
 };
