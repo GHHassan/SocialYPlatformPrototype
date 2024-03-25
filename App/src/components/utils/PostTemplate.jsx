@@ -179,7 +179,6 @@ const PostTemplate = ({
         window.open(linkedInUrl, '_blank');
         break;
       case '5':
-        // Copy link to clipboard
         navigator.clipboard.writeText(postUrl)
           .then(() => alert('Link copied to clipboard!'))
           .catch(err => console.error('Error copying link:', err));
