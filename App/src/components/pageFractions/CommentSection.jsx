@@ -42,13 +42,12 @@ function CommentItems({ comments }) {
   );
 }
 
-function CommentSection({ post, user, showComment, setShowComment, fetchComments, comments }) {
+function CommentSection({ post, user, showComment, fetchComments, comments, setComments }) {
   const [commentContent, setCommentContent] = useState('');
 
   const handleCommentChange = (e) => {
     setCommentContent(e.target.value);
   }
-
   const postComment = async (post) => {
     if (!commentContent) return;
     const body = {

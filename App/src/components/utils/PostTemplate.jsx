@@ -189,9 +189,9 @@ const PostTemplate = ({
     }
   };
   
-  const fetchComments = async (postID) => {
+  const fetchComments = async () => {
     try {
-      const response = await fetch(`${API_ROOT}/comment?postID=${postID}`);
+      const response = await fetch(`${API_ROOT}/comment?postID=${post.postID}`);
       const data = await response.json();
       if (data.message === 'success') {
         delete data.message;
@@ -237,6 +237,7 @@ const PostTemplate = ({
         post={post}
         user={user}
         comments={comments}
+        setComments={setComments}
         showComment={showComment}
         setShowComment={setShowComment}
         fetchComments={fetchComments}
