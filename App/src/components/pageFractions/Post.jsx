@@ -3,24 +3,19 @@ import { useState } from 'react';
 import CreatePost from './CreatePost';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
-
+import { useAppState } from '../../contexts/AppStateContext';
+import { usePostState } from '../../contexts/PostStateContext';
 const SUCCESS_MESSAGE = 'success';
 
 
 
-const Post = ({
-    reloadPosts,
-    setReloadPosts,
-    posts,
-    user,
-}) => {
-    const [dropdownIndex, setDropdownIndex] = useState(null);
-    const [showActions, setShowActions] = useState(false);
+const Post = () => {
+    const { state, dispatch } = useAppState();
+    const {  user } = state;
+    const { state: pstate, dispatch: pDispatch } = usePostState();
+    const {reloadPosts, posts, allComments, showEditPost, showActions } = pstate;
     const visibilityOptions = ['Public', 'Friends', 'Private'];
-    const [allComments, setAllComments] = useState([]);
-    const [showEditPost, setShowEditPost] = useState(false);
-    const [postToBeEdited, setPostToBeEdited] = useState(null);
-
+ 
     let token = localStorage.getItem('token');
     const deleteImage = async (imageName) => {
         if (!imageName) {
@@ -33,7 +28,10 @@ const Post = ({
                     'Authorization': 'Bearer ' + token,
                 },
             });
-            handleApiResponse(response, 'Old image deleted successfully');
+            const data = await response.json();
+            if (data.message === SUCCESS_MESSAGE) {
+                toast.success('Old image deleted successfully');
+            }
         } catch (error) {
             console.error('Error during deleteImage:', error);
         }
@@ -47,7 +45,10 @@ const Post = ({
                     'Authorization': 'Bearer ' + token,
                 },
             });
-            handleApiResponse(response, 'Old video deleted successfully');
+            const data = await response.json();
+            if (data.message === SUCCESS_MESSAGE) {
+                toast.success('Old video deleted successfully');
+            }
         } catch (error) {
             console.error('Error during deleteVideo:', error);
         }
@@ -58,7 +59,10 @@ const Post = ({
             const response = await fetch(`${API_ROOT}/comment?postID=${postID}`, {
                 method: 'DELETE',
             });
-            handleApiResponse(response, 'Comments deleted successfully');
+            const data = await response.json();
+            if (data.message === SUCCESS_MESSAGE) {
+                toast.success('Comments deleted successfully');
+            }
         } catch (error) {
             console.error('Error during deleteComments:', error);
         }
@@ -83,10 +87,9 @@ const Post = ({
         const data = await response.json();
         if (data.message === SUCCESS_MESSAGE) {
             toast.success(successMessage);
-            setReloadPosts(true);
+            dispatch({ type: 'SET_RELOAD_POSTS', payload: true });
         } else {
-            console.error('Unexpected response:', response);
-            console.error('Unexpected response:', data);
+            toast.error('Unexpected JSON response from server', data.message);
         }
     };
 
@@ -108,40 +111,20 @@ const Post = ({
             });
             handleApiResponse(response, 'Post deleted successfully');
         } catch (error) {
-            console.error('Error during deletePost:', error);
+            toast.error('Error during delete operation');
         }
     };
 
-    const fetchAllComments = async () => {
-        try {
-            const response = await fetch(`${API_ROOT}/comment`);
-            const data = await response.json();
-            if (data.message === SUCCESS_MESSAGE) {
-                delete data.message;
-                setAllComments((prevComments) => ({
-                    ...prevComments,
-                    data,
-                }));
-                console.log('All comments:', allComments);
-            }
-        } catch (error) {
-            console.error('Error during fetchComments:', error);
-        }
-    }
+    
     const handleEditPost = (post) => {
         setPostToBeEdited({ ...post });
-        setShowEditPost(true);
-        setShowActions(false);
+        pDispatch({ type: 'TOGGLE_EDIT_POST', payload: true });
+        pDispatch({ type: 'TOGGLE_ACTIONS', payload: false });
     };
 
     const handleDeletePost = (post) => {
         deletePost(post);
-        setShowActions(false);
-    };
-
-    const handleDropdownToggle = (index) => {
-        setDropdownIndex(dropdownIndex === index ? null : index);
-        setShowActions(true);
+        pDispatch({ type: 'TOGGLE_EDIT_POST', payload: false });
     };
 
     const handleVisibility = (post, key) => {
@@ -156,8 +139,6 @@ const Post = ({
                     post={post}
                     index={index}
                     user={user}
-                    handleDropdownToggle={handleDropdownToggle}
-                    dropdownIndex={dropdownIndex}
                     handleEditPost={handleEditPost}
                     handleDeletePost={handleDeletePost}
                     handleVisibility={handleVisibility}

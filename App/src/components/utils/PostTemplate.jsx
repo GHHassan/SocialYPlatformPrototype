@@ -108,8 +108,6 @@ const PostTemplate = ({
   index,
   visibilityOptions,
   user,
-  handleDropdownToggle,
-  dropdownIndex,
   handleEditPost,
   handleDeletePost,
   handleVisibility,

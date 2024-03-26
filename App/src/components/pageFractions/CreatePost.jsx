@@ -18,7 +18,6 @@ import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
 
 const CreatePost = ({ user, setReloadPosts, post, showEditPost, setShowEditPost}) => {
-
     const [postContent, setPostContent] = useState(post ? post.textContent : '');
     const [postImage, setPostImage] = useState(null);
     const [postVideo, setPostVideo] = useState(null);
