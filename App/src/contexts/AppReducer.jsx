@@ -1,18 +1,19 @@
 export const initialState = {
     signedIn: false,
-    user: null,
+    userProfile: null,
     showSignIn: false,
     showSignUp: false,
-    initialized: false,
     signedInUser: null,
     isOpen: true,
+    hasProfile: true
 };
 
 export const appReducer = (state, action) => {
     switch (action.type) {
-        case 'SET_USER_FROM_SSO':
-        case 'SET_USER_FROM_TOKEN':
+        case 'SET_SIGNEDIN_USER':
             return { ...state, signedInUser: action.payload, signedIn: true };
+        case 'SET_USER_PROFILE':
+            return { ...state, userProfile: action.payload };
         case 'REMOVE_TOKEN':
             localStorage.removeItem("token");
             return { ...state, signedIn: false, user: null, signedInUser: null };

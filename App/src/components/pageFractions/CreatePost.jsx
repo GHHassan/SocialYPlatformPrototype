@@ -16,8 +16,17 @@ import { useEffect, useRef, useState } from 'react';
 import Select from './Select';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
+import { useHomeState } from '../../contexts/HomeStateContext';
+import { useAppState } from '../../contexts/AppStateContext';
 
-const CreatePost = ({ user, setReloadPosts, post, showEditPost, setShowEditPost}) => {
+const CreatePost = ({post}) => {
+    const { state: HomeState, dispatch: homeDispatch } = useHomeState();
+    const { reloadPosts, showEditPost,  } = HomeState;
+    const { state: AppState } = useAppState();
+    const { user } = AppState;
+
+    console.log('User:', user);
+    
     const [postContent, setPostContent] = useState(post ? post.textContent : '');
     const [postImage, setPostImage] = useState(null);
     const [postVideo, setPostVideo] = useState(null);
@@ -46,7 +55,6 @@ const deleteImage = async (imageName) => {
         const data = await response.json();
         if (data.message === 'success') {
             toast.success('oldImage deleted successfully');
-            setReloadPosts(true);
         } else {
             console.error('Unexpected response:', data);
         }
@@ -66,7 +74,6 @@ const deleteVideo = async (videoName) => {
         const data = await response.json();
         if (data.message === 'success') {
             toast.success('oldVideo deleted successfully');
-            setReloadPosts(true);
         }
     }
     catch (error) {
@@ -139,7 +146,7 @@ const uploadData = async () => {
         if (data.message === 'success') {
             resetPostForm();
             toast.success('Post created successfully');
-            setReloadPosts(true);
+            homeDispatch({ type: 'RELOLOAD_POSTS', payload: 'true'});
         }
         if (showEditPost && oldphotoPath) {
             deleteImage(oldphotoPath);
@@ -147,7 +154,6 @@ const uploadData = async () => {
         if (showEditPost && oldvideoPath) {
             deleteVideo(oldvideoPath);
         }
-        setShowEditPost(false);
     }
     catch (error) {
         toast.error('Error creating post');
@@ -222,7 +228,7 @@ const resetPostForm = () => {
     setPostVideo(null);
     setPostImageURL('');
     setPostVideoURL('');
-    setShowEditPost(false);
+    homeDispatch({ type: 'TOGGLE_EDIT_POST', payload: false });
     if (imageInputRef.current) {
         imageInputRef.current.value = '';
     }

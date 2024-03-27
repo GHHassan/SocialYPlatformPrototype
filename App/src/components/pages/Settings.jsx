@@ -1,40 +1,74 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Select from '../pageFractions/Select';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast'
 import { API_ROOT } from '../../Config';
-const Settings = ({ user }) => {
+import { useUser } from "@clerk/clerk-react";
+import { useAppState } from '../../contexts/AppStateContext';
+const Settings = () => {
+    const { state: AppState } = useAppState();
+    const { signedInUser, userProfile } = AppState;
+    const [user, setUser] = useState(null);
+    const ssouser = useUser();
 
-    if (!user) {
-        return <div>user Not found</div>;
-    }
-    const [firstName, setFirstName] = useState(user.firstName ?? '');
-    const [lastName, setLastName] = useState(user.lastName ?? '');
-    const [bio, setBio] = useState(user.bio ?? '');
-    const [website, setWebsite] = useState(user.website ?? '');
-    const [dateOfBirth, setDateOfBirth] = useState(user.dateOfBirth ?? '');
-    const [gender, setGender] = useState(user.gender ?? '');
-    const [email, setEmail] = useState(user.email ?? '');
-    const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber ?? '');
-    const [address, setAddress] = useState(user.address ?? '');
-    const [relationshipStatus, setRelationshipStatus] = useState(user.relationshipStatus ?? '');
-    const [profilePicturePath, setProfilePicturePath] = useState(user.profilePicturePath ?? '');
-    const [coverPicturePath, setCoverPicturePath] = useState(user.coverPicturePath ?? '');
+    useEffect(() => {
+        if (signedInUser?.isSignedIn && userProfile) {
+            console.log('User Profile:', userProfile);
+            setUser(userProfile);
+        } else if (signedInUser) {
+            setUser(signedInUser);
+        } else if (ssouser.isSignedIn) {
+            setUser(ssouser.user);
+        }
+    }, [signedInUser, userProfile]);
+
+    useEffect(() => {
+        if (user) { 
+            setFirstName(user.firstName ?? '');
+            setLastName(user.lastName ?? '');
+            setUserName(user.userName ?? userNameState);
+            setBio(user.bio ?? '');
+            setWebsite(user.website ?? '');
+            setDateOfBirth(user.dateOfBirth ?? '');
+            setGender(user.gender ?? '');
+            setEmail((user.email || user.primaryEmailAddress.emailAddress) ?? '');
+            setPhoneNumber((user.phoneNumber || user.primaryPhoneNumber) ?? '');
+            setAddress(user.address ?? '');
+            setRelationshipStatus(user.relationshipStatus ?? '');
+            setProfilePicturePath((user.profilePicturePath || user.imageUrl) ?? '');
+            setCoverPicturePath(user.coverPicturePath ?? '');
+            setUserNameState(user.userName ?? ''); 
+        }
+    }, [userProfile?.hasProfile]);
+
+    const [firstName, setFirstName] = useState(user?.firstName ?? '');
+    const [lastName, setLastName] = useState(user?.lastName ?? '');
+    const [userName, setUserName] = useState(user?.userName ?? '');
+    const [bio, setBio] = useState(user?.bio ?? '');
+    const [website, setWebsite] = useState(user?.website ?? '');
+    const [dateOfBirth, setDateOfBirth] = useState(user?.dateOfBirth ?? '');
+    const [gender, setGender] = useState(user?.gender ?? '');
+    const [email, setEmail] = useState(user?.email ?? '');
+    const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber ?? '');
+    const [address, setAddress] = useState(user?.address ?? '');
+    const [relationshipStatus, setRelationshipStatus] = useState(user?.relationshipStatus ?? '');
+    const [profilePicturePath, setProfilePicturePath] = useState(user?.profilePicturePath ?? '');
+    const [coverPicturePath, setCoverPicturePath] = useState(user?.coverPicturePath ?? '');
+    const [userNameState, setUserNameState] = useState('');
     // setting states for visibility
-    const [dateOfBirthVisibility, setDateOfBirthVisibility] = useState(user.dateOfBirthVisibility ?? '');
-    const [genderVisibility, setGenderVisibility] = useState(user.genderVisibility ?? '');
-    const [emailVisibility, setEmailVisibility] = useState(user.emailVisibility ?? '');
-    const [phoneNumberVisibility, setPhoneNumberVisibility] = useState(user.phoneNumberVisibility ?? '');
-    const [addressVisibility, setAddressVisibility] = useState(user.addressVisibility ?? '');
-    const [relationshipStatusVisibility, setRelationshipStatusVisibility] = useState(user.relationshipStatusVisibility ?? '');
-    const [profileVisibility, setProfileVisibility] = useState(user.profileVisibility ?? '');
-    const [profilePicture, setProfilePicture] = useState(user.profilePicture ?? '');
+    const [dateOfBirthVisibility, setDateOfBirthVisibility] = useState(user?.dateOfBirthVisibility ?? '');
+    const [genderVisibility, setGenderVisibility] = useState(user?.genderVisibility ?? '');
+    const [emailVisibility, setEmailVisibility] = useState(user?.emailVisibility ?? '');
+    const [phoneNumberVisibility, setPhoneNumberVisibility] = useState(user?.phoneNumberVisibility ?? '');
+    const [addressVisibility, setAddressVisibility] = useState(user?.addressVisibility ?? '');
+    const [relationshipStatusVisibility, setRelationshipStatusVisibility] = useState(user?.relationshipStatusVisibility ?? '');
+    const [profileVisibility, setProfileVisibility] = useState(user?.profileVisibility ?? '');
+    const [profilePicture, setProfilePicture] = useState((user?.profilePicture || user?.imageURL) ?? '');
     const [newProfilePicture, setNewProfilePicture] = useState(null);
     const [newCoverPicture, setNewCoverPicture] = useState(null);
-    const [coverPicture, setCoverPicture] = useState(user.coverPicturePath ?? '');
+    const [coverPicture, setCoverPicture] = useState(user?.coverPicturePath ?? '');
     const options = ['Private', 'Friends', 'Public']
     const navigate = useNavigate();
-    let token = localStorage.getItem('token');
 
     let profilePictureURL = null;
     let coverPicturePathURL = null;
@@ -44,9 +78,6 @@ const Settings = ({ user }) => {
         body.append('image', imageFile);
         const response = await fetch(`${API_ROOT}/upload`, {
             method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-            },
             body: body,
         })
         const data = await response.json();
@@ -61,7 +92,6 @@ const Settings = ({ user }) => {
 
     //upload profile and cover pictures
     const updateProfile = async () => {
-
         if (newProfilePicture) {
             await uploadFile(newProfilePicture, 'profilePicture');
             toast.success('Profile Picture Updated');
@@ -72,33 +102,37 @@ const Settings = ({ user }) => {
             toast.success('Cover Picture Updated');
         }
         // Send a POST request to the server with the updated profile data
+        const body = {
+            "userID": user.userID || user.id,
+            "firstName": firstName,
+            "lastName": lastName,
+            "username": (userName || userNameState) ?? '',
+            "bio": bio,
+            "website": website,
+            "dateOfBirth": dateOfBirth,
+            "gender": gender,
+            "email": email,
+            "phoneNumber": phoneNumber,
+            "address": address,
+            "profilePicturePath": profilePictureURL,
+            "coverPicturePath": coverPicturePathURL,
+            "relationshipStatus": relationshipStatus,
+            "profileVisibility": profileVisibility,
+            "emailVisibility": emailVisibility,
+            "phoneNumberVisibility": phoneNumberVisibility,
+            "addressVisibility": addressVisibility,
+            "dateOfBirthVisibility": dateOfBirthVisibility,
+            "genderVisibility": genderVisibility,
+            "relationshipStatusVisibility": relationshipStatusVisibility,
+        }
+        console.log('Profile Data:', body);
         const response = await fetch(`${API_ROOT}/profile`,
             {
-                method: user.userID ? 'PUT' : 'POST',
-                body: JSON.stringify({
-                    "userID": user.userID? user.userID : user.sub,
-                    "firstName": firstName,
-                    "lastName": lastName,
-                    "bio": bio,
-                    "website": website,
-                    "dateOfBirth": dateOfBirth,
-                    "gender": gender,
-                    "email": email,
-                    "phoneNumber": phoneNumber,
-                    "address": address,
-                    "profilePicturePath": profilePictureURL,
-                    "coverPicturePath": coverPicturePathURL,
-                    "relationshipStatus": relationshipStatus,
-                    "profileVisibility": profileVisibility,
-                    "emailVisibility": emailVisibility,
-                    "phoneNumberVisibility": phoneNumberVisibility,
-                    "addressVisibility": addressVisibility,
-                    "dateOfBirthVisibility": dateOfBirthVisibility,
-                    "genderVisibility": genderVisibility,
-                    "relationshipStatusVisibility": relationshipStatusVisibility,
-                }),
+                method: userProfile.hasProfile ? 'PUT' : 'POST',
+                body: JSON.stringify(body),
             })
         const data = await response.json();
+        console.log('Response:', data);
         if (data.message === 'success') {
             toast.success('Profile Updated');
         } else if (data.message === "user already exists (Forbidden)") {
@@ -243,7 +277,13 @@ const Settings = ({ user }) => {
         setNewCoverPicture(null);
     }
 
+    const checkDuplicateUseName = () => {
+        console.log('Checking for duplicate username', userNameState);
+    }
 
+    const handleUsernameChange = (e) => {
+        setUserNameState(e.target.value);
+    }
 
     return (
         <form onSubmit={handleSubmit} className=" mx-auto mt-8 p-6 bg-white rounded-md shadow-md">
@@ -346,18 +386,20 @@ const Settings = ({ user }) => {
 
             {/* username */}
             <div className="mb-4">
-                <label htmlFor="username">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-600">
                     Username:
                 </label>
                 <input
-                    type="text" readOnly
+                    type="text"
                     id="username"
-                    value={user.username}
-                    disabled
+                    value={user?.username ?? userNameState}
+                    disabled={user?.username?.trim().length > 0}
+                    required
                     className="mt-1 p-2 border rounded-md w-full"
+                    onChange={handleUsernameChange}
+                    onBlur={checkDuplicateUseName} // Add the onBlur event handler here
                 />
             </div>
-
 
             <div className="mb-4">
                 <label htmlFor="bioInput" className="block text-sm font-medium text-gray-600">
@@ -366,7 +408,7 @@ const Settings = ({ user }) => {
                 <input
                     type="text"
                     id="bioInput"
-                    value={bio}
+                    value={bio || ''}
                     onChange={handleBioChange}
                     className="mt-1 p-2 border rounded-md w-full"
                 />
@@ -379,7 +421,7 @@ const Settings = ({ user }) => {
                 <input
                     type="text"
                     id="websiteInput"
-                    value={website}
+                    value={website || ''}
                     onChange={handleWebsiteChange}
                     className="mt-1 p-2 border rounded-md w-full"
                 />
@@ -392,7 +434,7 @@ const Settings = ({ user }) => {
                 <input
                     type="date"
                     id="dateOfBirthInput"
-                    value={dateOfBirth}
+                    value={dateOfBirth || ''}
                     onChange={handleDateOfBirthChange}
                     className="mt-1 p-2 border rounded-md w-full"
                 />
@@ -416,7 +458,7 @@ const Settings = ({ user }) => {
                 <input
                     type="email"
                     id="emailInput"
-                    value={email}
+                    value={email || ''}
                     onChange={handleEmailChange}
                     className="mt-1 p-2 border rounded-md w-full"
                 />
@@ -430,7 +472,7 @@ const Settings = ({ user }) => {
                 <input
                     type="tel"
                     id="phoneNumberInput"
-                    value={phoneNumber}
+                    value={phoneNumber || ''}
                     onChange={handlePhoneNumberChange}
                     className="mt-1 p-2 border rounded-md w-full"
                 />
@@ -444,7 +486,7 @@ const Settings = ({ user }) => {
                 <input
                     type="text"
                     id="addressInput"
-                    value={address}
+                    value={address || ''}
                     onChange={handleAddressChange}
                     className="mt-1 p-2 border rounded-md w-full"
                 />
@@ -458,7 +500,7 @@ const Settings = ({ user }) => {
                 <input
                     type="text"
                     id="relationshipStatusInput"
-                    value={relationshipStatus}
+                    value={relationshipStatus || ''}
                     onChange={handleRelationshipStatusChange}
                     className="mt-1 p-2 border rounded-md w-full"
                 />

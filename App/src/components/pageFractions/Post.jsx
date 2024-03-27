@@ -4,7 +4,7 @@ import CreatePost from './CreatePost';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
 import { useAppState } from '../../contexts/AppStateContext';
-import { usePostState } from '../../contexts/PostStateContext';
+import { useHomeState } from '../../contexts/HomeStateContext';
 const SUCCESS_MESSAGE = 'success';
 
 
@@ -12,7 +12,7 @@ const SUCCESS_MESSAGE = 'success';
 const Post = () => {
     const { state, dispatch } = useAppState();
     const {  user } = state;
-    const { state: pstate, dispatch: pDispatch } = usePostState();
+    const { state: pstate, dispatch: pDispatch } = useHomeState();
     const {reloadPosts, posts, allComments, showEditPost, showActions } = pstate;
     const visibilityOptions = ['Public', 'Friends', 'Private'];
  
@@ -117,7 +117,7 @@ const Post = () => {
 
     
     const handleEditPost = (post) => {
-        setPostToBeEdited({ ...post });
+        pDispatch({ type: 'SET_EDITING_POST', payload: post });
         pDispatch({ type: 'TOGGLE_EDIT_POST', payload: true });
         pDispatch({ type: 'TOGGLE_ACTIONS', payload: false });
     };
@@ -138,12 +138,7 @@ const Post = () => {
                 <PostTemplate
                     post={post}
                     index={index}
-                    user={user}
-                    handleEditPost={handleEditPost}
-                    handleDeletePost={handleDeletePost}
-                    handleVisibility={handleVisibility}
                     visibilityOptions={visibilityOptions}
-                    showActions={showActions}
                 />
             </div>
         ))
@@ -160,13 +155,7 @@ const Post = () => {
                 {(user && showEditPost && postToBeEdited) && (
                     <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
                         <div className='bg-white p-6 rounded-lg max-h-screen max-w-[60%] overflow-y-auto'>
-                            <CreatePost
-                                post={postToBeEdited}
-                                reloadPosts={reloadPosts}
-                                setReloadPosts={setReloadPosts}
-                                user={user}
-                                showEditPost={showEditPost}
-                                setShowEditPost={setShowEditPost}
+                            <CreatePost post={postToBeEdited}
                             />
                         </div>
                     </div>

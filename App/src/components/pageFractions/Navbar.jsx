@@ -6,8 +6,8 @@ import { useAppState } from "../../contexts/AppStateContext";
 
 const Navbar = () => {
 
-    const { dispatch } = useAppState();
-    const { signedIn, signedInUser } = useAppState();
+    const { state, dispatch } = useAppState();
+    const { signedIn, signedInUser } = state;
     const { signOut } = useAuth();
     const ssoUser = useUser();
     const handleSignOut = async () => {
@@ -111,7 +111,7 @@ const Navbar = () => {
                             <p className="text-nowrap">Posts</p>
                         </Link>
 
-                        {SignedIn && ssoUser.isSignedIn ? (
+                        {signedIn || ssoUser.isSignedIn ? (
                             <div className="bg-red-600 font-medium hover:text-gray-300 text-white rounded-md px-3 py-1">
                                 <Link
                                     to="/kf6003/"
@@ -147,7 +147,7 @@ const Navbar = () => {
                         )}
 
                         {signedIn && (
-                            <Link to="/profile">
+                            <Link to="/settings">
                                 <span className="inline-block size-[46px] bg-gray-100 rounded-full overflow-hidden cursor-pointer">
                                     {signedInUser.imageUrl ? (
                                         <img

@@ -20,8 +20,12 @@ import { useUser } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { API_ROOT } from "../../Config";
+import { useAppState } from "../../contexts/AppStateContext";
 
-const Login = ({ setSignedIn }) => {
+const Login = () => {
+
+  const { state: appState, dispatch: appDispatch } = useAppState();
+  const { signedIn } = appState;
   const user = useUser();
   const [formData, setFormData] = useState({
     email: "",
@@ -67,7 +71,7 @@ const Login = ({ setSignedIn }) => {
       });
       const data = await response.json();
       if (data.message === "success") {
-        setSignedIn(true);
+        appDispatch({ type: "TOGGLE_SIGNED_IN", payload: true });
         localStorage.setItem("token", data.token);
         window.location.href = "/";
       } else {
