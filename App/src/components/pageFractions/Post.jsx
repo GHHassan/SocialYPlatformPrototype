@@ -16,6 +16,7 @@ const Post = () => {
     const {reloadPosts, posts, allComments, showEditPost, showActions } = pstate;
     const visibilityOptions = ['Public', 'Friends', 'Private'];
  
+    console.log('Post.js: posts:', posts);
     let token = localStorage.getItem('token');
     const deleteImage = async (imageName) => {
         if (!imageName) {
@@ -105,9 +106,6 @@ const Post = () => {
             if (allComments.length > 0) await deleteComments(post.postID);
             const response = await fetch(`${API_ROOT}/post?postID=${post.postID}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                },
             });
             handleApiResponse(response, 'Post deleted successfully');
         } catch (error) {

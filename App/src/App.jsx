@@ -17,9 +17,9 @@ import {jwtDecode} from 'jwt-decode';
 function App() {
   const ssoUser = useUser();
   const {state, dispatch } = useAppState();
-  const { signedIn, signedInUser, userProfile } = state; 
-  const token = localStorage.getItem('token');
+  const { signedIn, signedInUser, userProfile, posts } = state; 
   const navigate = useNavigate();
+
   useEffect(() => {
     if (ssoUser.isLoaded && ssoUser.isSignedIn) {
        const signedInUser = {
@@ -47,6 +47,7 @@ function App() {
     }
   }, [ssoUser.isSignedIn, signedIn]);  
 
+  console.log('post: signedInUser:', posts);
 	const getUserProfile = async (userID) => {
 		try {
 			const response = await fetch(`${API_ROOT}/profile?userID=${userID}`);
@@ -64,6 +65,20 @@ function App() {
 		}
 	};
 
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch(`${API_ROOT}/post`);
+      const data = await response.json();
+      if (data.message === "success") {
+        console.log('fetchPosts: data:', data);
+        delete data.message;
+        dispatch({ type: "SET_POSTS", payload: data.posts });
+      }
+    } catch (error) {
+      toast.error("Error getting posts");
+    }
+  }
+
   
 	useEffect(() => {
 		if (userProfile && !userProfile.hasProfile) {
@@ -77,6 +92,9 @@ function App() {
     }
   }, [signedIn]);
 
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   return (
     <div className="bg-gray-100 font-sans">

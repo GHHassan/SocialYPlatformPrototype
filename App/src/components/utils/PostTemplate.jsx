@@ -145,9 +145,6 @@ const PostTemplate = ({
     }
   };
 
-  // handle share click
-  // open a popup wiht option to share on homepage or facebook, twitter, linkedin or copy link
-  // handle share click
   const handleShareClick = (post) => {
     console.log('Share clicked:', post);
   
@@ -223,7 +220,7 @@ const PostTemplate = ({
           <div className="relative">
             <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
               onClick={() => handleDropdownToggle(index)}>...</button>
-            {(dropdownIndex === index && showActions) && (
+            {(index && showActions) && (
               <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
                 <button className="text-blue-500 text-xs" onClick={() => handleEditPost(post)}>Edit</button>
                 <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeletePost(post)}>Delete</button>
