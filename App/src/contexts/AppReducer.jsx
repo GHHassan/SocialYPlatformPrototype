@@ -5,7 +5,13 @@ export const initialState = {
     showSignUp: false,
     signedInUser: null,
     isOpen: true,
-    hasProfile: true
+    hasProfile: true,
+    newProfilePicture: null,
+    newCoverPicture: null,
+    oldProfilePicturePath: null,
+    oldCoverPicturePath: null,
+    newProfilePicturePath: null,
+    newCoverPicturePath: null,
 };
 
 export const appReducer = (state, action) => {
@@ -26,6 +32,10 @@ export const appReducer = (state, action) => {
                 localStorage.removeItem("token");
             }
             return { ...state, signedIn: false, user: null, signedInUser: null, initialized: false };
+        case 'SET_PICTURES':
+            return { ...state, newProfilePicture: action.payload.newProfilePicture, newCoverPicture: action.payload.newCoverPicture };
+        case 'SET_PICTURE_PATHS':
+            return { ...state, newProfilePicturePath: action.payload.newProfilePicturePath, newCoverPicturePath: action.payload.newCoverPicturePath, oldProfilePicturePath: action.payload.oldProfilePicturePath, oldCoverPicturePath: action.payload.oldCoverPicturePath };
         case 'TOGGLE_CHAT_VIEW':
             return { ...state, isOpen: !state.isOpen };
         default:

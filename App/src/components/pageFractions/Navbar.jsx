@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { SignedIn, useAuth } from "@clerk/clerk-react";
+import { SignedIn, UserProfile, useAuth } from "@clerk/clerk-react";
 import { useUser } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import { useAppState } from "../../contexts/AppStateContext";
@@ -7,7 +7,7 @@ import { useAppState } from "../../contexts/AppStateContext";
 const Navbar = () => {
 
     const { state, dispatch } = useAppState();
-    const { signedIn, signedInUser } = state;
+    const { signedIn, signedInUser,userProfile } = state;
     const { signOut } = useAuth();
     const ssoUser = useUser();
     const handleSignOut = async () => {
@@ -151,7 +151,7 @@ const Navbar = () => {
                                 <span className="inline-block size-[46px] bg-gray-100 rounded-full overflow-hidden cursor-pointer">
                                     {signedInUser.imageUrl ? (
                                         <img
-                                            src={signedInUser.imageUrl}
+                                            src={ (userProfile?.profilePicturePath || signedInUser?.imageUrl) || "https://ui-avatars.com/api/?name=John+Doe&background=random&rounded=true" }
                                             alt=""
                                         ></img>
                                     ) : (

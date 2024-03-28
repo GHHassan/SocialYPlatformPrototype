@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { API_ROOT } from '../../Config';
 import toast from 'react-hot-toast';
 let token = localStorage.getItem('token');
+import { useAppState } from '../../contexts/AppStateContext';
+import { useHomeState } from '../../contexts/HomeStateContext';
+const SUCCESS_MESSAGE = 'success';
 
 function CommentItems({ comments }) {
   const commentsJSX = comments.length > 0 ? (
@@ -42,9 +45,10 @@ function CommentItems({ comments }) {
   );
 }
 
-function CommentSection({ post, user, showComment, comments, setReloadComments, setShowComment}) {
+function CommentSection({ post, showComment, comments, setReloadComments, setShowComment }) {
   const [commentContent, setCommentContent] = useState('');
-
+  const { state: AppState, dispatch: AppDispatch } = useAppState();
+  const { userProfile: user, isChatOpen } = AppState;
   const handleCommentChange = (e) => {
     setCommentContent(e.target.value);
   }
@@ -87,7 +91,7 @@ function CommentSection({ post, user, showComment, comments, setReloadComments, 
         placeholder="Write a comment..."
         value={commentContent}
         onChange={handleCommentChange}
-        onClick={()=> setShowComment(!showComment)}
+        onClick={() => setShowComment(!showComment)}
       />
       <button
         type='submit'

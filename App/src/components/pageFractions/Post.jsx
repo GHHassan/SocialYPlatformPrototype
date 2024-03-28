@@ -7,8 +7,6 @@ import { useAppState } from '../../contexts/AppStateContext';
 import { useHomeState } from '../../contexts/HomeStateContext';
 const SUCCESS_MESSAGE = 'success';
 
-
-
 const Post = () => {
     const { state, dispatch } = useAppState();
     const {  user } = state;

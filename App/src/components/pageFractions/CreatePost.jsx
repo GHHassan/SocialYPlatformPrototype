@@ -23,9 +23,7 @@ const CreatePost = ({post}) => {
     const { state: HomeState, dispatch: homeDispatch } = useHomeState();
     const { reloadPosts, showEditPost,  } = HomeState;
     const { state: AppState } = useAppState();
-    const { user } = AppState;
-
-    console.log('User:', user);
+    const { userProfile: user } = AppState;
     
     const [postContent, setPostContent] = useState(post ? post.textContent : '');
     const [postImage, setPostImage] = useState(null);
