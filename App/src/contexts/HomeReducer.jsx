@@ -9,7 +9,7 @@ export const homeInitialState = {
 
 export const homeReducer = (state, action) => {
     switch (action.type) {
-        case 'TOGGLE_EDIT_POST':
+        case 'TOGGLE_SHOW_EDIT_POST':
             return { ...state, showEditPost: action.payload };
         case 'SET_POSTS':
             return { 

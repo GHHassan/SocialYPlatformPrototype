@@ -6,6 +6,7 @@ import { API_ROOT } from '../../Config';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useAppState } from '../../contexts/AppStateContext';
+import { useHomeState } from '../../contexts/HomeStateContext';
 let token = localStorage.getItem('token');
 
 const SUCCESS_MESSAGE = 'success';
@@ -108,19 +109,18 @@ const PostTemplate = ({
   post,
   index,
   visibilityOptions,
-  handleDropdownToggle,
-  handleEditPost,
   handleDeletePost,
   handleVisibility,
-  showActions,
+  dropDownIndex,
 }) => {
 
   const { state: AppState, dispatch: AppDispatch } = useAppState();
+  const { state: HomeState, dispatch: HomeDispatch } = useHomeState();
   const { setReloadPosts, userProfile: user } = AppState;
   const [showComment, setShowComment] = useState(false);
   const [comments, setComments] = useState({});
   const [reloadComments, setReloadComments] = useState(false);
-
+  const [showActions, setShowActions] = useState(false);
   const sendLike = async (post) => {
     if (!user) {
       toast.error('Please login to like the post');
@@ -211,6 +211,18 @@ const PostTemplate = ({
     }
   }
 
+  const handleDropdownToggle = (index, dropDownIndex) => {
+    console.log('index:', index, 'dropDownIndex:', dropDownIndex);
+    if (index === dropDownIndex) {
+      setShowActions(!showActions);
+    }
+  }
+
+  const handleEditPost = (post) => {
+    HomeDispatch({ type: 'SET_EDITING_POST', payload: post });
+    HomeDispatch({ type: 'TOGGLE_SHOW_EDIT_POST', payload: true });
+    setShowActions(false);
+};
   useEffect(() => {
     if (showComment || reloadComments) {
       fetchComments();
@@ -223,8 +235,8 @@ const PostTemplate = ({
         {user?.userID === post?.userID && (
           <div className="relative">
             <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
-              onClick={() => handleDropdownToggle(index)}>...</button>
-            {(showActions) && (
+              onClick={() => handleDropdownToggle(index, dropDownIndex)}>...</button>
+            {(showActions && dropDownIndex === index) && (
               <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
                 <button className="text-blue-500 text-xs" onClick={() => handleEditPost(post)}>Edit</button>
                 <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeletePost(post)}>Delete</button>

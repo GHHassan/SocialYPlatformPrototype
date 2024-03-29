@@ -40,9 +40,9 @@ export const deleteVideo = async (videoName) => {
 
 const Post = () => {
     const { state, dispatch } = useAppState();
-    const { user } = state;
+    const { signedInUser: user } = state;
     const { state: pstate, dispatch: pDispatch } = useHomeState();
-    const { reloadPosts, posts, allComments, showEditPost, showActions, postToBeEdited } = pstate;
+    const { posts, allComments, showEditPost, postToBeEdited } = pstate;
     const visibilityOptions = ['Public', 'Friends', 'Private'];
     let token = localStorage.getItem('token');
 
@@ -104,12 +104,6 @@ const Post = () => {
         }
     };
 
-    const handleEditPost = (post) => {
-        pDispatch({ type: 'SET_EDITING_POST', payload: post });
-        pDispatch({ type: 'TOGGLE_EDIT_POST', payload: true });
-        pDispatch({ type: 'TOGGLE_ACTIONS', payload: false });
-    };
-
     const handleDeletePost = (post) => {
         deletePost(post);
         pDispatch({ type: 'TOGGLE_EDIT_POST', payload: false });
@@ -123,10 +117,6 @@ const Post = () => {
         updatePostVisibility(myPost);
     };
 
-    const handleDropdownToggle = (index) => {
-        pDispatch({ type: 'TOGGLE_ACTIONS', payload: !showActions });
-    }
-    console.log('editin post:', postToBeEdited)
     const postJSX = (
         posts.map((post, index) => (
             <div className='my-4 p-5 border border-gray-300 rounded-lg' key={index}>
@@ -135,15 +125,12 @@ const Post = () => {
                     index={index}
                     visibilityOptions={visibilityOptions}
                     handleVisibility={handleVisibility}
-                    handleEditPost={handleEditPost}
                     handleDeletePost={handleDeletePost}
-                    showActions={showActions}
-                    handleDropdownToggle={handleDropdownToggle}
+                    dropDownIndex={index}
                 />
             </div>
         ))
     );
-
     return (
         <>
             <div>

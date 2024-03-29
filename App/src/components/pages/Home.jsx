@@ -10,7 +10,7 @@ const Home = () => {
 
     const SUCCESS_MESSAGE = 'success';
     const { state: AppState, dispatch: AppDispatch } = useAppState();
-    const { userProfile, isChatOpen } = AppState;
+    const { userProfile, signedInUser, isChatOpen } = AppState;
     const { state: HomeState, dispatch: HomeDispatch } = useHomeState();
     const { reloadPosts, allComments} = HomeState;
 
@@ -52,6 +52,7 @@ const Home = () => {
         }
     }, [reloadPosts])
 
+    console.log('SignedInUSer:', signedInUser)
     return (
         <div className="relative "> 
             <div className="md:w-2/3 w-full">

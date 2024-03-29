@@ -26,8 +26,8 @@ import { useAppState } from "../../contexts/AppStateContext";
 const Login = () => {
 
   const { state: appState, dispatch: appDispatch } = useAppState();
-  const { signedIn } = appState;
   const user = useUser();
+  
   const [formData, setFormData] = useState({
     email: "",
     password: "",

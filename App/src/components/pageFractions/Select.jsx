@@ -13,7 +13,7 @@ function Select({ options, value, identifier = '', onChange }) {
   return (
     < >
       <select
-        value={value}
+        value={value || ''}
         onChange={(e) =>
           onChange(identifier, e.target.value)
         }
