@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useAppState } from './contexts/AppStateContext'; // Adjust the path as necessary
+import { useAppState } from './contexts/AppStateContext';
 import toast, { Toaster } from "react-hot-toast";
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Navbar from './components/pageFractions/Navbar';
@@ -9,10 +9,11 @@ import Settings from './components/pages/Settings';
 import OtherUsersProfile from './components/pages/OtherUsersProfile';
 import Login from './components/pageFractions/SignIn';
 import Footer from "./components/pageFractions/Footer";
-import { SignUp, useUser } from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-react";
 import { HomeStateProvider } from './contexts/HomeStateContext';
 import { API_ROOT } from "./Config";
 import {jwtDecode} from 'jwt-decode';
+import SignUp from './components/pageFractions/SignUp';
 
 function App() {
   const ssoUser = useUser();

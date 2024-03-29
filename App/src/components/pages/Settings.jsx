@@ -3,7 +3,7 @@ import Select from '../pageFractions/Select';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
 import { useAppState } from '../../contexts/AppStateContext';
-import { deleteImage} from '../pageFractions/Post';
+import { deleteImage } from '../pageFractions/Post';
 
 const pictures = {
     newProfilePicture: null,
@@ -117,20 +117,13 @@ const Settings = () => {
         } catch (e) {
             toast.error('Error uploading cover picture', e.message);
         }
-        try {
-            if (userInfo.hasOwnProperty('hasProfile') && !userInfo.hasProfile) {
-                method = 'POST';
-                if (!profilePictureURL) {
-                    profilePictureURL = userInfo.imageUrl;
-                }
-            } else {
-                method = 'PUT';
-            }
-        } catch (e) {
-            toast.error('Error updating profile', e.message);
+        if (userInfo.hasOwnProperty('hasProfile') && !userInfo.hasProfile) {
+            method = 'POST';
+        } else {
+            method = 'PUT';
         }
-        try {   
-                  
+        try {
+
             console.log('sign in user:', signedInUser.id)
             console.log('method:', method)
             const body = {
@@ -165,6 +158,7 @@ const Settings = () => {
                     body: JSON.stringify(body),
                 })
             const data = await response.json();
+            console.log('data:', data);
             if (data.message === 'success') {
                 toast.success('Profile Updated');
                 /** delete old images and clean up after update if applicable */
@@ -174,9 +168,11 @@ const Settings = () => {
                 if (userInfo.coverPicturePath !== null && userInfo.oldCoverPicturePath !== null) {
                     deleteImage(userInfo.oldCoverPicturePath);
                 }
+            } else {
+                toast.error('Error updating profile Data', data.message);
             }
         } catch (e) {
-            toast.error('Error updating profile', e.message);
+            toast.error('Error updating profile Final catch', e.message);
         }
     }
 
@@ -193,6 +189,33 @@ const Settings = () => {
             if (user.username !== userInfo.username) {
                 setErrors((prev) => ({ ...prev, username: 'Username already exists try different username' }));
             }
+        }
+    }
+    console.log('userInfo:', userInfo);
+    const handleDeleteProfile = ()=> {
+        if (window.confirm('Are you sure you want to delete your profile? it cannot be undone!')) {
+            const deleteProfile = async () => {
+                try {
+                    const response = await fetch(`${API_ROOT}/profile?userID=${signedInUser.id}`, {
+                        method: 'DELETE',
+                    });
+                    const data = await response.json();
+                    console.log('data:', data);
+                    if (data.message === 'success') {
+                        toast.success('Profile Deleted');
+                        AppDispatch({ type: 'TOGGLE_SIGNED_IN', payload: false });
+                        AppDispatch({ type: 'SET_SIGNEDIN_USER', payload: null });
+                        await deleteImage(userInfo.profilePicturePath);
+                        await deleteImage(userInfo.coverPicturePath);
+                        window.location.href = '/kf6003/';
+                    } else {
+                        toast.error('Error deleting profile', data.message);
+                    }
+                } catch (e) {
+                    toast.error('Error deleting profile', e.message);
+                }
+            }
+            deleteProfile();
         }
     }
     return (
@@ -275,6 +298,8 @@ const Settings = () => {
                         <div className="mb-4">
                             <label htmlFor="firstName" className="block text-sm font-medium text-gray-600">
                                 First Name:
+                            <span className='px-2 py-2 pt-1 pb-1 rounded-md float-end bg-red-700 text-white text-pretty'
+                            onClick={handleDeleteProfile}>delete profile</span>
                             </label>
                             <input
                                 type="text"
