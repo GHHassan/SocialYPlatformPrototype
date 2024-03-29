@@ -7,65 +7,46 @@ import { useAppState } from '../../contexts/AppStateContext';
 import { useHomeState } from '../../contexts/HomeStateContext';
 const SUCCESS_MESSAGE = 'success';
 
+export const deleteImage = async (imageName) => {
+    if (!imageName) {
+        return;
+    }
+    try {
+        const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
+            method: 'DELETE',
+        });
+        const data = await response.json();
+        if (data.message === SUCCESS_MESSAGE) {
+            toast.success('Old image deleted successfully');
+        }
+    } catch (error) {
+        console.error('Error during deleteImage:', error);
+    }
+};
+
+export const deleteVideo = async (videoName) => {
+    try {
+        const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
+            method: 'DELETE',
+        });
+        const data = await response.json();
+        if (data.message === SUCCESS_MESSAGE) {
+            toast.success('Old video deleted successfully');
+        }
+    } catch (error) {
+        console.error('Error during deleteVideo:', error);
+    }
+};
+
 const Post = () => {
     const { state, dispatch } = useAppState();
-    const {  user } = state;
+    const { user } = state;
     const { state: pstate, dispatch: pDispatch } = useHomeState();
-    const {reloadPosts, posts, allComments, showEditPost, showActions } = pstate;
+    const { reloadPosts, posts, allComments, showEditPost, showActions } = pstate;
     const visibilityOptions = ['Public', 'Friends', 'Private'];
- 
+
     console.log('Post.js: posts:', posts);
     let token = localStorage.getItem('token');
-    const deleteImage = async (imageName) => {
-        if (!imageName) {
-            return;
-        }
-        try {
-            const response = await fetch(`${API_ROOT}/upload?image=${imageName}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                },
-            });
-            const data = await response.json();
-            if (data.message === SUCCESS_MESSAGE) {
-                toast.success('Old image deleted successfully');
-            }
-        } catch (error) {
-            console.error('Error during deleteImage:', error);
-        }
-    };
-
-    const deleteVideo = async (videoName) => {
-        try {
-            const response = await fetch(`${API_ROOT}/upload?video=${videoName}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                },
-            });
-            const data = await response.json();
-            if (data.message === SUCCESS_MESSAGE) {
-                toast.success('Old video deleted successfully');
-            }
-        } catch (error) {
-            console.error('Error during deleteVideo:', error);
-        }
-    };
-
-    const deleteComments = async (postID) => {
-        try {
-            const response = await fetch(`${API_ROOT}/comment?postID=${postID}`, {
-                method: 'DELETE',
-            });
-            const data = await response.json();
-            if (data.message === SUCCESS_MESSAGE) {
-                toast.success('Comments deleted successfully');
-            }
-        } catch (error) {
-            console.error('Error during deleteComments:', error);
-        }
-    };
 
     const updatePostVisibility = async (post) => {
         try {
@@ -111,7 +92,20 @@ const Post = () => {
         }
     };
 
-    
+    const deleteComments = async (postID) => {
+        try {
+            const response = await fetch(`${API_ROOT}/comment?postID=${postID}`, {
+                method: 'DELETE',
+            });
+            const data = await response.json();
+            if (data.message === SUCCESS_MESSAGE) {
+                toast.success('Comments deleted successfully');
+            }
+        } catch (error) {
+            console.error('Error during deleteComments:', error);
+        }
+    };
+
     const handleEditPost = (post) => {
         pDispatch({ type: 'SET_EDITING_POST', payload: post });
         pDispatch({ type: 'TOGGLE_EDIT_POST', payload: true });

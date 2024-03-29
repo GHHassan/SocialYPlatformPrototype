@@ -149,9 +149,9 @@ const Navbar = () => {
                         {signedIn && (
                             <Link to="/settings">
                                 <span className="inline-block size-[46px] bg-gray-100 rounded-full overflow-hidden cursor-pointer">
-                                    {signedInUser.imageUrl ? (
+                                    {signedInUser.imageUrl || userProfile?.profilePicturePath ? (
                                         <img
-                                            src={ (userProfile?.profilePicturePath || signedInUser?.imageUrl) || "https://ui-avatars.com/api/?name=John+Doe&background=random&rounded=true" }
+                                            src={ (userProfile?.profilePicturePath || signedInUser?.imageUrl) }
                                             alt=""
                                         ></img>
                                     ) : (

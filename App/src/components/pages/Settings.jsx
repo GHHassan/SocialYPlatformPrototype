@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import Select from '../pageFractions/Select';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
-import { useUser } from "@clerk/clerk-react";
 import { useAppState } from '../../contexts/AppStateContext';
-import App from '../../App';
+import { deleteImage, deleteVideo } from '../pageFractions/Post';
 
 const pictures = {
     newProfilePicture: null,
     newCoverPicture: null,
-    profilePicturePath: '',
-    coverPicturePath: '',
+    oldProfilePicturePath: '',
+    oldCoverPicturePath: '',
     newProfilePicturePath: '',
     newCoverPicturePath: '',
 }
@@ -31,7 +29,6 @@ const inputErrors = {
 const Settings = () => {
     const { state: AppState, dispatch: AppDispatch } = useAppState();
     const { signedInUser, userProfile } = AppState;
-    const navigate = useNavigate();
     const [userInfo, setUserInfo] = useState((userProfile || signedInUser));
     const [errors, setErrors] = useState(inputErrors);
     const [loading, setLoading] = useState(true);
@@ -59,8 +56,8 @@ const Settings = () => {
             pictures.newProfilePicturePath = e.target.files[0].name;
             setUserInfo({
                 ...userInfo,
-                profilePicturePath: URL.createObjectURL(e.target.files[0]),
                 oldProfilePicturePath: userInfo.profilePicturePath,
+                profilePicturePath: URL.createObjectURL(e.target.files[0]),
             });
         }
     };
@@ -90,9 +87,6 @@ const Settings = () => {
             if (type === 'profilePicture') {
                 pictures.newProfilePicturePath = data.imageURL;
                 setUserInfo({ ...userInfo, profilePicturePath: data.imageURL });
-                console.log('profile picture path:', data.imageURL);
-                // AppDispatch({ type: 'SET_PICTURES', payload: { newProfilePicture: null, newCoverPicture: null } });
-                // AppDispatch({ type: 'SET_PROFILE', payload: { ...userInfo, profilePicturePath: data.imageURL } });
             } else if (type === 'coverPicture') {
                 pictures.newCoverPicturePath = data.imageURL;
                 console.log('cover picture path:', data.imageURL);
@@ -100,8 +94,7 @@ const Settings = () => {
             }
         }
     }
-
-    //upload profile and cover pictures
+    /** updating profile data */
     const updateProfile = async () => {
         console.log('updating profile');
         let method;
@@ -113,7 +106,6 @@ const Settings = () => {
                 toast.success('Profile Picture Updated');
             }
         } catch (e) {
-            console.log('profile picture error:', e.message);
             toast.error('Error uploading profile', e.message);
         }
         try {
@@ -123,7 +115,7 @@ const Settings = () => {
                 toast.success('Cover Picture Updated');
             }
         } catch (e) {
-            console.log('cover picture error:', e.message);
+            toast.error('Error uploading cover picture', e.message);
         }
         try {
             if (userInfo.hasOwnProperty('hasProfile') && !userInfo.hasProfile) {
@@ -135,8 +127,7 @@ const Settings = () => {
                 method = 'PUT';
             }
         } catch (e) {
-            console.log('error setting method:', e.message);
-            console.log('method:', method);
+            toast.error('Error updating profile', e.message);
         }
         try {            
             const body = {
@@ -170,12 +161,18 @@ const Settings = () => {
                     body: JSON.stringify(body),
                 })
             const data = await response.json();
-            console.log('data:', data);
             if (data.message === 'success') {
                 toast.success('Profile Updated');
+                /** delete old images and clean up after update if applicable */
+                if (userInfo.profilePicturePath !== null && userInfo.oldProfilePicturePath !== null) {
+                    deleteImage(userInfo.oldProfilePicturePath);
+                }
+                if (userInfo.coverPicturePath !== null && userInfo.oldCoverPicturePath !== null) {
+                    deleteImage(userInfo.oldCoverPicturePath);
+                }
             }
         } catch (e) {
-            console.log('error updating profile:', e.message);
+            toast.error('Error updating profile', e.message);
         }
     }
 
@@ -322,7 +319,7 @@ const Settings = () => {
                             <p className='text-red-500'>{errors.username}</p>
                         </div>
 
-                        {/* Email -- Example already provided, included for completeness */}
+                        {/* Email */}
                         <div className="mb-4">
                             <label htmlFor="email" className="block text-sm font-medium text-gray-600">
                                 Email:
@@ -445,7 +442,7 @@ const Settings = () => {
                                 type="text"
                                 name="address"
                                 id="address"
-                                value={userInfo.address}
+                                value={userInfo.address || ''}
                                 onChange={handleInputChange}
                                 className="mt-1 p-2 border rounded-md w-full"
                             />
