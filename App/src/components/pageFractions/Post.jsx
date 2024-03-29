@@ -42,7 +42,7 @@ const Post = () => {
     const { state, dispatch } = useAppState();
     const { user } = state;
     const { state: pstate, dispatch: pDispatch } = useHomeState();
-    const { reloadPosts, posts, allComments, showEditPost, showActions } = pstate;
+    const { reloadPosts, posts, allComments, showEditPost, showActions, postToBeEdited } = pstate;
     const visibilityOptions = ['Public', 'Friends', 'Private'];
     let token = localStorage.getItem('token');
 
@@ -123,11 +123,11 @@ const Post = () => {
         updatePostVisibility(myPost);
     };
 
-    const handleDropdownToggle = (post) => {
+    const handleDropdownToggle = (index) => {
         pDispatch({ type: 'TOGGLE_ACTIONS', payload: !showActions });
-        pDispatch({ type: 'SET_EDITING_POST', payload: post });
     }
-    const postJSX = posts[0] !== 'No posts found' ? (
+    console.log('editin post:', postToBeEdited)
+    const postJSX = (
         posts.map((post, index) => (
             <div className='my-4 p-5 border border-gray-300 rounded-lg' key={index}>
                 <PostTemplate
@@ -142,10 +142,6 @@ const Post = () => {
                 />
             </div>
         ))
-    ) : (
-        <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 my-4">
-            <h1 className="text-xl font-semibold">No post found</h1>
-        </div>
     );
 
     return (

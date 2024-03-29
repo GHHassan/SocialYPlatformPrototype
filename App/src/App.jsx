@@ -70,10 +70,12 @@ function App() {
       const response = await fetch(`${API_ROOT}/post`);
       const data = await response.json();
       if (data.message === "success") {
-        console.log('fetchPosts: data:', data);
         delete data.message;
         dispatch({ type: "SET_POSTS", payload: data.posts });
+      } else if (data.message === "failed or no post found ") {
+        dispatch({ type: "SET_POSTS", payload: {posts: "No Post found"} });
       }
+
     } catch (error) {
       toast.error("Error getting posts");
     }

@@ -83,25 +83,20 @@ const Settings = () => {
         })
         const data = await response.json();
         if (data.message === 'success') {
-            console.log('data:', data);
             if (type === 'profilePicture') {
                 pictures.newProfilePicturePath = data.imageURL;
                 setUserInfo({ ...userInfo, profilePicturePath: data.imageURL });
             } else if (type === 'coverPicture') {
                 pictures.newCoverPicturePath = data.imageURL;
-                console.log('cover picture path:', data.imageURL);
                 setUserInfo({ ...userInfo, coverPicturePath: data.imageURL });
             }
         }
     }
     /** updating profile data */
     const updateProfile = async () => {
-        console.log('updating profile');
         let method;
         try {
-            console.log('trying')
             if (pictures.newProfilePicture !== null) {
-                console.log('uploading profile picture');
                 await uploadFile(pictures.newProfilePicture, 'profilePicture');
                 toast.success('Profile Picture Updated');
             }
@@ -110,7 +105,6 @@ const Settings = () => {
         }
         try {
             if (pictures.newCoverPicture !== null) {
-                console.log('uploading cover picture');
                 await uploadFile(pictures.newCoverPicture, 'coverPicture');
                 toast.success('Cover Picture Updated');
             }
@@ -123,9 +117,6 @@ const Settings = () => {
             method = 'PUT';
         }
         try {
-
-            console.log('sign in user:', signedInUser.id)
-            console.log('method:', method)
             const body = {
                 "profileID": userInfo?.profileID,
                 "userID": signedInUser.id,
@@ -151,14 +142,12 @@ const Settings = () => {
                 "genderVisibility": userInfo?.genderVisibility,
                 "relationshipStatusVisibility": userInfo?.relationshipStatusVisibility,
             }
-            console.log('body:', body);
             const response = await fetch(`${API_ROOT}/profile`,
                 {
                     method: method,
                     body: JSON.stringify(body),
                 })
             const data = await response.json();
-            console.log('data:', data);
             if (data.message === 'success') {
                 toast.success('Profile Updated');
                 /** delete old images and clean up after update if applicable */
@@ -191,7 +180,6 @@ const Settings = () => {
             }
         }
     }
-    console.log('userInfo:', userInfo);
     const handleDeleteProfile = ()=> {
         if (window.confirm('Are you sure you want to delete your profile? it cannot be undone!')) {
             const deleteProfile = async () => {
@@ -200,7 +188,6 @@ const Settings = () => {
                         method: 'DELETE',
                     });
                     const data = await response.json();
-                    console.log('data:', data);
                     if (data.message === 'success') {
                         toast.success('Profile Deleted');
                         AppDispatch({ type: 'TOGGLE_SIGNED_IN', payload: false });

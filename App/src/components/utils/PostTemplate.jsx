@@ -216,6 +216,7 @@ const PostTemplate = ({
       fetchComments();
     }
   }, [showComment, reloadComments]);
+
   return (
     <div>
       <div className="bg-white border-b-2 border-double border-gray300">
@@ -223,7 +224,7 @@ const PostTemplate = ({
           <div className="relative">
             <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
               onClick={() => handleDropdownToggle(index)}>...</button>
-            {(index && showActions) && (
+            {(showActions) && (
               <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
                 <button className="text-blue-500 text-xs" onClick={() => handleEditPost(post)}>Edit</button>
                 <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeletePost(post)}>Delete</button>
