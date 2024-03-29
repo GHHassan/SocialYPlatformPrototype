@@ -123,7 +123,7 @@
 //             className="p-2 my-2 w-9/12 lg:w-80 block md:w-80 bg-slate-100 rounded-md text-black m-auto"
 //             value={name}
 //             onChange={handleNameChange}
-            
+
 //           />
 //           <input
 //             type="email"
@@ -302,9 +302,8 @@ export const FormGroup = ({
         required={required}
         value={value}
         onChange={onChange}
-        className={`w-full p-3 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-          errorMessage ? "border-red-500" : "border-gray-300"
-        } `}
+        className={`w-full p-3 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${errorMessage ? "border-red-500" : "border-gray-300"
+          } `}
       />
       {errorMessage && (
         <p className="mt-2 text-xs text-red-600">{errorMessage}</p>
@@ -340,9 +339,8 @@ export const SelectGroup = ({
         onChange={onChange}
         value={value}
         required={required}
-        className={`w-full p-6 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${
-          errorMessage ? "border-red-500" : "border-gray-300"
-        } `}
+        className={`w-full p-6 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${errorMessage ? "border-red-500" : "border-gray-300"
+          } `}
       >
         <option value="">Select your role</option>
         {options.map((option) => (
@@ -381,7 +379,7 @@ const SignUp = () => {
       if (!user.isSignedIn) {
         await Clerk.load();
         const redirectUrl = window.location.origin + '/kf6002/';
-  
+
         Clerk.openSignIn({ redirectUrl: redirectUrl });
       } else {
         window.location.href = "/kf6002/";
@@ -390,7 +388,7 @@ const SignUp = () => {
       toast.error("Error signing in with Google");
     }
   };
-  
+
   // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -458,96 +456,97 @@ const SignUp = () => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex w-full items-center justify-center py-16 bg-gray-100"
-    >
-      <div className="w-full max-w-md mx-auto p-6 border border-gray-300 shadow-lg rounded-lg bg-white">
-        <div className="mb-4">
-          <SignUpWithGoogleButton onClick={handleGoogleSignUp} />
-        </div>
+    <div className="flex w-full items-center justify-center py-16 bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+      >
+        <div className="w-full max-w-md mx-auto p-6 border border-gray-300 shadow-lg rounded-lg bg-white">
+          <div className="mb-4">
+            <SignUpWithGoogleButton onClick={handleGoogleSignUp} />
+          </div>
 
-        <FormGroup
-          id="username"
-          name="username"
-          type="text"
-          label="Username"
-          placeholder="your username"
-          value={formData.username}
-          onChange={handleChange}
-          errorMessage={formErrors.username}
-          required
-        />
-        <FormGroup
-          id="email"
-          name="email"
-          type="email"
-          label="Email Address"
-          placeholder="you@example.com"
-          value={formData.email}
-          onChange={handleChange}
-          errorMessage={formErrors.email}
-          required
-        />
-        <FormGroup
-          id="password"
-          name="password"
-          type="password"
-          label="Password"
-          placeholder="••••••••"
-          value={formData.password}
-          onChange={handleChange}
-          errorMessage={formErrors.password}
-          required
-        />
-        <FormGroup
-          id="confirmPassword"
-          name="confirmPassword"
-          type="password"
-          label="Confirm Password"
-          placeholder="••••••••"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          errorMessage={formErrors.confirmPassword}
-          required
-        />
-        {/* Role Selection */}
-        <SelectGroup
-          id="role"
-          name="role"
-          label="Role"
-          value={formData.role} // Ensure formData.role exists in your state
-          onChange={handleChange}
-          options={[
-            { value: "Researcher", label: "Researcher" },
-            { value: "Participant", label: "Participant" },
-            {
-              value: "ResearcherAndParticipant",
-              label: "Researcher And Participant",
-            },
-          ]}
-          errorMessage={formErrors.role}
-          required
-        />
-        {/* Additional form groups for other inputs as needed */}
-        <button
-          className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
-          type="submit"
-          onClick={handleSubmit}
-        >
-          Sign Up
-        </button>
-        <div className="my-2 text-sm font-medium text-gray-700">
-          Already have an account?{" "}
-          <Link
-            to={"/login"}
-            className="text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-300"
+          <FormGroup
+            id="username"
+            name="username"
+            type="text"
+            label="Username"
+            placeholder="your username"
+            value={formData.username}
+            onChange={handleChange}
+            errorMessage={formErrors.username}
+            required
+          />
+          <FormGroup
+            id="email"
+            name="email"
+            type="email"
+            label="Email Address"
+            placeholder="you@example.com"
+            value={formData.email}
+            onChange={handleChange}
+            errorMessage={formErrors.email}
+            required
+          />
+          <FormGroup
+            id="password"
+            name="password"
+            type="password"
+            label="Password"
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
+            errorMessage={formErrors.password}
+            required
+          />
+          <FormGroup
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            label="Confirm Password"
+            placeholder="••••••••"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            errorMessage={formErrors.confirmPassword}
+            required
+          />
+          {/* Role Selection */}
+          <SelectGroup
+            id="role"
+            name="role"
+            label="Role"
+            value={formData.role} // Ensure formData.role exists in your state
+            onChange={handleChange}
+            options={[
+              { value: "Researcher", label: "Researcher" },
+              { value: "Participant", label: "Participant" },
+              {
+                value: "ResearcherAndParticipant",
+                label: "Researcher And Participant",
+              },
+            ]}
+            errorMessage={formErrors.role}
+            required
+          />
+          {/* Additional form groups for other inputs as needed */}
+          <button
+            className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
+            type="submit"
+            onClick={handleSubmit}
           >
-            Sign in
-          </Link>
+            Sign Up
+          </button>
+          <div className="my-2 text-sm font-medium text-gray-700">
+            Already have an account?{" "}
+            <Link
+              to={"/login"}
+              className="text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-300"
+            >
+              Sign in
+            </Link>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 };
 

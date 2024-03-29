@@ -44,8 +44,6 @@ const Post = () => {
     const { state: pstate, dispatch: pDispatch } = useHomeState();
     const { reloadPosts, posts, allComments, showEditPost, showActions } = pstate;
     const visibilityOptions = ['Public', 'Friends', 'Private'];
-
-    console.log('Post.js: posts:', posts);
     let token = localStorage.getItem('token');
 
     const updatePostVisibility = async (post) => {
@@ -115,6 +113,9 @@ const Post = () => {
     const handleDeletePost = (post) => {
         deletePost(post);
         pDispatch({ type: 'TOGGLE_EDIT_POST', payload: false });
+        pDispatch({ type: 'RELOAD_POSTS', payload: true })
+        pDispatch({ type: 'TOGGLE_ACTIONS', payload: false })
+        
     };
 
     const handleVisibility = (post, key) => {
@@ -122,6 +123,10 @@ const Post = () => {
         updatePostVisibility(myPost);
     };
 
+    const handleDropdownToggle = (post) => {
+        pDispatch({ type: 'TOGGLE_ACTIONS', payload: !showActions });
+        pDispatch({ type: 'SET_EDITING_POST', payload: post });
+    }
     const postJSX = posts[0] !== 'No posts found' ? (
         posts.map((post, index) => (
             <div className='my-4 p-5 border border-gray-300 rounded-lg' key={index}>
@@ -133,6 +138,7 @@ const Post = () => {
                     handleEditPost={handleEditPost}
                     handleDeletePost={handleDeletePost}
                     showActions={showActions}
+                    handleDropdownToggle={handleDropdownToggle}
                 />
             </div>
         ))

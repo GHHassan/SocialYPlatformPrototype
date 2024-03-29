@@ -9,7 +9,7 @@ import Settings from './components/pages/Settings';
 import OtherUsersProfile from './components/pages/OtherUsersProfile';
 import Login from './components/pageFractions/SignIn';
 import Footer from "./components/pageFractions/Footer";
-import { useUser } from "@clerk/clerk-react";
+import { SignUp, useUser } from "@clerk/clerk-react";
 import { HomeStateProvider } from './contexts/HomeStateContext';
 import { API_ROOT } from "./Config";
 import {jwtDecode} from 'jwt-decode';
@@ -47,7 +47,6 @@ function App() {
     }
   }, [ssoUser.isSignedIn, signedIn]);  
 
-  console.log('post: signedInUser:', posts);
 	const getUserProfile = async (userID) => {
 		try {
 			const response = await fetch(`${API_ROOT}/profile?userID=${userID}`);
@@ -96,6 +95,9 @@ function App() {
     fetchPosts();
   }, []);
 
+  useEffect(() => {
+    fetchPosts();
+  }, [state.reloadPosts]);
   return (
     <div className="bg-gray-100 font-sans">
       <header>
@@ -113,6 +115,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile/:userID" element={<OtherUsersProfile />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>

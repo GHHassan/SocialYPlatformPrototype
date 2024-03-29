@@ -129,10 +129,13 @@ const Settings = () => {
         } catch (e) {
             toast.error('Error updating profile', e.message);
         }
-        try {            
+        try {   
+                  
+            console.log('sign in user:', signedInUser.id)
+            console.log('method:', method)
             const body = {
-                "profileID": userInfo.profileID,
-                "userID": userInfo.userID,
+                "profileID": userInfo?.profileID,
+                "userID": signedInUser.id,
                 "firstName": userInfo?.firstName,
                 "lastName": userInfo?.lastName,
                 "username": userInfo?.username,
@@ -155,6 +158,7 @@ const Settings = () => {
                 "genderVisibility": userInfo?.genderVisibility,
                 "relationshipStatusVisibility": userInfo?.relationshipStatusVisibility,
             }
+            console.log('body:', body);
             const response = await fetch(`${API_ROOT}/profile`,
                 {
                     method: method,

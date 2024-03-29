@@ -23,6 +23,8 @@ export const homeReducer = (state, action) => {
             return { ...state, allComments: action.payload };
         case 'SET_EDITING_POST':
             return { ...state, postToBeEdited: action.payload };
+        case 'TOGGLE_ACTIONS':
+            return { ...state, showActions: action.payload };
         default:
             return state;
     }
