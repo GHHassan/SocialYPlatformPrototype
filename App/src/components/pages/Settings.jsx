@@ -3,7 +3,7 @@ import Select from '../pageFractions/Select';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
 import { useAppState } from '../../contexts/AppStateContext';
-import { deleteImage, deleteVideo } from '../pageFractions/Post';
+import { deleteImage} from '../pageFractions/Post';
 
 const pictures = {
     newProfilePicture: null,

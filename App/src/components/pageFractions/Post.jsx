@@ -129,6 +129,10 @@ const Post = () => {
                     post={post}
                     index={index}
                     visibilityOptions={visibilityOptions}
+                    handleVisibility={handleVisibility}
+                    handleEditPost={handleEditPost}
+                    handleDeletePost={handleDeletePost}
+                    showActions={showActions}
                 />
             </div>
         ))

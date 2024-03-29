@@ -5,6 +5,7 @@ import CommentSection from '../pageFractions/CommentSection';
 import { API_ROOT } from '../../Config';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { useAppState } from '../../contexts/AppStateContext';
 let token = localStorage.getItem('token');
 
 const SUCCESS_MESSAGE = 'success';
@@ -107,13 +108,15 @@ const PostTemplate = ({
   post,
   index,
   visibilityOptions,
-  user,
+  handleDropdownToggle,
   handleEditPost,
   handleDeletePost,
   handleVisibility,
   showActions,
 }) => {
 
+  const { state: AppState, dispatch: AppDispatch } = useAppState();
+  const { setReloadPosts, userProfile: user } = AppState;
   const [showComment, setShowComment] = useState(false);
   const [comments, setComments] = useState({});
   const [reloadComments, setReloadComments] = useState(false);
@@ -232,7 +235,6 @@ const PostTemplate = ({
         <p className="text-sm font-semibold text-gray-500">{post.firstName} {post.lastName}</p>
         <p className="text-xs text-gray-500">@{post.username}</p>
       </div>
-
       <PostContent post={post} />
 
       <PostActions
