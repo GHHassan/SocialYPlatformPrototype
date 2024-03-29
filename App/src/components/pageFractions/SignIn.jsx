@@ -160,7 +160,7 @@
  */
 
 import React, { useState } from "react";
-import { SignUpWithGoogleButton, CheckboxWithLabel, FormGroup } from "./Signup"; // Assuming this is already defined
+import { SignUpWithGoogleButton, CheckboxWithLabel, FormGroup } from "./SignUp"; // Assuming this is already defined
 import { useUser } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
