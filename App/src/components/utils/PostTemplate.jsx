@@ -116,11 +116,40 @@ const PostTemplate = ({
 
   const { state: AppState, dispatch: AppDispatch } = useAppState();
   const { state: HomeState, dispatch: HomeDispatch } = useHomeState();
-  const { setReloadPosts, userProfile: user } = AppState;
+  const { userProfile: user } = AppState;
   const [showComment, setShowComment] = useState(false);
   const [comments, setComments] = useState({});
   const [reloadComments, setReloadComments] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const [reloadPosts, setReloadPosts] = useState(false);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch(`${API_ROOT}/post`);
+      const data = await response.json();
+      if (data.message === "success") {
+        delete data.message;
+        console.log('data:', data);
+        HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
+        setReloadPosts(false);
+      }
+    } catch (error) {
+      toast.error("Error getting posts");
+    }
+  }
+
+  useEffect(() => {
+    if (reloadPosts) {
+      fetchPosts();
+    }
+  }, [reloadPosts]);
+
+  useEffect(() => {
+    if (showComment || reloadComments) {
+      fetchComments();
+    }
+  }, [showComment, reloadComments]);
+
   const sendLike = async (post) => {
     if (!user) {
       toast.error('Please login to like the post');
@@ -137,9 +166,6 @@ const PostTemplate = ({
     try {
       const response = await fetch(`${API_ROOT}/reaction`, {
         method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-        },
         body: JSON.stringify(body),
       });
       handleApiResponse(response, 'Like posted successfully');
@@ -148,23 +174,42 @@ const PostTemplate = ({
     }
   };
 
+  const fetchComments = async () => {
+    try {
+      const response = await fetch(`${API_ROOT}/comment?postID=${post.postID}`);
+      const data = await response.json();
+      if (data.message === 'success') {
+        delete data.message;
+        setComments(Object.values(data));
+        setReloadComments(false);
+      }
+    } catch (error) {
+      toast.error('Error fetching comments');
+    }
+  }
+
+  useEffect(() => {
+    if (showComment || reloadComments) {
+      fetchComments();
+    }
+  }, [showComment, reloadComments]);
+
+
   const handleShareClick = (post) => {
-    console.log('Share clicked:', post);
-  
     const postUrl = `${window.location.origin}/post/${post.postID}`;
     const url = encodeURIComponent(postUrl);
     const title = encodeURIComponent(post.title);
-  
+
     // Construct sharing URLs
     const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
     const twitterUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
     const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`;
     const whatsAppUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(title + " " + url)}`;
     const textMessageUrl = `sms:?body=${encodeURIComponent(title + " " + url)}`;
-  
+
     // Prompt for the user's choice
     const choice = prompt('Choose an option to share:\n1. Homepage\n2. Facebook\n3. Twitter\n4. LinkedIn\n5. Copy Link\n6. WhatsApp\n7. Text Message');
-  
+
     switch (choice) {
       case '1':
         console.log('Sharing on Homepage is not implemented.');
@@ -193,26 +238,8 @@ const PostTemplate = ({
         alert('Invalid choice.');
     }
   };
-  
-
-  const fetchComments = async () => {
-    try {
-      const response = await fetch(`${API_ROOT}/comment?postID=${post.postID}`);
-      const data = await response.json();
-      if (data.message === 'success') {
-        delete data.message;
-        setComments(Object.values(data));
-        setShowComment(true);
-      } else {
-        setComments({ 'message': 'No comments found' });
-      }
-    } catch (error) {
-      toast.error('Error fetching comments');
-    }
-  }
 
   const handleDropdownToggle = (index, dropDownIndex) => {
-    console.log('index:', index, 'dropDownIndex:', dropDownIndex);
     if (index === dropDownIndex) {
       setShowActions(!showActions);
     }
@@ -222,12 +249,7 @@ const PostTemplate = ({
     HomeDispatch({ type: 'SET_EDITING_POST', payload: post });
     HomeDispatch({ type: 'TOGGLE_SHOW_EDIT_POST', payload: true });
     setShowActions(false);
-};
-  useEffect(() => {
-    if (showComment || reloadComments) {
-      fetchComments();
-    }
-  }, [showComment, reloadComments]);
+  };
 
   return (
     <div>
@@ -252,7 +274,7 @@ const PostTemplate = ({
 
       <PostActions
         post={post}
-        handleCommentClick={()=> setShowComment(!showComment)}
+        handleCommentClick={() => setShowComment(!showComment)}
         handleLikeClick={sendLike}
         handleShareClick={handleShareClick}
       />
@@ -260,7 +282,6 @@ const PostTemplate = ({
         post={post}
         user={user}
         comments={comments}
-        setComments={setComments}
         showComment={showComment}
         setShowComment={setShowComment}
         setReloadComments={setReloadComments}

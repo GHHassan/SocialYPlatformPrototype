@@ -20,14 +20,12 @@ const Home = () => {
             const data = await response.json();
             if (data.message === 'success' && Object.keys(data).length > 0) {
                 delete data.message;
-                console.log('Data:', data);
                 HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
             } else {
                 HomeDispatch({ type: 'SET_POSTS', payload: ['No Post Found'] });
             }
         } catch (error) {
             console.error('Error fetching posts:', error);
-            HomeDispatch({ type: 'SET_POSTS', payload: [] });
         }
     };
 
@@ -52,7 +50,6 @@ const Home = () => {
         }
     }, [reloadPosts])
 
-    console.log('SignedInUSer:', signedInUser)
     return (
         <div className="relative "> 
             <div className="md:w-2/3 w-full">

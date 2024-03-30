@@ -18,7 +18,6 @@ export const initialState = {
     signedInUser: null,
     isOpen: true,
     hasProfile: true,
-    reloadPosts: true,
 };
 
 export const appReducer = (state, action) => {
@@ -34,8 +33,6 @@ export const appReducer = (state, action) => {
             return { ...state, signedIn: action.payload };
         case 'TOGGLE_CHAT_VIEW':
             return { ...state, isOpen: !state.isOpen };
-        case 'RELOAD_POSTS':
-            return { ...state, reloadPosts: action.payload };
         default:
             return state;
     }

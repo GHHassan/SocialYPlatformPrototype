@@ -1,5 +1,5 @@
 import PostTemplate from '../utils/PostTemplate';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CreatePost from './CreatePost';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
@@ -41,10 +41,32 @@ export const deleteVideo = async (videoName) => {
 const Post = () => {
     const { state, dispatch } = useAppState();
     const { signedInUser: user } = state;
-    const { state: pstate, dispatch: pDispatch } = useHomeState();
-    const { posts, allComments, showEditPost, postToBeEdited } = pstate;
+    const { state: HomeState, dispatch: HomeDispatch } = useHomeState();
+    const { posts, allComments, showEditPost, postToBeEdited } = HomeState;
     const visibilityOptions = ['Public', 'Friends', 'Private'];
     let token = localStorage.getItem('token');
+    const [reloadPosts, setReloadPosts] = useState(false);
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch(`${API_ROOT}/post`);
+      const data = await response.json();
+      if (data.message === "success") {
+        delete data.message;
+        HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
+        setReloadPosts(false);
+      }
+    } catch (error) {
+      toast.error("Error getting posts");
+    }
+  }
+
+  useEffect(() => {
+    if (reloadPosts) {
+      fetchPosts();
+    }
+  }, [reloadPosts]);
+
 
     const updatePostVisibility = async (post) => {
         try {
@@ -56,6 +78,7 @@ const Post = () => {
                 body: JSON.stringify(post),
             });
             handleApiResponse(response, 'Post visibility updated successfully');
+            setReloadPosts(true);
         } catch (error) {
             console.error('Error during updatePostVisibility:', error);
         }
@@ -85,6 +108,7 @@ const Post = () => {
                 method: 'DELETE',
             });
             handleApiResponse(response, 'Post deleted successfully');
+            setReloadPosts(true);
         } catch (error) {
             toast.error('Error during delete operation');
         }
@@ -106,9 +130,9 @@ const Post = () => {
 
     const handleDeletePost = (post) => {
         deletePost(post);
-        pDispatch({ type: 'TOGGLE_EDIT_POST', payload: false });
-        pDispatch({ type: 'RELOAD_POSTS', payload: true })
-        pDispatch({ type: 'TOGGLE_ACTIONS', payload: false })
+        HomeDispatch({ type: 'TOGGLE_EDIT_POST', payload: false });
+        HomeDispatch({ type: 'RELOAD_POSTS', payload: true })
+        HomeDispatch({ type: 'TOGGLE_ACTIONS', payload: false })
         
     };
 
@@ -133,13 +157,12 @@ const Post = () => {
     );
     return (
         <>
-            <div>
+            <div className='ml-3'>
                 {postJSX}
                 {(user && showEditPost && postToBeEdited) && (
                     <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
                         <div className='bg-white p-6 rounded-lg max-h-screen max-w-[60%] overflow-y-auto'>
-                            <CreatePost post={postToBeEdited}
-                            />
+                            <CreatePost post={postToBeEdited} />
                         </div>
                     </div>
                 )}

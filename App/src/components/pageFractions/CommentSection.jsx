@@ -50,7 +50,7 @@ function CommentSection({ post, showComment, comments, setReloadComments, setSho
   const { state: AppState, dispatch: AppDispatch } = useAppState();
   const { userProfile: user, isChatOpen } = AppState;
   const handleCommentChange = (e) => {
-    setCommentContent(e.target.value);
+    setCommentContent(e.target.value); 
   }
   const postComment = async (post) => {
     if (!commentContent) return;
@@ -62,23 +62,19 @@ function CommentSection({ post, showComment, comments, setReloadComments, setSho
       "name": `${user.firstName} ${user.lastName}`,
       "commentContent": commentContent,
     };
-
     try {
       const response = await fetch(`${API_ROOT}/comment`, {
         method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-        },
         body: JSON.stringify(body),
       });
       const data = await response.json();
       if (data.message === 'success') {
         toast.success('Comment posted successfully');
         setReloadComments(true);
+        setCommentContent('');
       } else {
-        console.error('Unexpected response:', data);
+        setCommentContent('No comments found');
       }
-      setCommentContent('');
     } catch (error) {
       toast.error('Error posting comment');
     }

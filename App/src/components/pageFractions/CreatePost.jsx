@@ -20,8 +20,8 @@ import { useHomeState } from '../../contexts/HomeStateContext';
 import { useAppState } from '../../contexts/AppStateContext';
 
 const CreatePost = ({ post }) => {
-    const { state: HomeState, dispatch: homeDispatch } = useHomeState();
-    const { showEditPost, } = HomeState;
+    const { state: HomeState, dispatch: HomeDispatch } = useHomeState();
+    const { showEditPost } = HomeState;
     const { state: AppState } = useAppState();
     const { userProfile: user } = AppState;
 
@@ -34,12 +34,33 @@ const CreatePost = ({ post }) => {
     const [oldvideoPath, setOldvideoPath] = useState(post?.videoPath || '');
     const [newImagePath, setNewImagePath] = useState('');
     const [newVideoPath, setNewVideoPath] = useState('');
-    const [postVisibility, setPostVisibility] = useState(post?.visibility);
+    const [postVisibility, setPostVisibility] = useState(post?.visibility || 'Friends');
     const [toBeSubmitted, setToBeSubmitted] = useState(false);
     const [mediaUploaded, setMediaUploaded] = useState(false);
     const [message, setMessage] = useState(post?.visibility);
+    const [reloadPosts, setReloadPosts] = useState(false);
     const imageInputRef = useRef(null);
     const videoInputRef = useRef(null);
+
+    const fetchPosts = async () => {
+        try {
+            const response = await fetch(`${API_ROOT}/post`);
+            const data = await response.json();
+            if (data.message === "success") {
+                delete data.message;
+                HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
+                setReloadPosts(false);
+            }
+        } catch (error) {
+            toast.error("Error getting posts");
+        }
+    }
+
+    useEffect(() => {
+        if (reloadPosts) {
+            fetchPosts();
+        }
+    }, [reloadPosts]);
 
     const deleteImage = async (imageName) => {
         try {
@@ -77,7 +98,6 @@ const CreatePost = ({ post }) => {
         const body = new FormData();
         body.append('image', postImage ? postImage : '');
         body.append('video', postVideo ? postVideo : '');
-        let uploaded = false;
         const response = await fetch(`${API_ROOT}/upload`, {
             method: 'POST',
             body: body,
@@ -131,16 +151,17 @@ const CreatePost = ({ post }) => {
             if (data.message === 'success') {
                 resetPostForm();
                 toast.success('Post created successfully');
-                AppDispatch({ type: 'RELOLOAD_POSTS', payload: 'true' });
             }
-            if (showEditPost && oldphotoPath) {
+            if (showEditPost && newImagePath) {
                 deleteImage(oldphotoPath);
             }
-            if (showEditPost && oldvideoPath) {
+            if (showEditPost && newVideoPath) {
                 deleteVideo(oldvideoPath);
             }
+            setReloadPosts(true);
         }
         catch (error) {
+            console.error('Error during uploadData:', error);
             toast.error('Error creating post');
         }
     }
@@ -202,7 +223,7 @@ const CreatePost = ({ post }) => {
             toast.error('Empty Post, Please input some Text or medis file');
             return;
         }
-        handleMessageChange(message)
+        handleMessageChange(postVisibility);
         setToBeSubmitted(true);
 
     };
@@ -213,7 +234,7 @@ const CreatePost = ({ post }) => {
         setPostVideo(null);
         setPostImageURL('');
         setPostVideoURL('');
-        homeDispatch({ type: 'TOGGLE_SHOW_EDIT_POST', payload: false });
+        HomeDispatch({ type: 'TOGGLE_SHOW_EDIT_POST', payload: false });
         if (imageInputRef.current) {
             imageInputRef.current.value = '';
         }
@@ -225,11 +246,11 @@ const CreatePost = ({ post }) => {
     const handleMessageChange = (value) => {
         if (!value) return;
         if (value === 'Private') {
-            setMessage('This post will only be visible to you, Are you sure, you want to continue?');
+            setMessage(<span>This post will Not be visible to <span className='text-xl font-bold'>ANYONE EXCEPT YOU </span>, Are you sure, you want to continue?</span>);
         } else if (value === 'Friends') {
-            setMessage('This post will only be visible to your friends on SocialY, Are you sure, you want to continue?');
+            setMessage(<span>This post will only be visible to <span className='text-xl font-bold'> YOUR FRIENDS </span>, on SocialY, Are you sure, you want to continue?</span>);
         } else {
-            setMessage('This post will be visible to everyone, Are you sure, you want to continue?');
+            setMessage(<span>This post will only be visible to <span className='text-xl font-bold'> EVERYONE </span>, on OR off SocialY, Are you sure, you want to continue?</span>);
         }
     }
 
@@ -239,7 +260,7 @@ const CreatePost = ({ post }) => {
     }
 
     return (
-        <>
+        <div className='ml-3'>
             {user && (
                 <div>
                     <h2>Create Post</h2>
@@ -362,7 +383,7 @@ const CreatePost = ({ post }) => {
                             </div>
                         }
                     </form>
-                    {toBeSubmitted && <div className="fixed top-1/4 left-1/4 right-1/4 bg-red-500 text-white p-4 text-center">
+                    {toBeSubmitted && <div className="fixed top-1/4 left-1/4 right-1/4 bg-red-800 text-white p-4 text-center rounded-lg">
                         <p className="font-bold">Consider the audience of your post!</p>
                         <p>{message}</p>
                         <p>Remember to be mindful of your content and its impact on your privacy.</p>
@@ -378,7 +399,7 @@ const CreatePost = ({ post }) => {
                     </div>}
                 </div>
             )}
-        </>
+        </div>
     );
 };
 

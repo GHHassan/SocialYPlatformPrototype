@@ -90,18 +90,12 @@ function App() {
       const data = await response.json();
       if (data.message === "success") {
         delete data.message;
-        dispatch({ type: "SET_POSTS", payload: data });
-        dispatch({ type: "SET_RELOAD_POSTS", payload: false });
-        console.log("POSTS FROM APPS", data);
-      } else if (data.message === "failed or no post found ") {
-        dispatch({ type: "SET_POSTS", payload: { posts: "No Post found" } });
+        dispatch({ type: 'SET_POSTS', payload: Object.values(data) });
       }
-
     } catch (error) {
       toast.error("Error getting posts");
     }
   }
-
   return (
     <div className="bg-gray-100 font-sans">
       <header>

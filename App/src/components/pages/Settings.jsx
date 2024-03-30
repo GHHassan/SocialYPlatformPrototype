@@ -200,7 +200,6 @@ const Settings = () => {
         }
     }
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         validateForm() ?? updateProfile();
