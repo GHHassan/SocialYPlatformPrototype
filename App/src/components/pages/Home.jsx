@@ -9,8 +9,8 @@ import Chat from './Chat';
 const Home = () => {
 
     const SUCCESS_MESSAGE = 'success';
-    const { state: AppState, dispatch: AppDispatch } = useAppState();
-    const { userProfile, signedInUser, isChatOpen } = AppState;
+    const { state: AppState, } = useAppState();
+    const { userProfile, isChatOpen } = AppState;
     const { state: HomeState, dispatch: HomeDispatch } = useHomeState();
     const { reloadPosts, allComments} = HomeState;
 

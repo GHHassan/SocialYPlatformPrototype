@@ -114,36 +114,14 @@ const PostTemplate = ({
   dropDownIndex,
 }) => {
 
-  const { state: AppState, dispatch: AppDispatch } = useAppState();
-  const { state: HomeState, dispatch: HomeDispatch } = useHomeState();
-  const { userProfile: user } = AppState;
+  const { state: AppState, } = useAppState();
+  const { dispatch: HomeDispatch } = useHomeState();
+  const { userProfile: user} = AppState;
   const [showComment, setShowComment] = useState(false);
   const [comments, setComments] = useState({});
   const [reloadComments, setReloadComments] = useState(false);
   const [showActions, setShowActions] = useState(false);
-  const [reloadPosts, setReloadPosts] = useState(false);
-
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch(`${API_ROOT}/post`);
-      const data = await response.json();
-      if (data.message === "success") {
-        delete data.message;
-        console.log('data:', data);
-        HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
-        setReloadPosts(false);
-      }
-    } catch (error) {
-      toast.error("Error getting posts");
-    }
-  }
-
-  useEffect(() => {
-    if (reloadPosts) {
-      fetchPosts();
-    }
-  }, [reloadPosts]);
-
+ 
   useEffect(() => {
     if (showComment || reloadComments) {
       fetchComments();

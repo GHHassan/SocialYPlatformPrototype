@@ -17,25 +17,25 @@ import SignUp from './components/pageFractions/SignUp';
 
 function App() {
   const ssoUser = useUser();
-  const { state, dispatch } = useAppState();
-  const { signedIn, signedInUser, userProfile, posts, reloadPosts } = state;
+  const { state: AppState, dispatch: AppDispatch } = useAppState();
+  const { signedIn, signedInUser, reloadProfile } = AppState;
   const navigate = useNavigate();
 
   /** set signedIn user */
   useEffect(() => {
-    if (ssoUser.isLoaded && ssoUser.isSignedIn) {
+    if (ssoUser?.isLoaded && ssoUser?.isSignedIn) {
       const signedInUser = {
         ...ssoUser.user,
         isSignedIn: ssoUser.isSignedIn,
       };
-      dispatch({ type: 'SET_SIGNEDIN_USER', payload: signedInUser });
-      dispatch({ type: 'TOGGLE_SIGNED_IN', payload: true });
+      AppDispatch({ type: 'SET_SIGNEDIN_USER', payload: signedInUser });
+      AppDispatch({ type: 'TOGGLE_SIGNED_IN', payload: true });
     } else if (localStorage.getItem("token")) {
       const token = jwtDecode(localStorage.getItem("token"));
       if (token.exp < Date.now() / 1000) {
         localStorage.removeItem("token");
-        dispatch({ type: 'TOGGLE_SIGNED_IN', payload: false });
-        dispatch({ type: 'SET_SIGNEDIN_USER', payload: null });
+        AppDispatch({ type: 'TOGGLE_SIGNED_IN', payload: false });
+        AppDispatch({ type: 'SET_SIGNEDIN_USER', payload: null });
       } else {
         const user = {
           id: token.sub,
@@ -43,8 +43,8 @@ function App() {
           username: token.username,
           isSignedIn: true,
         };
-        dispatch({ type: 'SET_SIGNEDIN_USER', payload: user });
-        dispatch({ type: 'TOGGLE_SIGNED_IN', payload: true });
+        AppDispatch({ type: 'SET_SIGNEDIN_USER', payload: user });
+        AppDispatch({ type: 'TOGGLE_SIGNED_IN', payload: true });
       }
     }
   }, [ssoUser.isSignedIn, signedIn]);
@@ -54,19 +54,7 @@ function App() {
     if (signedIn && signedInUser) {
       getUserProfile(signedInUser.id);
     }
-  }, [signedInUser, signedIn]);
-
-  useEffect(() => {
-    if (reloadPosts) {
-      fetchPosts().then(() => {
-        dispatch({ type: 'RELOAD_POSTS', payload: false });
-      });
-    }
-  }, [reloadPosts]);
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  }, [signedInUser, signedIn, reloadProfile]);
 
   const getUserProfile = async (userID) => {
     try {
@@ -74,7 +62,7 @@ function App() {
       const data = await response.json();
       if (data.message === "success") {
         const user = { ...data[0], hasProfile: true };
-        dispatch({ type: "SET_USER_PROFILE", payload: user });
+        AppDispatch({ type: "SET_USER_PROFILE", payload: user });
       } else {
         toast.error("Please Create a Profile to continue");
         navigate('/settings', { replace: true });
@@ -84,18 +72,6 @@ function App() {
     }
   };
 
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch(`${API_ROOT}/post`);
-      const data = await response.json();
-      if (data.message === "success") {
-        delete data.message;
-        dispatch({ type: 'SET_POSTS', payload: Object.values(data) });
-      }
-    } catch (error) {
-      toast.error("Error getting posts");
-    }
-  }
   return (
     <div className="bg-gray-100 font-sans">
       <header>

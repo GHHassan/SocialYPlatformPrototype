@@ -5,7 +5,6 @@ import { API_ROOT } from '../../Config';
 import { useAppState } from '../../contexts/AppStateContext';
 import { deleteImage } from '../pageFractions/Post';
 import { useUser } from '@clerk/clerk-react';
-import App from '../../App';
 
 const pictures = {
     newProfilePicture: null,
@@ -44,6 +43,11 @@ const Settings = () => {
         dateOfBirth: userInfo?.dateOfBirth || '',
     };
 
+    useEffect(() => {
+        setProfilePicturePath();
+        setLoading(false);
+    }, [signedIn, pictures, signedInUser]);
+
     let method;
     if (userInfo && !userInfo?.hasProfile) {
         method = 'POST';
@@ -51,23 +55,15 @@ const Settings = () => {
         method = 'PUT';
     }
 
-    const reloadProfile = () => {
-        AppDispatch({ type: 'RELOAD_POSTS', payload: true });
-    }
     const setProfilePicturePath = () => {
-        
+
         if (method === 'POST' && !(pictures?.newProfilePicturePath)) {
             let profilePicturePath = ssoUser?.user.imageUrl || pictures.newProfilePicturePath;
             setUserInfo((userInfo) => ({ ...userInfo, profilePicturePath }));
-        }else if (method === 'PUT' && !userInfo?.profilePicturePath){
-            setUserInfo((userInfo) => ({ ...userInfo, profilePicturePath: ssoUser.user.imageUrl}));
+        } else if (method === 'PUT' && !userInfo?.profilePicturePath) {
+            setUserInfo((userInfo) => ({ ...userInfo, profilePicturePath: ssoUser.user?.imageUrl }));
         }
     };
-
-    useEffect(() => {
-            setProfilePicturePath();
-            setLoading(false);
-    }, [signedIn, pictures, signedInUser]); 
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -146,7 +142,6 @@ const Settings = () => {
         }
 
         try {
-            console.log('method', method);
             const body = {
                 "profileID": userInfo?.profileID,
                 "userID": signedInUser.id,
@@ -160,7 +155,7 @@ const Settings = () => {
                 "email": userInfo?.email,
                 "phoneNumber": userInfo?.phoneNumber,
                 "address": userInfo?.address,
-                "profilePicturePath": userInfo?.profilePicturePath,
+                "profilePicturePath": pictures?.newProfilePicturePath || userInfo?.profilePicturePath,
                 "coverPicturePath": pictures?.newCoverPicturePath || userInfo?.coverPicturePath,
                 "relationshipStatus": userInfo?.relationshipStatus,
 
@@ -178,24 +173,20 @@ const Settings = () => {
                     body: JSON.stringify(body),
                 })
             const data = await response.json();
-            console.log('method', method)
-            console.log('Data from update profile', data);
             if (data.message === 'success') {
                 toast.success('Profile Updated');
                 /** delete old images and clean up after update if applicable */
                 if (userInfo.profilePicturePath !== null && userInfo.oldProfilePicturePath !== null) {
-                    console.log('Deleting old profile picture');
                     deleteImage(userInfo.oldProfilePicturePath);
                 }
                 if (userInfo?.coverPicturePath !== null && userInfo.oldCoverPicturePath !== null) {
-                    console.log('Deleting old cover picture');
                     deleteImage(userInfo.oldCoverPicturePath);
                 }
+                AppDispatch({ type: 'RELOAD_PROFILE', payload: true });
             } else {
                 toast.error('Error updating profile Data', data.message);
             }
         } catch (e) {
-            console.log('Error updating profile', e.message);
             toast.error('Error updating profile Final catch', e.message);
         }
     }
@@ -227,11 +218,11 @@ const Settings = () => {
 
 
     const checkDuplicateUseName = async () => {
-        const response = await fetch(`${API_ROOT}/profile?userID=${signedInUser.id}`);
+        const response = await fetch(`${API_ROOT}/register?userID=${signedInUser.id}`);
         const data = await response.json();
         if (data.message === 'success') {
             const user = data[0];
-            if (user.username !== userInfo.username) {
+            if (user.username === userInfo.username) {
                 setErrors((prev) => ({ ...prev, username: 'Username already exists try different username' }));
             }
         }
@@ -402,7 +393,9 @@ const Settings = () => {
                                 id="username"
                                 value={userInfo.username || ''}
                                 onChange={handleInputChange}
+                                onBlur={checkDuplicateUseName}
                                 required
+                                // disabled={userInfo?.hasProfile}
                                 className="mt-1 p-2 border rounded-md w-full"
                             />
                             <p className='text-red-500'>{errors.username}</p>

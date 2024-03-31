@@ -18,6 +18,7 @@ export const initialState = {
     signedInUser: null,
     isOpen: true,
     hasProfile: true,
+    reloadProfile: false,
 };
 
 export const appReducer = (state, action) => {
@@ -25,6 +26,7 @@ export const appReducer = (state, action) => {
         case 'SET_SIGNEDIN_USER':
             return { ...state, signedInUser: action.payload, signedIn: true };
         case 'SET_USER_PROFILE':
+            state.reloadProfile = false;
             return { ...state, userProfile: action.payload };
         case 'REMOVE_TOKEN':
             localStorage.removeItem("token");
@@ -33,6 +35,8 @@ export const appReducer = (state, action) => {
             return { ...state, signedIn: action.payload };
         case 'TOGGLE_CHAT_VIEW':
             return { ...state, isOpen: !state.isOpen };
+        case 'RELOAD_PROFILE':
+            return { ...state, reloadProfile: true };
         default:
             return state;
     }

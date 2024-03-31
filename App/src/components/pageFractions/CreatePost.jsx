@@ -21,7 +21,7 @@ import { useAppState } from '../../contexts/AppStateContext';
 
 const CreatePost = ({ post }) => {
     const { state: HomeState, dispatch: HomeDispatch } = useHomeState();
-    const { showEditPost } = HomeState;
+    const { showEditPost, reloadPosts: reload } = HomeState;
     const { state: AppState } = useAppState();
     const { userProfile: user } = AppState;
 
@@ -38,29 +38,8 @@ const CreatePost = ({ post }) => {
     const [toBeSubmitted, setToBeSubmitted] = useState(false);
     const [mediaUploaded, setMediaUploaded] = useState(false);
     const [message, setMessage] = useState(post?.visibility);
-    const [reloadPosts, setReloadPosts] = useState(false);
     const imageInputRef = useRef(null);
     const videoInputRef = useRef(null);
-
-    const fetchPosts = async () => {
-        try {
-            const response = await fetch(`${API_ROOT}/post`);
-            const data = await response.json();
-            if (data.message === "success") {
-                delete data.message;
-                HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
-                setReloadPosts(false);
-            }
-        } catch (error) {
-            toast.error("Error getting posts");
-        }
-    }
-
-    useEffect(() => {
-        if (reloadPosts) {
-            fetchPosts();
-        }
-    }, [reloadPosts]);
 
     const deleteImage = async (imageName) => {
         try {
@@ -89,7 +68,7 @@ const CreatePost = ({ post }) => {
             }
         }
         catch (error) {
-            console.error('Error:', error);
+            toast.error('Error deleting video');
         }
     }
 
@@ -125,7 +104,7 @@ const CreatePost = ({ post }) => {
             setMediaUploaded(true);
         }
         if (!result) {
-            console.error('File upload failed:', result.message);
+            toast.error('Error uploading file');
         }
     }
 
@@ -158,7 +137,7 @@ const CreatePost = ({ post }) => {
             if (showEditPost && newVideoPath) {
                 deleteVideo(oldvideoPath);
             }
-            setReloadPosts(true);
+            HomeDispatch({ type: 'RELOAD_POSTS', payload: true })
         }
         catch (error) {
             console.error('Error during uploadData:', error);
@@ -206,7 +185,7 @@ const CreatePost = ({ post }) => {
                 setMediaUploaded(true);
             }
         } catch (error) {
-            console.error('Error during postAnyWay:', error);
+            toast.error('Error uploading media');
         }
     };
 
