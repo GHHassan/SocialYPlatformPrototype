@@ -58,10 +58,10 @@ const Settings = () => {
     const setProfilePicturePath = () => {
 
         if (method === 'POST' && !(pictures?.newProfilePicturePath)) {
-            let profilePicturePath = ssoUser?.user.imageUrl || pictures.newProfilePicturePath;
+            let profilePicturePath = ssoUser?.user?.imageUrl || pictures.newProfilePicturePath;
             setUserInfo((userInfo) => ({ ...userInfo, profilePicturePath }));
         } else if (method === 'PUT' && !userInfo?.profilePicturePath) {
-            setUserInfo((userInfo) => ({ ...userInfo, profilePicturePath: ssoUser.user?.imageUrl }));
+            setUserInfo((userInfo) => ({ ...userInfo, profilePicturePath: ssoUser?.user?.imageUrl }));
         }
     };
 
