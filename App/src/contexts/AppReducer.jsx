@@ -16,7 +16,7 @@ export const initialState = {
     showSignIn: false,
     showSignUp: false,
     signedInUser: null,
-    isOpen: true,
+    isChatOpen: true,
     hasProfile: true,
     reloadProfile: false,
 };
@@ -34,7 +34,7 @@ export const appReducer = (state, action) => {
         case 'TOGGLE_SIGNED_IN':
             return { ...state, signedIn: action.payload };
         case 'TOGGLE_CHAT_VIEW':
-            return { ...state, isOpen: !state.isOpen };
+            return { ...state, isChatOpen: !state.isChatOpen };
         case 'RELOAD_PROFILE':
             return { ...state, reloadProfile: true };
         default:

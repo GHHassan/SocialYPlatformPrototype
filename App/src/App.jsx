@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react';
 import { useAppState } from './contexts/AppStateContext';
-import toast, { Toaster } from "react-hot-toast";
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import Navbar from './components/pageFractions/Navbar';
 import Home from './components/pages/Home';
-import Chat from './components/pages/Chat';
 import Settings from './components/pages/Settings';
 import OtherUsersProfile from './components/pages/OtherUsersProfile';
 import Login from './components/pageFractions/SignIn';
@@ -14,6 +12,7 @@ import { HomeStateProvider } from './contexts/HomeStateContext';
 import { API_ROOT } from "./Config";
 import { jwtDecode } from 'jwt-decode';
 import SignUp from './components/pageFractions/SignUp';
+import MainLayout from './components/utils/MainLayout';
 
 function App() {
   const ssoUser = useUser();
@@ -73,27 +72,34 @@ function App() {
   };
 
   return (
-    <div className="bg-gray-100 font-sans">
-      <header>
+    <div>
+      <header className="w-full">
         <Navbar />
       </header>
-      <main className="mt-8">
-        <Toaster />
-        <Routes>
-          <Route path="/" element={
+
+      <Routes>
+        <Route path="/" element={
+          <MainLayout>
             <HomeStateProvider>
               <Home />
             </HomeStateProvider>
-          } />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/profile/:userID" element={<OtherUsersProfile />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </main>
-      <footer>
+          </MainLayout>
+        } />
+        <Route path="/settings" element={
+          <MainLayout>
+            <Settings />
+          </MainLayout>
+        } />
+        <Route path="/profile/:userID" element={
+          <MainLayout>
+            <OtherUsersProfile />
+          </MainLayout>
+        } />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+      <footer className="w-full">
         <Footer />
       </footer>
     </div>

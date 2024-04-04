@@ -239,7 +239,7 @@ const CreatePost = ({ post }) => {
     }
 
     return (
-        <div className='ml-3'>
+        <div>
             {user && (
                 <div>
                     <h2>Create Post</h2>

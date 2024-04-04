@@ -66,7 +66,7 @@ const ProfileViewTable = (profile) => {
     };
 
     return (
-        <div className="my-8 relative">
+        <div>
             {/* Cover Picture */}
             <div className="mb-20">
                 <label htmlFor="coverPictureInput" className="block text-sm font-medium text-gray-600">

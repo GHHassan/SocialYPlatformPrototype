@@ -143,7 +143,7 @@ const Post = () => {
 
     const postJSX = (
         posts.map((post, index) => (
-            <div className='my-4 p-5 border border-gray-300 rounded-lg' key={index}>
+            <div className='my-4 p-3 border border-gray-300 rounded-lg' key={index}>
                 <PostTemplate
                     post={post}
                     index={index}
@@ -157,7 +157,7 @@ const Post = () => {
     );
     return (
         <>
-            <div className='ml-3'>
+            <div >
                 {postJSX}
                 {(user && showEditPost && postToBeEdited) && (
                     <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
