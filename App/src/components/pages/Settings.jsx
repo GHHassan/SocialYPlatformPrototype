@@ -1,3 +1,13 @@
+/**
+ * @file Settings.jsx 
+ * Is the profile setting page for the 
+ * signed in user. It allows the user to
+ * update their profile information.
+ * 
+ * @uses Select component to display the select options.
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ */
 import React, { useEffect, useState } from 'react';
 import Select from '../pageFractions/Select';
 import { toast } from 'react-hot-toast';
@@ -5,7 +15,6 @@ import { API_ROOT } from '../../Config';
 import { useAppState } from '../../contexts/AppStateContext';
 import { deleteImage } from '../pageFractions/Post';
 import { useUser } from '@clerk/clerk-react';
-import App from '../../App';
 
 const pictures = {
     newProfilePicture: null,

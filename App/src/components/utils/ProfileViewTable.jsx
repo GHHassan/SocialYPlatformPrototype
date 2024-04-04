@@ -1,3 +1,18 @@
+
+/**
+ * @file ProfileViewTable.jsx
+ * 
+ * It is used to display the profile of a user in a table format.
+ * It checks the visibility of each field and displays it accordingly.
+ * if the field is private, it will display 'Locked'.
+ * if the profile is private, it will display a message that the profile is locked.
+ * 
+ * due to frindship feature not implemented, only users who marks their profile 
+ * visibility for friends only it will be considered public until the friendship
+ * feature is added.
+ * 
+ *@author Ghulam Hassan Hassani <w20017074>
+ */
 import React from 'react';
 
 const ProfileViewTable = (profile) => {
@@ -54,7 +69,6 @@ const ProfileViewTable = (profile) => {
             </tr>
         );
     }
-    // Check if profilePicturePath is null
     const profilePictureStyle = {
         backgroundImage: `url(${newProfile.profilePicturePath})`,
         backgroundSize: 'cover',

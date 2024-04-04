@@ -9,6 +9,11 @@
  * Only acceps images in both video and image input fields due to the
  * server fileUpload size limit is  2MB in php.ini file.
  * 
+ * @uses the Select component to allow users to select the visibility of the post.
+ * @uses the AppStateContext to access the user's profile information.
+ * @uses the HomeStateContext to access the state of the home page
+ * and referesh on new post update/create.
+ * 
  * @author G H Hassani <w20017074>
  */
 

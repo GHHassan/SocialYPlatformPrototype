@@ -1,5 +1,25 @@
+/**
+ * @file Navbar.jsx
+ * 
+ * Navbar component is a reusable component that displays the navigation bar
+ * at the top of the page. It is used in the App component to display the
+ * navigation bar on all pages of the application.
+ * 
+ * It dynamically changes the content of the navigation bar based on the
+ * user's authentication status. If the user is signed in, it displays the
+ * 
+ * user's profile picture/avatar links to the settings page.
+ * 
+ * @uses ClerkProvider from @clerk/clerk-react
+ * @uses useContext from react
+ * @uses react-hot-toast
+ * @uses react-router-dom
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ */
+
 import { Link } from "react-router-dom";
-import { SignedIn, UserProfile, useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 import { useUser } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import { useAppState } from "../../contexts/AppStateContext";

@@ -1,3 +1,12 @@
+/**
+ * Chat component
+ * 
+ * this is a place holder component for the chat page
+ * its intended to display the recent chats of the user
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ */
+
 import React from 'react';
 
 const Chat = () => {

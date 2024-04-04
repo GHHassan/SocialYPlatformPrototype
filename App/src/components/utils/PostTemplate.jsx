@@ -1,3 +1,19 @@
+/**
+ * @file PostTemplate.jsx 
+ * It is used to display and manage of the posts individually.
+ * 
+ * sub components of the PostTemplate are:
+ * - PostHeader
+ * - PostContent
+ * - PostActions
+ * - CommentSection
+ * 
+ * sub components have been intentionally separated to make 
+ * the code more readable and maintainable.
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ * 
+ **/
 import React from 'react';
 import ProfileAvatar from '../utils/ProfileAvatar';
 import Select from '../pageFractions/Select';
@@ -21,7 +37,6 @@ const handleApiResponse = async (response, successMessage) => {
     console.error('Unexpected response:', data);
   }
 };
-
 
 const PostHeader = ({ post, user, visibilityOptions, handleVisibility }) => {
 

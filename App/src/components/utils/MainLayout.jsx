@@ -1,3 +1,10 @@
+/**
+ * @file MainLayout.jsx 
+ * It is used to display the main layout of the application.
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ */
+
 import { Toaster } from 'react-hot-toast';
 import Chat from '../pages/Chat';
 
@@ -12,9 +19,6 @@ function MainLayout({ children }) {
                 <Chat />
             </section>
         </div>
-
-
-
     );
 }
 

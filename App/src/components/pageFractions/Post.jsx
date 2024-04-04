@@ -1,5 +1,18 @@
+/**
+ * @file Post.jsx 
+ * is the file where the Post component is defined. 
+ * It is used to display and managed the posts on the home page.
+ * 
+ * @uses the PostTemplate component to display and manage each post.
+ * @uses the CreatePost component to handle the creation of new posts.
+ * @uses useContext from react to access the global state and 
+ * dispatch functions to update the global state and the application.
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ * 
+ */
+
 import PostTemplate from '../utils/PostTemplate';
-import { useState, useEffect } from 'react';
 import CreatePost from './CreatePost';
 import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';

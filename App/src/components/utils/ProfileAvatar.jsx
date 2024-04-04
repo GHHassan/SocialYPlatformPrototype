@@ -1,3 +1,13 @@
+/**
+ * @file ProfileAvatar.jsx 
+ * is a reusable component that displays a user's profile image
+ *  or their initials if they do not have an image.
+ * 
+ * @uses react-router-dom for navigation.
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ */
+
 import React from 'react';
 import {useNavigate} from 'react-router-dom';
 

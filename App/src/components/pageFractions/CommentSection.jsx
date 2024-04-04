@@ -1,11 +1,27 @@
-
+/**
+ * @file CommentSection.jsx 
+ * is a component that displays the comments for a post 
+ * and allows users to post comments.
+ * It also allows users to edit and delete their comments.
+ * It is used in the PostTemplate component that is 
+ * responsible for rendering a single post.
+ * 
+ * @uses the CommentItem component to display and manage 
+ * individual comments.
+ * @uses the ProfileAvatar component to display the
+ * profile picture of the user who posted the comment.
+ * @uses the AppStateContext to access the user's profile information.
+ * 
+ * @author Hassan <w20017074>
+ * 
+ */
 import ProfileAvatar from '../utils/ProfileAvatar';
 import { useState } from 'react';
 import { API_ROOT } from '../../Config';
 import toast from 'react-hot-toast';
 import { useAppState } from '../../contexts/AppStateContext';
 
-function CommentItem({ index, comment, setReloadComments }) {
+function CommentItem({ comment, setReloadComments }) {
   const { state: AppState } = useAppState();
   const { userProfile: user } = AppState;
   const [showActions, setShowActions] = useState(false);
@@ -189,8 +205,6 @@ function CommentSection({ post, showComment, comments, setReloadComments, setSho
         <h1 className="text-xl font-semibold">No comments found</h1>
       </div>
     ];
-
-
 
   return (
     <div>

@@ -1,3 +1,17 @@
+/**
+ * share buttons for social media
+ * 
+ * This component is used to provide user friendly UI buttons to 
+ * enable users share the post on social media platforms like Twitter,
+ *  WhatsApp, and copy the link to the clipboard.
+ * this is also a place if the application is extended to include
+ * more social media platforms.
+ * 
+ * @uses react-fontawesome for icons
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ * 
+ */
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter, faWhatsapp } from '@fortawesome/free-brands-svg-icons';

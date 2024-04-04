@@ -1,3 +1,18 @@
+/**
+ * Home page component
+ * 
+ * This component is used to display the home page of the application.
+ * It displays the posts and allows the user to create new posts.
+ * @uses useContext to provide home state and dispatch functions to its 
+ * children components.
+ * This reduces the need to pass the state and dispatch functions as props 
+ * and helps improve the readability and maintainance of the code.
+ * ß
+ * @uses Post and its children component to manage the posts.
+ * @uses CreatePost component to handle the creation of new posts.
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ */
 import Post from '../pageFractions/Post';
 import CreatePost from '../pageFractions/CreatePost';
 import { useEffect } from 'react';

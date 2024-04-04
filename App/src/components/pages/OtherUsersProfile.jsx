@@ -1,4 +1,18 @@
-
+/**
+ * @file OtherUsersProfile.jsx 
+ * is the file where the profile of other users is displayed.
+ * It is used to display the profile of other users when the user
+ * clicks on the profile of other users.
+ * 
+ * This component will render a read-only profile and will not allow
+ * the user to edit the profile of other users.
+ * 
+ * @uses ProfileTemplate to display the profile of the user.
+ * @uses useParams from react-router-dom to get the userID from the URL.
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ * 
+ */
 import { useEffect } from 'react';
 import ProfileTemplate from '../utils/ProfileView';
 import { useParams } from 'react-router-dom';
@@ -30,7 +44,6 @@ const OtherUsersProfile = () => {
         prospectiveUser();
     }
         , []);
-
 
     return (
         <div>
