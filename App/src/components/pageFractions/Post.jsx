@@ -45,28 +45,6 @@ const Post = () => {
     const { posts, allComments, showEditPost, postToBeEdited } = HomeState;
     const visibilityOptions = ['Public', 'Friends', 'Private'];
     let token = localStorage.getItem('token');
-    const [reloadPosts, setReloadPosts] = useState(false);
-
-    const fetchPosts = async () => {
-        try {
-            const response = await fetch(`${API_ROOT}/post`);
-            const data = await response.json();
-            if (data.message === "success") {
-                delete data.message;
-                HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
-                setReloadPosts(false);
-            }
-        } catch (error) {
-            toast.error("Error getting posts");
-        }
-    }
-
-    useEffect(() => {
-        if (reloadPosts) {
-            fetchPosts();
-        }
-    }, [reloadPosts]);
-
 
     const updatePostVisibility = async (post) => {
         try {
@@ -78,7 +56,7 @@ const Post = () => {
                 body: JSON.stringify(post),
             });
             handleApiResponse(response, 'Post visibility updated successfully');
-            setReloadPosts(true);
+            HomeDispatch({ type: 'RELOAD_POSTS', payload: true })
         } catch (error) {
             console.error('Error during updatePostVisibility:', error);
         }
@@ -108,7 +86,7 @@ const Post = () => {
                 method: 'DELETE',
             });
             handleApiResponse(response, 'Post deleted successfully');
-            setReloadPosts(true);
+            HomeDispatch({ type: 'RELOAD_POSTS', payload: true })
         } catch (error) {
             toast.error('Error during delete operation');
         }
@@ -133,7 +111,6 @@ const Post = () => {
         HomeDispatch({ type: 'TOGGLE_EDIT_POST', payload: false });
         HomeDispatch({ type: 'RELOAD_POSTS', payload: true })
         HomeDispatch({ type: 'TOGGLE_ACTIONS', payload: false })
-
     };
 
     const handleVisibility = (post, key) => {
@@ -150,7 +127,7 @@ const Post = () => {
                     visibilityOptions={visibilityOptions}
                     handleVisibility={handleVisibility}
                     handleDeletePost={handleDeletePost}
-                    dropDownIndex={index}
+                    postIndex={index}
                 />
             </div>
         ))
