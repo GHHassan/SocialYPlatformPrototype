@@ -6,23 +6,30 @@ import { API_ROOT } from '../../Config';
 
 const OtherUsersProfile = () => {
     const { userID } = useParams();
+    switch (userID) {
+        case 'undefined':
+            return <h1>User Not found</h1>
+        case userID.length > 15:
+            return <h1>User Not found</h1>
+    }
+
     let user = null;
     const prospectiveUser = async () => {
-        const response = await fetch (`${API_ROOT}/profile?userID=${userID}`, {
+        const response = await fetch(`${API_ROOT}/profile?userID=${userID}`, {
             method: 'GET'
         })
         const data = await response.json();
         if (data.message === 'success') {
             user = data[0];
-        }else {
+        } else {
             return <h1>User Not found</h1>
         }
     }
 
-    useEffect(() => {   
+    useEffect(() => {
         prospectiveUser();
     }
-    , []); 
+        , []);
 
 
     return (

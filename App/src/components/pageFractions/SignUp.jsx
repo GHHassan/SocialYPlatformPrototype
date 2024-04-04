@@ -235,6 +235,7 @@ const SignUp = () => {
       method: "POST",
       body: body,
     });
+    console.log(response);
     const data = await response.json();
     console.log(data);
     if (data.message === "success") {

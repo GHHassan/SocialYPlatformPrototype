@@ -32,6 +32,9 @@ export const appReducer = (state, action) => {
             localStorage.removeItem("token");
             return { ...state, signedIn: false, userProfile: null, signedInUser: null };
         case 'TOGGLE_SIGNED_IN':
+            if (action.payload === false) {
+                return { ...state, signedIn: false, userProfile: null, signedInUser: null };
+            }
             return { ...state, signedIn: action.payload };
         case 'TOGGLE_CHAT_VIEW':
             return { ...state, isChatOpen: !state.isChatOpen };

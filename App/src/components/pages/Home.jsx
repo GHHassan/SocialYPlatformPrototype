@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 import { API_ROOT } from '../../Config';
 import { useAppState } from '../../contexts/AppStateContext';
 import { useHomeState } from '../../contexts/HomeStateContext';
-import Chat from './Chat';
 
 const Home = () => {
 
@@ -36,7 +35,6 @@ const Home = () => {
             if (data.message === SUCCESS_MESSAGE) {
                 delete data.message;
                 HomeDispatch({ type: 'SET_COMMENTS', payload: data });
-                console.log('All comments:', allComments);
             }
         } catch (error) {
             console.error('Error during fetchComments:', error);

@@ -5,6 +5,7 @@ import { API_ROOT } from '../../Config';
 import { useAppState } from '../../contexts/AppStateContext';
 import { deleteImage } from '../pageFractions/Post';
 import { useUser } from '@clerk/clerk-react';
+import App from '../../App';
 
 const pictures = {
     newProfilePicture: null,
@@ -256,8 +257,11 @@ const Settings = () => {
                         toast.success('Account Deleted');
                         if (ssoUser.isLoaded && ssoUser.isSignedIn) {
                             signOut();
-                            AppDispatch({ type: 'RELOAD_POSTS', payload: false });
+                        }else{
+                            window.location.href = '/';
                         }
+                        AppDispatch({ type: 'TOGGLE_SIGNIN', payload: false });
+                        AppDispatch({ type: 'RELOAD_POSTS', payload: false });
                     }
                 } catch (e) {
                     toast.error('Error deleting account', e.message);

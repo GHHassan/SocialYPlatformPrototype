@@ -82,11 +82,10 @@ class Register extends Endpoint
     {
         $jsonData = file_get_contents("php://input");
         $data = json_decode($jsonData, true);
-        if (!empty($data['type'])) {
+        if (!isset($data['type']) || empty($data['type'])) {
             $this->registerUser($data);
             return;
-        } else {
-        }
+        } //should be fixed
         switch ($data['type']) {
             case "user.created":
                 $this->registerUser($data);
@@ -108,21 +107,17 @@ class Register extends Endpoint
     private function registerUser($data)
     {
         $this->initialiseSQLAndParams();
-
-        if (isset($data['email'])) {
-            $this->email = $this->sanitiseString($data['email']);
-        }
         $sql = "SELECT email FROM users WHERE email = :email";
         $sqlParams = [
             ':email' => $this->email
         ];
 
         if (count($this->db->countRows($sql, $sqlParams)) > 0) {
-            throw new ClientError(409, "duplicate");
+            $this->data = ["message" => "User already exists"];
+            return;
         }
-
         $data = $this->db->executeSql($this->sql, $this->sqlParams);
-        count($data) > 0 ? $data['message'] = 'success' : $data['message'] = 'failed';
+        ($data['lastInsertId']) > 0 ? $data['message'] = 'success' : $data['message'] = 'failed';
         $this->data = $data;
     }
 
@@ -258,7 +253,7 @@ class Register extends Endpoint
     {
         $jsonData = file_get_contents("php://input");
         $data = json_decode($jsonData, true);
-        if (!isset($data['type'])) {
+        if (!isset($data['type']) || empty($data['type'])) {
             if (isset($data['username']) && isset($data['email']) && isset($data['password'])) {
                 if ($this->isValidEmail($data['email'])) {
                     isset($data['userID']) ? $this->userID = $data['userID'] : $this->userID = $this->generateUserID();
@@ -273,7 +268,7 @@ class Register extends Endpoint
             } else {
                 throw new ClientError(422, 'Missing required data');
             }
-        } else {
+        } else if (!empty($data['type'])) {
             switch ($data['type']) {
                 case "user.created":
                     $this->sql = "INSERT INTO users (userID, username, email, password_hash, role) VALUES (:userID, :username, :email, :password, :role)";
@@ -287,14 +282,12 @@ class Register extends Endpoint
                 default:
                     throw new ClientError(422, 'Invalid SSO event type');
             }
+            $userData = $data['data'];
+            $this->userID = $userData['id'];
+            $this->username = isset($userData['username']) ? $userData['username'] : (isset($userData['firstname']) && isset($userData['lastname']) ? ucwords($userData['firstname'] . ' ' . $userData['lastname']) : 'Unknown');
+            $this->email = $userData['email_addresses'][0]['email_address'];
+            $this->password = "SSO";
         }
-
-        $userData = $data['data'];
-        $this->userID = $userData['id'];
-        //if username is null then set it to firstname and lastname or unknown
-        $this->username = isset($userData['username']) ? $userData['username'] : (isset($userData['firstname']) && isset($userData['lastname']) ? ucwords($userData['firstname'] . ' ' . $userData['lastname']) : 'Unknown');
-        $this->email = $userData['email_addresses'][0]['email_address'];
-        $this->password = "SSO";
 
         $this->sqlParams = [
             ":userID" => $this->userID,

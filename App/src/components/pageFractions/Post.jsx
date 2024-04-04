@@ -47,25 +47,25 @@ const Post = () => {
     let token = localStorage.getItem('token');
     const [reloadPosts, setReloadPosts] = useState(false);
 
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch(`${API_ROOT}/post`);
-      const data = await response.json();
-      if (data.message === "success") {
-        delete data.message;
-        HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
-        setReloadPosts(false);
-      }
-    } catch (error) {
-      toast.error("Error getting posts");
+    const fetchPosts = async () => {
+        try {
+            const response = await fetch(`${API_ROOT}/post`);
+            const data = await response.json();
+            if (data.message === "success") {
+                delete data.message;
+                HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
+                setReloadPosts(false);
+            }
+        } catch (error) {
+            toast.error("Error getting posts");
+        }
     }
-  }
 
-  useEffect(() => {
-    if (reloadPosts) {
-      fetchPosts();
-    }
-  }, [reloadPosts]);
+    useEffect(() => {
+        if (reloadPosts) {
+            fetchPosts();
+        }
+    }, [reloadPosts]);
 
 
     const updatePostVisibility = async (post) => {
@@ -133,7 +133,7 @@ const Post = () => {
         HomeDispatch({ type: 'TOGGLE_EDIT_POST', payload: false });
         HomeDispatch({ type: 'RELOAD_POSTS', payload: true })
         HomeDispatch({ type: 'TOGGLE_ACTIONS', payload: false })
-        
+
     };
 
     const handleVisibility = (post, key) => {
@@ -157,16 +157,14 @@ const Post = () => {
     );
     return (
         <>
-            <div >
-                {postJSX}
-                {(user && showEditPost && postToBeEdited) && (
-                    <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
-                        <div className='bg-white p-6 rounded-lg max-h-screen max-w-[60%] overflow-y-auto'>
-                            <CreatePost post={postToBeEdited} />
-                        </div>
+            {postJSX}
+            {(user && showEditPost && postToBeEdited) && (
+                <div className="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-50 z-50 flex justify-center items-center overflow-auto">
+                    <div className='bg-white p-6 rounded-lg max-h-screen max-w-[60%] overflow-y-auto'>
+                        <CreatePost post={postToBeEdited} />
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </>
     );
 };

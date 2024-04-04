@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useAppState } from '../../contexts/AppStateContext';
 import { useHomeState } from '../../contexts/HomeStateContext';
-let token = localStorage.getItem('token');
+import { Link } from 'react-router-dom';
 
 const SUCCESS_MESSAGE = 'success';
 const handleApiResponse = async (response, successMessage) => {
@@ -27,12 +27,14 @@ const PostHeader = ({ post, user, visibilityOptions, handleVisibility }) => {
   return (
     <div className="flex items-start">
       <div className={` w-10 h-10 rounded-full m-2 cursor-pointer`}>
-        <ProfileAvatar
-          imagePath={post.profilePicturePath}
-          firstName={post.firstName}
-          lastName={post.lastName}
-          userID={post.userID}
-        />
+        <Link to={`/profile/${post.userID}`}>
+          <ProfileAvatar
+            imagePath={post.profilePicturePath}
+            firstName={post.firstName}
+            lastName={post.lastName}
+            userID={post.userID}
+          />
+        </Link>
       </div>
       <div className="flex-1">
         <div className="flex justify-between items-center">
@@ -116,12 +118,12 @@ const PostTemplate = ({
 
   const { state: AppState, } = useAppState();
   const { dispatch: HomeDispatch } = useHomeState();
-  const { userProfile: user} = AppState;
+  const { userProfile: user } = AppState;
   const [showComment, setShowComment] = useState(false);
   const [comments, setComments] = useState({});
   const [reloadComments, setReloadComments] = useState(false);
   const [showActions, setShowActions] = useState(false);
- 
+
   useEffect(() => {
     if (showComment || reloadComments) {
       fetchComments();

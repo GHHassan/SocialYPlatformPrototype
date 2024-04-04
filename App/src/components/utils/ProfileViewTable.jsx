@@ -25,34 +25,37 @@ const ProfileViewTable = (profile) => {
 
     const rows = [];
     if (newProfile['profileVisibility'] !== 'Private') {
-    for (const [key, value] of Object.entries(newProfile)) {
-        if (!publicParams.includes(key) && privateParams.includes(key)) {
-            rows.push(
-                <tr key={key} className="border-b border-gray-200">
-                    <td className="py-3 px-6 w-1/3">{key}</td>
-                    <td className="py-3 px-6 w-2/3">
-                        {newProfile[key + "Visibility"] !== 'Private' ? value : 'Locked'}
-                    </td>
-                </tr>
-            );
-        } else if (publicParams.includes(key)) {
-            rows.push(
-                <tr key={key} className="border-b border-gray-200">
-                    <td className="py-3 px-6 w-1/3">{key}</td>
-                    <td className="py-3 px-6 w-2/3">{value}</td>
-                </tr>
-            );
+        for (const [key, value] of Object.entries(newProfile)) {
+            if (!publicParams.includes(key) && privateParams.includes(key)) {
+                rows.push(
+                    <tr key={key} className="border-b border-gray-200">
+                        <td className="py-3 px-6 w-1/3">{key}</td>
+                        <td className="py-3 px-6 w-2/3">
+                            {newProfile[key + "Visibility"] !== 'Private' ? value : 'Locked'}
+                        </td>
+                    </tr>
+                );
+            } else if (publicParams.includes(key)) {
+                rows.push(
+                    <tr key={key} className="border-b border-gray-200">
+                        <td className="py-3 px-6 w-1/3">{key}</td>
+                        <td className="py-3 px-6 w-2/3">{value}</td>
+                    </tr>
+                );
+            }
         }
-    }
     } else {
         rows.push(
-            <tr className="border-b border-gray-200">
-                <td className="py-3 px-6 w-full">{newProfile.firstName + ' ' + newProfile.lastName}'s has locked his profile</td>
+            <tr key={'locked'} className="border-b border-gray-200">
+                <td className="py-3 px-6 w-full">
+                    {newProfile.firstName + ' ' + newProfile.lastName}'s has locked {newProfile['gender'] === 'Male' ? <span>his</span> : newProfile['gender'] === 'Female' ? <span>her</span> : <span>their</span>} profile
+                </td>
+
             </tr>
         );
-        }
-      // Check if profilePicturePath is null
-      const profilePictureStyle = {
+    }
+    // Check if profilePicturePath is null
+    const profilePictureStyle = {
         backgroundImage: `url(${newProfile.profilePicturePath})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -91,15 +94,9 @@ const ProfileViewTable = (profile) => {
                     </div>
                 </div>
             </div>
-            
+
             {/* Profile Contents */}
             <table className="min-w-full bg-white border border-gray-300">
-                <thead>
-                    <tr>
-                        <th className="py-3 px-6 text-left border-b border-gray-300">Field</th>
-                        <th className="py-3 px-6 text-left border-b border-gray-300">Value</th>
-                    </tr>
-                </thead>
                 <tbody>{rows}</tbody>
             </table>
         </div>

@@ -13,6 +13,7 @@ import { API_ROOT } from "./Config";
 import { jwtDecode } from 'jwt-decode';
 import SignUp from './components/pageFractions/SignUp';
 import MainLayout from './components/utils/MainLayout';
+import { toast } from 'react-hot-toast';
 
 function App() {
   const ssoUser = useUser();
