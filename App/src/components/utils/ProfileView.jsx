@@ -26,7 +26,7 @@ const ProfileTemplate = () => {
     }, []);
 
     if (!profile ) {
-        return <h1>Loading...</h1>;
+        return <h1>Profile Not Found</h1>;
     } else {
         return (
             <>

@@ -1,16 +1,73 @@
-import React, { useEffect } from 'react';
+
 import ProfileAvatar from '../utils/ProfileAvatar';
 import { useState } from 'react';
 import { API_ROOT } from '../../Config';
 import toast from 'react-hot-toast';
-let token = localStorage.getItem('token');
+import { useAppState } from '../../contexts/AppStateContext';
 
-function CommentItems({ comments }) {
-  const commentsJSX = comments.length > 0 ? (
-    comments.map((comment, index) => (
-      <div key={index} className="mb-4 p-4 bg-white border border-gray-300 rounded-md">
+function CommentItem({ index, comment, setReloadComments }) {
+  const { state: AppState } = useAppState();
+  const { userProfile: user } = AppState;
+  const [showActions, setShowActions] = useState(false);
+
+  const handleDropdownToggle = () => {
+    setShowActions(true); 
+    setTimeout(() => {
+      setShowActions(false);
+    }, 3000); 
+  }
+  
+  
+  const editComment = async (comment) => {
+    const response = await fetch(`${API_ROOT}/comment`, {
+      method: 'PUT',
+      body: JSON.stringify(comment),
+    });
+    const data = await response.json();
+    if (data.message === 'success') {
+      toast.success('Comment updated successfully');
+      setReloadComments(true);
+    } else {
+      toast.error('Error updating comment');
+    }
+  }
+
+
+  const handleEditComment = async (comment) => {
+    
+  }
+
+  const handleDeleteComment = async(comment) => {
+    const response = await fetch(`${API_ROOT}/comment?commentID=${comment.commentID}`,
+      {
+        method: 'DELETE',
+      });
+    const data = await response.json();
+    if (data.message === 'success') {
+      toast.success('Comment deleted successfully');
+      setReloadComments(true);
+    } else {
+      toast.error('Error deleting comment');
+    }
+    setShowActions(!showActions);
+  }
+
+  const commentJSX = 
+      <div className="mb-4 p-4 bg-white border border-gray-300 rounded-md">
+        {user?.userID === comment?.userID && (
+          <div className="relative">
+            <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
+              onClick={() => handleDropdownToggle()}>...</button>
+            {(showActions) && (
+              <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
+                <button className="text-blue-500 text-xs" onClick={() => handleEditComment(comment)}>Edit</button>
+                <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeleteComment(comment)}>Delete</button>
+              </div>
+            )}
+          </div>
+        )}
         <div className="flex items-start">
-          <div className="w-8 h-8 rounded-full overflow-hidden mr-4">
+          <div className="w-7 h-7 rounded-full overflow-hidden mr-4">
             <ProfileAvatar
               imagePath={comment.profilePath}
               firstName={comment.username}
@@ -19,30 +76,24 @@ function CommentItems({ comments }) {
             />
           </div>
           <div className="flex-1">
-            <div className="flex justify-between items-center mb-2">
-              <h2 className="text-lg font-semibold">{comment.username}</h2>
-            </div>
-
-            <h3 className="text-sm text-gray-500">{comment.commentDateTime}</h3>
-            <p className="text-base">{comment.commentContent}</p>
+            <p className="text-xs font-semibold flex justify-between text-gray-500">{comment.firstName} {comment.lastName} @{comment.username}</p>
+            <p className="text-xs font-semibold flex justify-between text-gray-500"></p>
+            <p className="text-xs text-gray-500">{comment.commentDateTime}</p>
           </div>
         </div>
+        <p className=" text-base">{comment.commentContent}</p>
       </div>
-    ))
-  ) : (
-    <div className="bg-gray-100 border border-gray-300 rounded-lg p-4 my-4">
-      <h1 className="text-xl font-semibold">No comments found</h1>
-    </div>
-  );
 
   return (
     <div>
-      {commentsJSX}
+      {commentJSX}
     </div>
   );
 }
 
-function CommentSection({ post, user, showComment, comments, setReloadComments, setShowComment}) {
+function CommentSection({ post, showComment, comments, setReloadComments, setShowComment }) {
+  const { state: AppState } = useAppState();
+  const { userProfile: user } = AppState;
   const [commentContent, setCommentContent] = useState('');
 
   const handleCommentChange = (e) => {
@@ -54,27 +105,25 @@ function CommentSection({ post, user, showComment, comments, setReloadComments, 
       "postID": post.postID,
       "userID": user.userID,
       "username": user.username,
+      "firstName": user.firstName,
+      "lastName": user.lastName,
       "profilePath": user.profilePicturePath,
       "name": `${user.firstName} ${user.lastName}`,
       "commentContent": commentContent,
     };
-
     try {
       const response = await fetch(`${API_ROOT}/comment`, {
         method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-        },
         body: JSON.stringify(body),
       });
       const data = await response.json();
       if (data.message === 'success') {
         toast.success('Comment posted successfully');
         setReloadComments(true);
+        setCommentContent('');
       } else {
-        console.error('Unexpected response:', data);
+        setCommentContent('No comments found');
       }
-      setCommentContent('');
     } catch (error) {
       toast.error('Error posting comment');
     }
@@ -87,7 +136,7 @@ function CommentSection({ post, user, showComment, comments, setReloadComments, 
         placeholder="Write a comment..."
         value={commentContent}
         onChange={handleCommentChange}
-        onClick={()=> setShowComment(!showComment)}
+        onClick={() => setShowComment(!showComment)}
       />
       <button
         type='submit'
@@ -98,13 +147,32 @@ function CommentSection({ post, user, showComment, comments, setReloadComments, 
       </button>
     </div>
   )
+
+  const commentsJSX = Object.values(comments).length > 0 ?
+    Object.values(comments).map((comment, index) => (
+      <div key={index}>
+        <CommentItem
+          comment={comment}
+          index={index}
+          setReloadComments={setReloadComments}
+        />
+      </div>
+    )) :
+    [
+      <div key="no-comments" className="bg-gray-100 border border-gray-300 rounded-lg p-4 my-4">
+        <h1 className="text-xl font-semibold">No comments found</h1>
+      </div>
+    ];
+
+
+
   return (
     <div>
       {user && inputJSX}
       {showComment && (
-        <CommentItems
-          comments={comments}
-        />
+        <div>
+          {commentsJSX}
+        </div>
       )}
     </div>
   )

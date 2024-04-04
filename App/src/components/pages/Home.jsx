@@ -1,13 +1,17 @@
 import Post from '../pageFractions/Post';
 import CreatePost from '../pageFractions/CreatePost';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { API_ROOT } from '../../Config';
+import { useAppState } from '../../contexts/AppStateContext';
+import { useHomeState } from '../../contexts/HomeStateContext';
 
-const Home = (props) => {
+const Home = () => {
 
-
-    const [showEditPost, setShowEditPost] = useState(false);
-    const [reloadPosts, setReloadPosts] = useState(true);
+    const SUCCESS_MESSAGE = 'success';
+    const { state: AppState, } = useAppState();
+    const { userProfile, isChatOpen } = AppState;
+    const { state: HomeState, dispatch: HomeDispatch } = useHomeState();
+    const { reloadPosts, allComments } = HomeState;
 
     const fetchPost = async () => {
         try {
@@ -15,44 +19,42 @@ const Home = (props) => {
             const data = await response.json();
             if (data.message === 'success' && Object.keys(data).length > 0) {
                 delete data.message;
-                props.setPosts(Object.values(data));
-
+                HomeDispatch({ type: 'SET_POSTS', payload: Object.values(data) });
             } else {
-                props.setPosts(['No posts found']);
+                HomeDispatch({ type: 'SET_POSTS', payload: ['No Post Found'] });
             }
         } catch (error) {
-            props.setPosts(['Error fetching posts']);
+            console.error('Error fetching posts:', error);
+        }
+    };
+
+    const fetchAllComments = async () => {
+        try {
+            const response = await fetch(`${API_ROOT}/comment`);
+            const data = await response.json();
+            if (data.message === SUCCESS_MESSAGE) {
+                delete data.message;
+                HomeDispatch({ type: 'SET_COMMENTS', payload: data });
+            }
+        } catch (error) {
+            console.error('Error during fetchComments:', error);
         }
     }
 
     useEffect(() => {
         if (reloadPosts) {
-            fetchPost();
-            setReloadPosts(false);
+            fetchPost()
+            fetchAllComments()
         }
     }, [reloadPosts])
 
-
     return (
-        <>
-            {props.signedIn &&
-                <CreatePost
-                    {...props}
-                    showEditPost={showEditPost}
-                    setShowEditPost={setShowEditPost}
-                    setReloadPosts={setReloadPosts}
-                    reloadPosts={reloadPosts}
-                />}
-
-            <Post
-                {...props}
-                showEditPost={showEditPost}
-                setShowEditPost={setShowEditPost}
-                setReloadPosts={setReloadPosts}
-                reloadPosts={reloadPosts}
-            />
-        </>
+        <div className='m-7'>
+            {userProfile && <CreatePost />}
+            <Post />
+        </div>
     );
+
 }
 
 export default Home;

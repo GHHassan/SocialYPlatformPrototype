@@ -1,485 +1,584 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Select from '../pageFractions/Select';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast'
+import { toast } from 'react-hot-toast';
 import { API_ROOT } from '../../Config';
-const Settings = ({ user }) => {
+import { useAppState } from '../../contexts/AppStateContext';
+import { deleteImage } from '../pageFractions/Post';
+import { useUser } from '@clerk/clerk-react';
+import App from '../../App';
 
-    if (!user) {
-        return <div>user Not found</div>;
+const pictures = {
+    newProfilePicture: null,
+    newCoverPicture: null,
+    oldProfilePicturePath: '',
+    oldCoverPicturePath: '',
+    newProfilePicturePath: '',
+    newCoverPicturePath: '',
+}
+
+const inputErrors = {
+    firstName: '',
+    lastName: '',
+    username: '',
+    email: '',
+    dateOfBirth: '',
+    phoneNumber: '',
+    bio: '',
+    website: '',
+    address: '',
+};
+
+const Settings = () => {
+    const { state: AppState, dispatch: AppDispatch } = useAppState();
+    const { signedInUser, userProfile, signedIn } = AppState;
+    const [userInfo, setUserInfo] = useState((userProfile || signedInUser));
+    const [errors, setErrors] = useState(inputErrors);
+    const [loading, setLoading] = useState(true);
+    const ssoUser = useUser();
+    const { signOut } = useUser();
+    const requiredFields = {
+        firstName: userInfo?.firstName || '',
+        lastName: userInfo?.lastName || '',
+        username: userInfo?.username || '',
+        email: userInfo?.email || '',
+        dateOfBirth: userInfo?.dateOfBirth || '',
+    };
+
+    useEffect(() => {
+        setProfilePicturePath();
+        setLoading(false);
+    }, [signedIn, pictures, signedInUser]);
+
+    let method;
+    if (userInfo && !userInfo?.hasProfile) {
+        method = 'POST';
+    } else {
+        method = 'PUT';
     }
-    const [firstName, setFirstName] = useState(user.firstName ?? '');
-    const [lastName, setLastName] = useState(user.lastName ?? '');
-    const [bio, setBio] = useState(user.bio ?? '');
-    const [website, setWebsite] = useState(user.website ?? '');
-    const [dateOfBirth, setDateOfBirth] = useState(user.dateOfBirth ?? '');
-    const [gender, setGender] = useState(user.gender ?? '');
-    const [email, setEmail] = useState(user.email ?? '');
-    const [phoneNumber, setPhoneNumber] = useState(user.phoneNumber ?? '');
-    const [address, setAddress] = useState(user.address ?? '');
-    const [relationshipStatus, setRelationshipStatus] = useState(user.relationshipStatus ?? '');
-    const [profilePicturePath, setProfilePicturePath] = useState(user.profilePicturePath ?? '');
-    const [coverPicturePath, setCoverPicturePath] = useState(user.coverPicturePath ?? '');
-    // setting states for visibility
-    const [dateOfBirthVisibility, setDateOfBirthVisibility] = useState(user.dateOfBirthVisibility ?? '');
-    const [genderVisibility, setGenderVisibility] = useState(user.genderVisibility ?? '');
-    const [emailVisibility, setEmailVisibility] = useState(user.emailVisibility ?? '');
-    const [phoneNumberVisibility, setPhoneNumberVisibility] = useState(user.phoneNumberVisibility ?? '');
-    const [addressVisibility, setAddressVisibility] = useState(user.addressVisibility ?? '');
-    const [relationshipStatusVisibility, setRelationshipStatusVisibility] = useState(user.relationshipStatusVisibility ?? '');
-    const [profileVisibility, setProfileVisibility] = useState(user.profileVisibility ?? '');
-    const [profilePicture, setProfilePicture] = useState(user.profilePicture ?? '');
-    const [newProfilePicture, setNewProfilePicture] = useState(null);
-    const [newCoverPicture, setNewCoverPicture] = useState(null);
-    const [coverPicture, setCoverPicture] = useState(user.coverPicturePath ?? '');
-    const options = ['Private', 'Friends', 'Public']
-    const navigate = useNavigate();
-    let token = localStorage.getItem('token');
 
-    let profilePictureURL = null;
-    let coverPicturePathURL = null;
+    const setProfilePicturePath = () => {
 
-    const uploadFile = async (imageFile, type) => {
-        const body = new FormData();
-        body.append('image', imageFile);
-        const response = await fetch(`${API_ROOT}/upload`, {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-            },
-            body: body,
-        })
-        const data = await response.json();
-        if (data.message === 'success') {
-            if (type === 'profilePicture') {
-                profilePictureURL = data.imageURL;
-            } else if (type === 'coverPicture') {
-                coverPicturePathURL = data.imageURL;
-            }
+        if (method === 'POST' && !(pictures?.newProfilePicturePath)) {
+            let profilePicturePath = ssoUser?.user?.imageUrl || pictures.newProfilePicturePath;
+            setUserInfo((userInfo) => ({ ...userInfo, profilePicturePath }));
+        } else if (method === 'PUT' && !userInfo?.profilePicturePath) {
+            setUserInfo((userInfo) => ({ ...userInfo, profilePicturePath: ssoUser?.user?.imageUrl }));
         }
-    }
+    };
 
-    //upload profile and cover pictures
-    const updateProfile = async () => {
-
-        if (newProfilePicture) {
-            await uploadFile(newProfilePicture, 'profilePicture');
-            toast.success('Profile Picture Updated');
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setUserInfo((prev) => ({ ...prev, [name]: value }));
+        if (value !== '') {
+            setErrors((prev) => ({ ...prev, [name]: '' }));
         }
-
-        if (newCoverPicture) {
-            await uploadFile(newCoverPicture, 'coverPicture');
-            toast.success('Cover Picture Updated');
+        if (name === 'email' && !validateEmail(value)) {
+            setErrors((prev) => ({ ...prev, email: 'Invalid Email' }));
         }
-        // Send a POST request to the server with the updated profile data
-        const response = await fetch(`${API_ROOT}/profile`,
-            {
-                method: user.userID ? 'PUT' : 'POST',
-                body: JSON.stringify({
-                    "userID": user.userID? user.userID : user.sub,
-                    "firstName": firstName,
-                    "lastName": lastName,
-                    "bio": bio,
-                    "website": website,
-                    "dateOfBirth": dateOfBirth,
-                    "gender": gender,
-                    "email": email,
-                    "phoneNumber": phoneNumber,
-                    "address": address,
-                    "profilePicturePath": profilePictureURL,
-                    "coverPicturePath": coverPicturePathURL,
-                    "relationshipStatus": relationshipStatus,
-                    "profileVisibility": profileVisibility,
-                    "emailVisibility": emailVisibility,
-                    "phoneNumberVisibility": phoneNumberVisibility,
-                    "addressVisibility": addressVisibility,
-                    "dateOfBirthVisibility": dateOfBirthVisibility,
-                    "genderVisibility": genderVisibility,
-                    "relationshipStatusVisibility": relationshipStatusVisibility,
-                }),
-            })
-        const data = await response.json();
-        if (data.message === 'success') {
-            toast.success('Profile Updated');
-        } else if (data.message === "user already exists (Forbidden)") {
-            navigate('/settings:userID');
-        }
-    }
-
-    const handleFirstNameChange = (e) => {
-        setFirstName(e.target.value);
     };
 
-
-    const handleLastNameChange = (e) => {
-        setLastName(e.target.value);
+    const handleVisibilityChange = (fieldName, value) => {
+        setUserInfo((prev) => ({ ...prev, [fieldName]: value }));
     };
-
-    const handleBioChange = (e) => {
-        setBio(e.target.value);
-    };
-
-    const handleWebsiteChange = (e) => {
-        setWebsite(e.target.value);
-    };
-
-    const handleDateOfBirthChange = (e) => {
-        setDateOfBirth(e.target.value);
-    };
-
-    const handleGenderChange = (identifier, value) => {
-        console.log(identifier, value);
-        setGender(value);
-    };
-
-    const handleEmailChange = (e) => {
-        setEmail(e.target.value);
-    };
-
-    const handlePhoneNumberChange = (e) => {
-        setPhoneNumber(e.target.value);
-    };
-
-    const handleAddressChange = (e) => {
-        setAddress(e.target.value);
-    };
-
-    const handleRelationshipStatusChange = (e) => {
-        setRelationshipStatus(e.target.value);
-    };
-
-    const handleDateOfBirthVisibilityChange = (identifier, value) => {
-        console.log(identifier, value);
-        setDateOfBirthVisibility(value);
-    }
-
-    const handleGenderVisibilityChange = (identifier, value) => {
-        console.log(identifier, value);
-        setGenderVisibility(value);
-    }
-
-    const handleEmailVisibilityChange = (identifier, value) => {
-        console.log(identifier, value);
-        setEmailVisibility(value);
-    }
-
-    const handlePhoneNumberVisibilityChange = (identifier, value) => {
-        console.log(identifier, value);
-        setPhoneNumberVisibility(value);
-    }
-
-    const handleAddressVisibilityChange = (identifier, value) => {
-        console.log(identifier, value);
-        setAddressVisibility(value);
-    }
-
-    const handleRelationshipStatusVisibilityChange = (identifier, value) => {
-        console.log(identifier, value);
-        setRelationshipStatusVisibility(value);
-    }
-
-    const handleProfileVisibilityChange = (identifier, value) => {
-        console.log(identifier, value);
-        setProfileVisibility(value);
-    }
 
     const handleProfilePictureChange = (e) => {
         if (e.target.files.length > 0) {
-            setProfilePicture(() => {
-                setNewProfilePicture(e.target.files[0])
-                const newProfilePicture = e.target.files[0];
-                setProfilePicturePath(URL.createObjectURL(newProfilePicture));
-                return newProfilePicture;
+            pictures.newProfilePicture = e.target.files[0];
+            pictures.newProfilePicturePath = e.target.files[0].name;
+            setUserInfo({
+                ...userInfo,
+                oldProfilePicturePath: userInfo.profilePicturePath,
+                profilePicturePath: URL.createObjectURL(e.target.files[0]),
             });
         }
     };
 
     const handleCoverPictureChange = (e) => {
         if (e.target.files.length > 0) {
-            setCoverPicture((prevCoverPicture) => {
-                setNewCoverPicture(e.target.files[0])
-                console.log('Previous Cover Picture:', prevCoverPicture);
-                const newCoverPicture = e.target.files[0];
-                console.log('New Cover Picture:', newCoverPicture);
-                setCoverPicturePath(URL.createObjectURL(newCoverPicture));
-                return newCoverPicture;
+            pictures.newCoverPicture = e.target.files[0];
+            pictures.newCoverPicturePath = e.target.files[0].name;
+            setUserInfo({
+                ...userInfo,
+                coverPicturePath: URL.createObjectURL(e.target.files[0]),
+                oldCoverPicturePath: userInfo?.coverPicturePath,
             });
         }
     };
 
-    const handleSubmit = (e) => {
+    const uploadFile = async (imageFile, type) => {
+        const body = new FormData();
+        body.append('image', imageFile);
+        const response = await fetch(`${API_ROOT}/upload`, {
+            method: 'POST',
+            body: body,
+        })
+        const data = await response.json();
+        if (data.message === 'success') {
+            if (type === 'profilePicture') {
+                pictures.newProfilePicturePath = data.imageURL;
+                setUserInfo({ ...userInfo, profilePicturePath: data.imageURL });
+            } else if (type === 'coverPicture') {
+                pictures.newCoverPicturePath = data.imageURL;
+                setUserInfo({ ...userInfo, coverPicturePath: data.imageURL });
+            }
+        }
+    }
+    /** updating profile data */
+    const updateProfile = async () => {
+        try {
+            if (pictures.newProfilePicture !== null) {
+                await uploadFile(pictures.newProfilePicture, 'profilePicture');
+                toast.success('Profile Picture Updated');
+            }
+        } catch (e) {
+            toast.error('Error uploading profile', e.message);
+        }
+        try {
+            if (pictures.newCoverPicture !== null) {
+                await uploadFile(pictures.newCoverPicture, 'coverPicture');
+                toast.success('Cover Picture Updated');
+            }
+        } catch (e) {
+            toast.error('Error uploading cover picture', e.message);
+        }
+
+        try {
+            const body = {
+                "profileID": userInfo?.profileID,
+                "userID": signedInUser.id,
+                "firstName": userInfo?.firstName,
+                "lastName": userInfo?.lastName,
+                "username": userInfo?.username,
+                "bio": userInfo?.bio,
+                "website": userInfo?.website,
+                "dateOfBirth": userInfo?.dateOfBirth,
+                "gender": userInfo?.gender,
+                "email": userInfo?.email,
+                "phoneNumber": userInfo?.phoneNumber,
+                "address": userInfo?.address,
+                "profilePicturePath": pictures?.newProfilePicturePath || userInfo?.profilePicturePath,
+                "coverPicturePath": pictures?.newCoverPicturePath || userInfo?.coverPicturePath,
+                "relationshipStatus": userInfo?.relationshipStatus,
+
+                "profileVisibility": userInfo?.profileVisibility,
+                "emailVisibility": userInfo?.emailVisibility,
+                "phoneNumberVisibility": userInfo?.phoneNumberVisibility,
+                "addressVisibility": userInfo?.addressVisibility,
+                "dateOfBirthVisibility": userInfo?.dateOfBirthVisibility,
+                "genderVisibility": userInfo?.genderVisibility,
+                "relationshipStatusVisibility": userInfo?.relationshipStatusVisibility,
+            }
+            const response = await fetch(`${API_ROOT}/profile`,
+                {
+                    method: method,
+                    body: JSON.stringify(body),
+                })
+            const data = await response.json();
+            if (data.message === 'success') {
+                toast.success('Profile Updated');
+                /** delete old images and clean up after update if applicable */
+                if (userInfo.profilePicturePath !== null && userInfo.oldProfilePicturePath !== null) {
+                    deleteImage(userInfo.oldProfilePicturePath);
+                }
+                if (userInfo?.coverPicturePath !== null && userInfo.oldCoverPicturePath !== null) {
+                    deleteImage(userInfo.oldCoverPicturePath);
+                }
+                AppDispatch({ type: 'RELOAD_PROFILE', payload: true });
+            } else {
+                toast.error('Error updating profile Data', data.message);
+            }
+        } catch (e) {
+            toast.error('Error updating profile Final catch', e.message);
+        }
+    }
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        updateProfile(profilePicture, coverPicture);
-    };
-
-
-    const visibilityDropdown = (options, value, identifier, onChange) => {
-        return (
-            <div >
-                <label htmlFor={identifier} className="block text-sm font-medium text-gray-600">
-                    {identifier}
-                </label>
-
-                <Select
-                    options={options}
-                    value={value}
-                    identifier={identifier}
-                    onChange={onChange}
-                />
-
-            </div>
-        )
+        validateForm() ?? updateProfile();
     }
 
-    const handleRemoveProfilePicture = () => {
-        setProfilePicturePath('');
-        setProfilePicture(null);
-        setNewProfilePicture(null);
+    const hasErrors = (error) => {
+        return Object.values(error).some((value) => value !== '');
+    }
+    const validateForm = () => {
+        Object.keys(requiredFields).forEach((key) => {
+            if (requiredFields[key] === '') {
+                setErrors((prev) => ({ ...prev, [key]: 'This field is required *' }));
+            }
+        });
+        if (hasErrors(errors)) {
+            toast.error('Please fill in all required fields');
+            return false;
+        }
     }
 
-    const handleRemoveCoverPicture = () => {
-        setCoverPicturePath('');
-        setCoverPicture(null);
-        setNewCoverPicture(null);
+    function validateEmail(email) {
+        const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return regex.test(String(email).toLowerCase());
     }
 
 
-
+    const checkDuplicateUseName = async () => {
+        const response = await fetch(`${API_ROOT}/register?userID=${signedInUser.id}`);
+        const data = await response.json();
+        if (data.message === 'success') {
+            const user = data[0];
+            if (user.username === userInfo.username) {
+                setErrors((prev) => ({ ...prev, username: 'Username already exists try different username' }));
+            }
+        }
+    }
+    const handleDeleteAccount = () => {
+        if (window.confirm('Are you sure you want to delete your profile? it cannot be undone!')) {
+            const deleteProfile = async () => {
+                try {
+                    const response = await fetch(`${API_ROOT}/profile?userID=${signedInUser.id}`, {
+                        method: 'DELETE',
+                    });
+                    const data = await response.json();
+                    if (data.message === 'success') {
+                        toast.success('Profile Deleted');
+                        await deleteImage(userInfo?.profilePicturePath);
+                        await deleteImage(userInfo?.coverPicturePath);
+                    } else {
+                        toast.error('Error deleting profile', data.message);
+                    }
+                } catch (e) {
+                    toast.error('Error deleting profile', e.message);
+                }
+            }
+            const deleteAccount = async () => {
+                try {
+                    const response = await fetch(`${API_ROOT}/register?userID=${signedInUser.id}`, {
+                        method: 'DELETE',
+                    });
+                    const data = await response.json();
+                    if (data.message === 'success') {
+                        toast.success('Account Deleted');
+                        if (ssoUser.isLoaded && ssoUser.isSignedIn) {
+                            signOut();
+                        }else{
+                            window.location.href = '/';
+                        }
+                        AppDispatch({ type: 'TOGGLE_SIGNIN', payload: false });
+                        AppDispatch({ type: 'RELOAD_POSTS', payload: false });
+                    }
+                } catch (e) {
+                    toast.error('Error deleting account', e.message);
+                }
+            }
+            deleteProfile();
+            deleteAccount();
+        }
+    }
     return (
-        <form onSubmit={handleSubmit} className=" mx-auto mt-8 p-6 bg-white rounded-md shadow-md">
-            <div>
-                {/* Cover Picture */}
-                <label htmlFor="coverPictureInput" className="block text-sm font-medium text-gray-600">
-                    Cover Picture:
-                </label>
-                <div className="relative w-full h-36 overflow-hidden border border-gray-300 rounded-t-lg">
-                    <input
-                        type="file"
-                        id="coverPictureInput"
-                        onChange={handleCoverPictureChange}
-                        accept="image/*"
-                        className="hidden"
-                    />
-                    <label
-                        htmlFor="coverPictureInput"
-                        className="cursor-pointer block w-full h-full bg-cover bg-center relative"
-                        style={{
-                            backgroundImage: `url(${coverPicturePath})`,
-                        }}
-                    >
-                        {coverPicturePath !== '' && (
-                            <div className="absolute inset-0 bg-black bg-opacity-30">
-                                <span className="absolute inset-0 flex items-center justify-center font-semibold">
-                                    Change Cover Picture
+        <div >
+            {!loading && (
+                <form onSubmit={handleSubmit} className=" mx-auto mt-8 p-6 bg-white rounded-md shadow-md">
+                    <div>
+                        {/* Cover Picture */}
+                        <label htmlFor="coverPictureInput" className="block text-sm font-medium text-gray-600">
+                            Cover Picture:
+                        </label>
+                        <div className="relative w-full h-36 overflow-hidden border border-gray-300 rounded-t-lg">
+                            <input
+                                type="file"
+                                id="coverPictureInput"
+                                onChange={handleCoverPictureChange}
+                                accept="image/*"
+                                className="hidden"
+                            />
+                            <label
+                                htmlFor="coverPictureInput"
+                                className="cursor-pointer block w-full h-full bg-cover bg-center relative"
+                                style={{ backgroundImage: `url(${userInfo?.coverPicturePath})` }}
+                            >
+                                {!userInfo?.coverPicturePath && (
+                                    <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center font-semibold">
+                                        <span>Upload Cover Picture</span>
+                                    </div>
+                                )}
+                                {userInfo?.coverPicturePath && (
+                                    <button
+                                        type="button"
+                                        className="absolute top-2 right-2 text-white"
+                                        onClick={() => {
+                                            pictures.newCoverPicture = null
+                                            setUserInfo({ ...userInfo, coverPicturePath: '' });
+                                        }}
+                                    >
+                                        x
+                                    </button>
+                                )}
+                            </label>
+                        </div>
+
+                        {/* Profile Picture */}
+                        <input
+                            type="file"
+                            id="profilePictureInput"
+                            onChange={handleProfilePictureChange}
+                            accept="image/*"
+                            className="hidden"
+                        />
+                        <label
+                            htmlFor="profilePictureInput"
+                            className="cursor-pointer block w-16 h-16 bg-cover bg-center rounded-full border-2 -mt-8 mx-auto relative z-10"
+                            style={{ backgroundImage: `url(${userInfo.profilePicturePath}` }}
+                        >
+                            {!userInfo.profilePicturePath && (
+                                <span className="absolute inset-0 flex items-center justify-center text-white font-bold">
+                                    {userInfo.firstName?.charAt(0) || ''}{userInfo.lastName?.charAt(0) || ''}
                                 </span>
+                            )}
+                            {userInfo.profilePicturePath && (
                                 <button
+                                    type="button"
                                     className="absolute top-2 right-2 text-white"
-                                    onClick={() => handleRemoveCoverPicture()}
+                                    onClick={() => {
+                                        pictures.newProfilePicture = null
+                                        setUserInfo({ ...userInfo, profilePicturePath: '' });
+                                    }}
                                 >
                                     x
                                 </button>
-                            </div>
-                        )}
-                    </label>
-                </div>
+                            )}
+                        </label>
+                    </div>
 
-                {/* Profile Picture */}
-                <input
-                    type="file"
-                    id="profilePictureInput"
-                    onChange={handleProfilePictureChange}
-                    accept="image/*"
-                    className="hidden"
-                />
-                <label
-                    htmlFor="profilePictureInput"
-                    className="cursor-pointer block w-16 h-16 bg-cover bg-center rounded-full border-2 -mt-8 mx-auto relative z-10"
-                    style={{
-                        backgroundImage: `url(${profilePicturePath})`,
-                    }}
-                >
-                    {!profilePicturePath && (
-                        <span className="absolute inset-0 flex items-center justify-center text-white font-bold">
-                            {firstName?.charAt(0) || ''}{lastName?.charAt(0) || ''}
-                        </span>
-                    )}
-                    {profilePicturePath && (
-                        <button
-                            className="absolute top-2 right-2 text-white"
-                            onClick={() => handleRemoveProfilePicture()}
-                        >
-                            x
-                        </button>
-                    )}
-                </label>
-            </div>
+                    {/* Dynamic Form Fields Example: First Name and Email */}
+                    <div className="mb-4">
+                        <label htmlFor="firstName" className="block text-sm font-medium text-gray-600">
+                            First Name:
+                            {userProfile &&
+                                <span className='px-2 py-2 pt-1 pb-1 rounded-md float-end bg-red-700 text-white text-pretty'
+                                    onClick={handleDeleteAccount}>delete profile</span>
+                            }
+                        </label>
+                        <input
+                            type="text"
+                            name="firstName"
+                            id="firstName"
+                            value={userInfo.firstName || ''}
+                            onChange={handleInputChange}
+                            required
+                            className="mt-1 p-2 border rounded-md w-full"
+                        />
+                        <p className='text-red-500'>{errors.firstName}</p>
+                    </div>
 
+                    {/* Last Name */}
+                    <div className="mb-4">
+                        <label htmlFor="lastName" className="block text-sm font-medium text-gray-600">
+                            Last Name:
+                        </label>
+                        <input
+                            type="text"
+                            name="lastName"
+                            id="lastName"
+                            value={userInfo.lastName || ''}
+                            onChange={handleInputChange}
+                            onBlur={checkDuplicateUseName}
+                            required
+                            className="mt-1 p-2 border rounded-md w-full"
+                        />
+                        <p className='text-red-500'>{errors.lastName}</p>
+                    </div>
 
-            {/* Profile form fields */}
-            <div className="mb-4">
-                <label htmlFor="firstNameInput" className="block text-sm font-medium text-gray-600">
-                    First Name:
-                </label>
-                <input
-                    type="text"
-                    id="firstNameInput"
-                    value={firstName}
-                    onChange={handleFirstNameChange}
-                    required
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-            </div>
+                    {/* Username */}
+                    <div className="mb-4">
+                        <label htmlFor="username" className="block text-sm font-medium text-gray-600">
+                            Username:
+                        </label>
+                        <input
+                            type="text"
+                            name="username"
+                            id="username"
+                            value={userInfo.username || ''}
+                            onChange={handleInputChange}
+                            onBlur={checkDuplicateUseName}
+                            required
+                            // disabled={userInfo?.hasProfile}
+                            className="mt-1 p-2 border rounded-md w-full"
+                        />
+                        <p className='text-red-500'>{errors.username}</p>
+                    </div>
 
-            <div className="mb-4">
-                <label htmlFor="lastNameInput" className="block text-sm font-medium text-gray-600">
-                    Last Name:
-                </label>
-                <input
-                    type="text"
-                    id="lastNameInput"
-                    value={lastName}
-                    onChange={handleLastNameChange}
-                    required
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-            </div>
+                    {/* Email */}
+                    <div className="mb-4">
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-600">
+                            Email:
+                        </label>
+                        <input
+                            type="email"
+                            name="email"
+                            id="email"
+                            value={userInfo.email || ''}
+                            onChange={handleInputChange}
+                            required
+                            className="mt-1 p-2 border rounded-md w-full"
+                        />
+                        <p className='text-red-500'>{errors.email}</p>
+                        <Select
+                            options={['Private', 'Friends', 'Public', 'Select']}
+                            value={userInfo.emailVisibility || 'Select'}
+                            identifier="emailVisibility"
+                            onChange={handleVisibilityChange}
+                        />
+                    </div>
 
-            {/* username */}
-            <div className="mb-4">
-                <label htmlFor="username">
-                    Username:
-                </label>
-                <input
-                    type="text" readOnly
-                    id="username"
-                    value={user.username}
-                    disabled
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-            </div>
+                    {/* Bio */}
+                    <div className="mb-4">
+                        <label htmlFor="bio" className="block text-sm font-medium text-gray-600">
+                            Bio:
+                        </label>
+                        <input
+                            type="text"
+                            name="bio"
+                            id="bio"
+                            value={userInfo.bio || ''}
+                            onChange={handleInputChange}
+                            className="mt-1 p-2 border rounded-md w-full"
+                        />
+                    </div>
 
+                    {/* Website */}
+                    <div className="mb-4">
+                        <label htmlFor="website" className="block text-sm font-medium text-gray-600">
+                            Website:
+                        </label>
+                        <input
+                            type="text"
+                            name="website"
+                            id="website"
+                            value={userInfo.website || ''}
+                            onChange={handleInputChange}
+                            className="mt-1 p-2 border rounded-md w-full"
+                        />
+                    </div>
 
-            <div className="mb-4">
-                <label htmlFor="bioInput" className="block text-sm font-medium text-gray-600">
-                    Bio:
-                </label>
-                <input
-                    type="text"
-                    id="bioInput"
-                    value={bio}
-                    onChange={handleBioChange}
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-            </div>
+                    {/* Date of Birth */}
+                    <div className="mb-4">
+                        <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-600">
+                            Date of Birth:
+                        </label>
+                        <input
+                            type="date"
+                            name="dateOfBirth"
+                            id="dateOfBirth"
+                            value={userInfo.dateOfBirth || ''}
+                            onChange={handleInputChange}
+                            className="mt-1 p-2 border rounded-md w-full"
+                        />
+                        <p className='text-red-500'>{errors.dateOfBirth}</p>
+                        <Select
+                            options={['Private', 'Friends', 'Public']}
+                            value={userInfo.dateOfBirthVisibility || 'Select'}
+                            identifier='dateOfBirthVisibility'
+                            onChange={handleVisibilityChange}
+                        />
+                    </div>
 
-            <div className="mb-4">
-                <label htmlFor="websiteInput" className="block text-sm font-medium text-gray-600">
-                    Website:
-                </label>
-                <input
-                    type="text"
-                    id="websiteInput"
-                    value={website}
-                    onChange={handleWebsiteChange}
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-            </div>
+                    {/* Gender */}
+                    <div className="mb-4">
+                        <label htmlFor="gender" className="block text-sm font-medium text-gray-600">
+                            Gender:
+                        </label>
+                        <Select
+                            name="gender"
+                            options={['Male', 'Female', 'LGBTQ', 'Prefer Not to Say']}
+                            value={userInfo.gender || 'Select'}
+                            identifier='gender'
+                            onChange={handleVisibilityChange}
+                        />
+                        <Select
+                            options={['Private', 'Friends', 'Public']}
+                            value={userInfo.genderVisibility || 'Select'}
+                            identifier='genderVisibility'
+                            onChange={handleVisibilityChange}
+                        />
+                    </div>
 
-            <div className="mb-4">
-                <label htmlFor="dateOfBirthInput" className="block text-sm font-medium text-gray-600">
-                    Date of Birth:
-                </label>
-                <input
-                    type="date"
-                    id="dateOfBirthInput"
-                    value={dateOfBirth}
-                    onChange={handleDateOfBirthChange}
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-                {visibilityDropdown(options, dateOfBirthVisibility, 'Date of Birth Visibility', handleDateOfBirthVisibilityChange)}
-            </div>
+                    {/* Phone Number */}
+                    <div className="mb-4">
+                        <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-600">
+                            Phone Number:
+                        </label>
+                        <input
+                            type="tel"
+                            name="phoneNumber"
+                            id="phoneNumber"
+                            value={userInfo.phoneNumber || ''}
+                            onChange={handleInputChange}
+                            className="mt-1 p-2 border rounded-md w-full"
+                        />
+                        <Select
+                            options={['Private', 'Friends', 'Public']}
+                            value={userInfo.phoneNumberVisibility || 'Select'}
+                            identifier='phoneNumberVisibility'
+                            onChange={handleVisibilityChange}
+                        />
+                    </div>
 
-            <div className="mb-4">
-                <label htmlFor="genderInput" className="block text-sm font-medium text-gray-600">
-                    Gender:
-                </label>
-                <div className="mt-1 p-2 border rounded-md w-full">
-                    {visibilityDropdown(['Male', 'Female', 'LGBTQ', 'Prefer Not to say'], gender, '', handleGenderChange)}
-                </div>
-                {visibilityDropdown(options, genderVisibility, 'Gender Visibility', handleGenderVisibilityChange)}
-            </div>
+                    {/* Address */}
+                    <div className="mb-4">
+                        <label htmlFor="address" className="block text-sm font-medium text-gray-600">
+                            Address:
+                        </label>
+                        <input
+                            type="text"
+                            name="address"
+                            id="address"
+                            value={userInfo.address || ''}
+                            onChange={handleInputChange}
+                            className="mt-1 p-2 border rounded-md w-full"
+                        />
+                        <Select
+                            options={['Private', 'Friends', 'Public']}
+                            value={userInfo.addressVisibility || 'Select'}
+                            identifier='addressVisibility'
+                            onChange={handleVisibilityChange}
+                        />
+                    </div>
 
-            <div className="mb-4">
-                <label htmlFor="emailInput" className="block text-sm font-medium text-gray-600">
-                    Email:
-                </label>
-                <input
-                    type="email"
-                    id="emailInput"
-                    value={email}
-                    onChange={handleEmailChange}
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-                {visibilityDropdown(options, emailVisibility, 'Email Visibility', handleEmailVisibilityChange)}
-            </div>
+                    {/* Relationship Status */}
+                    <div className="mb-4">
+                        <label htmlFor="relationshipStatus" className="block text-sm font-medium text-gray-600">
+                            Relationship Status:
+                        </label>
+                        <Select
+                            name="relationshipStatus"
+                            options={['Select', 'Single', 'In a Relationship', 'Engaged', 'Married', 'It\'s Complicated', 'Prefer Not to Say']}
+                            value={userInfo.relationshipStatus || 'Select'}
+                            identifier='relationshipStatus'
+                            onChange={handleVisibilityChange}
+                        />
+                        <Select
+                            options={['Private', 'Friends', 'Public']}
+                            value={userInfo.relationshipStatusVisibility || 'Select'}
+                            identifier='relationshipStatusVisibility'
+                            onChange={handleVisibilityChange}
+                        />
+                    </div>
 
-            <div className="mb-4">
-                <label htmlFor="phoneNumberInput" className="block text-sm font-medium text-gray-600">
-                    Phone Number:
-                </label>
-                <input
-                    type="tel"
-                    id="phoneNumberInput"
-                    value={phoneNumber}
-                    onChange={handlePhoneNumberChange}
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-                {visibilityDropdown(options, phoneNumberVisibility, 'Phone Number Visibility', handlePhoneNumberVisibilityChange)}
-            </div>
-
-            <div className="mb-4">
-                <label htmlFor="addressInput" className="block text-sm font-medium text-gray-600">
-                    Address:
-                </label>
-                <input
-                    type="text"
-                    id="addressInput"
-                    value={address}
-                    onChange={handleAddressChange}
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-                {visibilityDropdown(options, addressVisibility, 'Address Visibility', handleAddressVisibilityChange)}
-            </div>
-
-            <div className="mb-4">
-                <label htmlFor="relationshipStatusInput" className="block text-sm font-medium text-gray-600">
-                    Relationship Status:
-                </label>
-                <input
-                    type="text"
-                    id="relationshipStatusInput"
-                    value={relationshipStatus}
-                    onChange={handleRelationshipStatusChange}
-                    className="mt-1 p-2 border rounded-md w-full"
-                />
-                {visibilityDropdown(options, relationshipStatusVisibility, 'Relationship Status Visibility', handleRelationshipStatusVisibilityChange)}
-            </div>
-
-            <div className="mb-4">
-                <label htmlFor="genderInput" className="block text-sm font-medium text-gray-600">
-                    Profile Visibility:
-                </label>
-                <div className="mt-1 p-2 border rounded-md w-full">
-                    {visibilityDropdown(options, profileVisibility, '', handleProfileVisibilityChange)}
-                </div>
-            </div>
-
-
-            <button type="submit" className="bg-blue-500 text-white rounded-md p-2">Submit</button>
-
-        </form>
+                    {/* Profile Visibility */}
+                    <div className="mb-4">
+                        <label htmlFor="profileVisibility" className="block text-sm font-medium text-gray-600">
+                            Profile Visibility:
+                        </label>
+                        <Select
+                            name="profileVisibility"
+                            options={['Private', 'Friends', 'Public']}
+                            value={userInfo.profileVisibility || 'Select'}
+                            identifier='profileVisibility'
+                            onChange={handleVisibilityChange}
+                        />
+                    </div>
+                    <button type="submit" className="bg-blue-500 text-white rounded-md p-2" onClick={handleSubmit}>Submit</button>
+                </form>
+            )}
+        </div>
     );
 };
 
 export default Settings;
-

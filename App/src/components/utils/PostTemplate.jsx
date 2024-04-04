@@ -5,7 +5,10 @@ import CommentSection from '../pageFractions/CommentSection';
 import { API_ROOT } from '../../Config';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-let token = localStorage.getItem('token');
+import { useAppState } from '../../contexts/AppStateContext';
+import { useHomeState } from '../../contexts/HomeStateContext';
+import { Link } from 'react-router-dom';
+import ShareButtons from './ShareButtons';
 
 const SUCCESS_MESSAGE = 'success';
 const handleApiResponse = async (response, successMessage) => {
@@ -25,12 +28,14 @@ const PostHeader = ({ post, user, visibilityOptions, handleVisibility }) => {
   return (
     <div className="flex items-start">
       <div className={` w-10 h-10 rounded-full m-2 cursor-pointer`}>
-        <ProfileAvatar
-          imagePath={post.profilePicturePath}
-          firstName={post.firstName}
-          lastName={post.lastName}
-          userID={post.userID}
-        />
+        <Link to={`/profile/${post.userID}`}>
+          <ProfileAvatar
+            imagePath={post.profilePicturePath}
+            firstName={post.firstName}
+            lastName={post.lastName}
+            userID={post.userID}
+          />
+        </Link>
       </div>
       <div className="flex-1">
         <div className="flex justify-between items-center">
@@ -107,18 +112,19 @@ const PostTemplate = ({
   post,
   index,
   visibilityOptions,
-  user,
-  handleDropdownToggle,
-  dropdownIndex,
-  handleEditPost,
   handleDeletePost,
   handleVisibility,
-  showActions,
+  postIndex,
 }) => {
 
+  const { state: AppState, } = useAppState();
+  const { dispatch: HomeDispatch } = useHomeState();
+  const { userProfile: user } = AppState;
   const [showComment, setShowComment] = useState(false);
   const [comments, setComments] = useState({});
   const [reloadComments, setReloadComments] = useState(false);
+  const [showActions, setShowActions] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false);
 
   const sendLike = async (post) => {
     if (!user) {
@@ -136,9 +142,6 @@ const PostTemplate = ({
     try {
       const response = await fetch(`${API_ROOT}/reaction`, {
         method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-        },
         body: JSON.stringify(body),
       });
       handleApiResponse(response, 'Like posted successfully');
@@ -147,56 +150,6 @@ const PostTemplate = ({
     }
   };
 
-  // handle share click
-  // open a popup wiht option to share on homepage or facebook, twitter, linkedin or copy link
-  // handle share click
-  const handleShareClick = (post) => {
-    console.log('Share clicked:', post);
-  
-    const postUrl = `${window.location.origin}/post/${post.postID}`;
-    const url = encodeURIComponent(postUrl);
-    const title = encodeURIComponent(post.title);
-  
-    // Construct sharing URLs
-    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-    const twitterUrl = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
-    const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`;
-    const whatsAppUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(title + " " + url)}`;
-    const textMessageUrl = `sms:?body=${encodeURIComponent(title + " " + url)}`;
-  
-    // Prompt for the user's choice
-    const choice = prompt('Choose an option to share:\n1. Homepage\n2. Facebook\n3. Twitter\n4. LinkedIn\n5. Copy Link\n6. WhatsApp\n7. Text Message');
-  
-    switch (choice) {
-      case '1':
-        console.log('Sharing on Homepage is not implemented.');
-        break;
-      case '2':
-        window.open(facebookUrl, '_blank');
-        break;
-      case '3':
-        window.open(twitterUrl, '_blank');
-        break;
-      case '4':
-        window.open(linkedInUrl, '_blank');
-        break;
-      case '5':
-        navigator.clipboard.writeText(postUrl)
-          .then(() => alert('Link copied to clipboard!'))
-          .catch(err => console.error('Error copying link:', err));
-        break;
-      case '6':
-        window.open(whatsAppUrl, '_blank');
-        break;
-      case '7':
-        window.open(textMessageUrl, '_blank');
-        break;
-      default:
-        alert('Invalid choice.');
-    }
-  };
-  
-
   const fetchComments = async () => {
     try {
       const response = await fetch(`${API_ROOT}/comment?postID=${post.postID}`);
@@ -204,9 +157,7 @@ const PostTemplate = ({
       if (data.message === 'success') {
         delete data.message;
         setComments(Object.values(data));
-        setShowComment(true);
-      } else {
-        setComments({ 'message': 'No comments found' });
+        setReloadComments(false);
       }
     } catch (error) {
       toast.error('Error fetching comments');
@@ -218,14 +169,34 @@ const PostTemplate = ({
       fetchComments();
     }
   }, [showComment, reloadComments]);
+
+
+  const handleShareClick = (post) => {
+    console.log('Share post:', post);
+    setShowShareOptions(!showShareOptions);
+  };
+
+  const handleDropdownToggle = (index, postIndex) => {
+    setShowActions(!showActions);
+    setTimeout(() => {
+      setShowActions(false);
+    }, 4000);
+  }
+
+  const handleEditPost = (post) => {
+    HomeDispatch({ type: 'SET_EDITING_POST', payload: post });
+    HomeDispatch({ type: 'TOGGLE_SHOW_EDIT_POST', payload: true });
+    setShowActions(false);
+  };
+
   return (
     <div>
       <div className="bg-white border-b-2 border-double border-gray300">
         {user?.userID === post?.userID && (
           <div className="relative">
             <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
-              onClick={() => handleDropdownToggle(index)}>...</button>
-            {(dropdownIndex === index && showActions) && (
+              onClick={() => handleDropdownToggle(index, postIndex)}>...</button>
+            {(showActions && postIndex === index) && (
               <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
                 <button className="text-blue-500 text-xs" onClick={() => handleEditPost(post)}>Edit</button>
                 <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeletePost(post)}>Delete</button>
@@ -237,20 +208,19 @@ const PostTemplate = ({
         <p className="text-sm font-semibold text-gray-500">{post.firstName} {post.lastName}</p>
         <p className="text-xs text-gray-500">@{post.username}</p>
       </div>
-
       <PostContent post={post} />
 
       <PostActions
         post={post}
-        handleCommentClick={()=> setShowComment(!showComment)}
+        handleCommentClick={() => setShowComment(!showComment)}
         handleLikeClick={sendLike}
         handleShareClick={handleShareClick}
       />
+      {showShareOptions && <ShareButtons post={post} />}
       <CommentSection
         post={post}
         user={user}
         comments={comments}
-        setComments={setComments}
         showComment={showComment}
         setShowComment={setShowComment}
         setReloadComments={setReloadComments}
