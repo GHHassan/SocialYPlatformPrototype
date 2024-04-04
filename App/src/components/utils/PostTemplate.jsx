@@ -172,7 +172,6 @@ const PostTemplate = ({
 
 
   const handleShareClick = (post) => {
-    console.log('Share post:', post);
     setShowShareOptions(!showShareOptions);
   };
 
