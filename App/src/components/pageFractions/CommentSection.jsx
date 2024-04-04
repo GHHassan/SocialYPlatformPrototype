@@ -9,15 +9,17 @@ function CommentItem({ index, comment, setReloadComments }) {
   const { state: AppState } = useAppState();
   const { userProfile: user } = AppState;
   const [showActions, setShowActions] = useState(false);
+  const [showEditComment, setShowEditComment] = useState(false);
+  const [commentContent, setCommentContent] = useState(comment?.commentContent);
 
   const handleDropdownToggle = () => {
-    setShowActions(true); 
+    setShowActions(true);
     setTimeout(() => {
       setShowActions(false);
-    }, 3000); 
+    }, 3000);
   }
-  
-  
+
+
   const editComment = async (comment) => {
     const response = await fetch(`${API_ROOT}/comment`, {
       method: 'PUT',
@@ -30,14 +32,20 @@ function CommentItem({ index, comment, setReloadComments }) {
     } else {
       toast.error('Error updating comment');
     }
+    setShowEditComment(!showEditComment);
   }
 
 
-  const handleEditComment = async (comment) => {
-    
+  const handleEditComment = async () => {
+    const updatedComment = {...comment, commentContent: commentContent};
+    editComment(updatedComment);
   }
 
-  const handleDeleteComment = async(comment) => {
+  const handleEditCommentClick = () => {
+    setShowEditComment(!showEditComment);
+  }
+
+  const handleDeleteComment = async (comment) => {
     const response = await fetch(`${API_ROOT}/comment?commentID=${comment.commentID}`,
       {
         method: 'DELETE',
@@ -52,37 +60,55 @@ function CommentItem({ index, comment, setReloadComments }) {
     setShowActions(!showActions);
   }
 
-  const commentJSX = 
-      <div className="mb-4 p-4 bg-white border border-gray-300 rounded-md">
-        {user?.userID === comment?.userID && (
-          <div className="relative">
-            <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
-              onClick={() => handleDropdownToggle()}>...</button>
-            {(showActions) && (
-              <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
-                <button className="text-blue-500 text-xs" onClick={() => handleEditComment(comment)}>Edit</button>
-                <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeleteComment(comment)}>Delete</button>
-              </div>
-            )}
-          </div>
-        )}
-        <div className="flex items-start">
-          <div className="w-7 h-7 rounded-full overflow-hidden mr-4">
-            <ProfileAvatar
-              imagePath={comment.profilePath}
-              firstName={comment.username}
-              lastName={""}
-              userID={comment.userID}
-            />
-          </div>
-          <div className="flex-1">
-            <p className="text-xs font-semibold flex justify-between text-gray-500">{comment.firstName} {comment.lastName} @{comment.username}</p>
-            <p className="text-xs font-semibold flex justify-between text-gray-500"></p>
-            <p className="text-xs text-gray-500">{comment.commentDateTime}</p>
-          </div>
+  const commentJSX =
+    <div className="mb-4 p-4 bg-white border border-gray-300 rounded-md">
+      {user?.userID === comment?.userID && (
+        <div className="relative">
+          <button className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1"
+            onClick={() => handleDropdownToggle()}>...</button>
+          {(showActions) && (
+            <div className="absolute top-0 right-0 mt-2 mr-2 bg-white border border-gray-300 rounded-lg pr-1 pl-1">
+              <button className="text-blue-500 text-xs" onClick={handleEditCommentClick}>Edit</button>
+              <button className="text-red-500 ml-2 text-xs" onClick={() => handleDeleteComment(comment)}>Delete</button>
+            </div>
+          )}
         </div>
-        <p className=" text-base">{comment.commentContent}</p>
+      )}
+      <div className="flex items-start">
+        <div className="w-7 h-7 rounded-full overflow-hidden mr-4">
+          <ProfileAvatar
+            imagePath={comment.profilePath}
+            firstName={comment.username}
+            lastName={""}
+            userID={comment.userID}
+          />
+        </div>
+        <div className="flex-1">
+          <p className="text-xs font-semibold flex justify-between text-gray-500">{comment.firstName} {comment.lastName} @{comment.username}</p>
+          <p className="text-xs font-semibold flex justify-between text-gray-500"></p>
+          <p className="text-xs text-gray-500">{comment.commentDateTime}</p>
+        </div>
       </div>
+      {showEditComment ? (
+        <>
+          <input
+            type="text"
+            className="border border-gray-300 rounded-lg p-2 w-full mt-2"
+            value={commentContent}
+            onChange={(e) => setCommentContent(e.target.value)}
+          />
+          <button
+            className="bg-blue-500 text-white rounded-lg p-2 mt-2"
+            onClick={handleEditComment}
+          >
+            Save
+          </button>
+        </>
+      ) : (
+        <p className="text-base">{comment.commentContent}</p>
+      )}
+
+    </div>
 
   return (
     <div>
