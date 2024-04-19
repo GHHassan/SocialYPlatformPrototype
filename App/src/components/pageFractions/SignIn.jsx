@@ -15,17 +15,16 @@
  */
 
 import React, { useState } from "react";
-import { SignUpWithGoogleButton, CheckboxWithLabel, FormGroup } from "./SignUp"; // Assuming this is already defined
+import { SignUpWithGoogleButton, CheckboxWithLabel, FormGroup } from "./SignUp";
 import { useUser } from "@clerk/clerk-react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { API_ROOT } from "../../Config";
 import { useAppState } from "../../contexts/AppStateContext";
 
-
 const Login = () => {
 
-  const { state: appState, dispatch: appDispatch } = useAppState();
+  const { dispatch: appDispatch } = useAppState();
   const user = useUser();
   
   const [formData, setFormData] = useState({

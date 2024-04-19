@@ -11,7 +11,7 @@
 const Footer = () => {
 
     return (
-        <footer className="bg-black text-white text-center mb-2">
+        <footer className="bg-blue-500 text-white text-center">
             <h4 className="text-xl font-bold">Coursework assignment for KF6003 
             <span className="text-yellow-500 cursor-pointer" onClick={()=> window.location.href='/'}>
                 (SocialY)

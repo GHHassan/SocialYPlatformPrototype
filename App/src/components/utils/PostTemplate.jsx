@@ -24,7 +24,7 @@ import toast from 'react-hot-toast';
 import { useAppState } from '../../contexts/AppStateContext';
 import { useHomeState } from '../../contexts/HomeStateContext';
 import { Link } from 'react-router-dom';
-import ShareButtons from './ShareButtons';
+import ShareButtons from '../pageFractions/ShareButtons';
 
 const SUCCESS_MESSAGE = 'success';
 const handleApiResponse = async (response, successMessage) => {

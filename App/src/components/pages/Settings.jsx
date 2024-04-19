@@ -266,10 +266,10 @@ const Settings = () => {
                         toast.success('Account Deleted');
                         if (ssoUser.isLoaded && ssoUser.isSignedIn) {
                             signOut();
+                            AppDispatch({ type: 'TOGGLE_SIGNIN', payload: false });
                         }else{
                             window.location.href = '/';
                         }
-                        AppDispatch({ type: 'TOGGLE_SIGNIN', payload: false });
                         AppDispatch({ type: 'RELOAD_POSTS', payload: false });
                     }
                 } catch (e) {
@@ -358,7 +358,7 @@ const Settings = () => {
                     {/* Dynamic Form Fields Example: First Name and Email */}
                     <div className="mb-4">
                         <label htmlFor="firstName" className="block text-sm font-medium text-gray-600">
-                            First Name:
+                            First Name: *
                             {userProfile &&
                                 <span className='px-2 py-2 pt-1 pb-1 rounded-md float-end bg-red-700 text-white text-pretty'
                                     onClick={handleDeleteAccount}>delete profile</span>
@@ -379,7 +379,7 @@ const Settings = () => {
                     {/* Last Name */}
                     <div className="mb-4">
                         <label htmlFor="lastName" className="block text-sm font-medium text-gray-600">
-                            Last Name:
+                            Last Name: *
                         </label>
                         <input
                             type="text"
@@ -397,7 +397,7 @@ const Settings = () => {
                     {/* Username */}
                     <div className="mb-4">
                         <label htmlFor="username" className="block text-sm font-medium text-gray-600">
-                            Username:
+                            Username: *
                         </label>
                         <input
                             type="text"
@@ -416,7 +416,7 @@ const Settings = () => {
                     {/* Email */}
                     <div className="mb-4">
                         <label htmlFor="email" className="block text-sm font-medium text-gray-600">
-                            Email:
+                            Email: *
                         </label>
                         <input
                             type="email"
@@ -469,7 +469,7 @@ const Settings = () => {
                     {/* Date of Birth */}
                     <div className="mb-4">
                         <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-600">
-                            Date of Birth:
+                            Date of Birth: *
                         </label>
                         <input
                             type="date"
