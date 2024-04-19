@@ -44,7 +44,6 @@ const Navbar = () => {
                 toast.success("Signed out successfully");
                 window.location.href = "/kf6003/";
             }
-            dispatch({ type: 'SET_UNAUTHENTICATED' })
         } catch (error) {
             toast.error("Error signing out");
         }

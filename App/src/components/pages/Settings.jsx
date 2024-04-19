@@ -15,6 +15,7 @@ import { API_ROOT } from '../../Config';
 import { useAppState } from '../../contexts/AppStateContext';
 import { deleteImage } from '../pageFractions/Post';
 import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/clerk-react';
 
 const pictures = {
     newProfilePicture: null,
@@ -44,7 +45,7 @@ const Settings = () => {
     const [errors, setErrors] = useState(inputErrors);
     const [loading, setLoading] = useState(true);
     const ssoUser = useUser();
-    const { signOut } = useUser();
+    const { signOut } = useAuth();
     const requiredFields = {
         firstName: userInfo?.firstName || '',
         lastName: userInfo?.lastName || '',
@@ -249,6 +250,7 @@ const Settings = () => {
                         toast.success('Profile Deleted');
                         await deleteImage(userInfo?.profilePicturePath);
                         await deleteImage(userInfo?.coverPicturePath);
+                        await deleteAccount();
                     } else {
                         toast.error('Error deleting profile', data.message);
                     }
@@ -256,30 +258,38 @@ const Settings = () => {
                     toast.error('Error deleting profile', e.message);
                 }
             }
-            const deleteAccount = async () => {
-                try {
-                    const response = await fetch(`${API_ROOT}/register?userID=${signedInUser.id}`, {
-                        method: 'DELETE',
-                    });
-                    const data = await response.json();
-                    if (data.message === 'success') {
-                        toast.success('Account Deleted');
-                        if (ssoUser.isLoaded && ssoUser.isSignedIn) {
-                            signOut();
-                            AppDispatch({ type: 'TOGGLE_SIGNIN', payload: false });
-                        }else{
-                            window.location.href = '/';
-                        }
-                        AppDispatch({ type: 'RELOAD_POSTS', payload: false });
-                    }
-                } catch (e) {
-                    toast.error('Error deleting account', e.message);
-                }
-            }
             deleteProfile();
-            deleteAccount();
         }
     }
+
+    const deleteAccount = async () => {
+        try {
+            const response = await fetch(`${API_ROOT}/register?userID=${signedInUser.id}`, {
+                method: 'DELETE',
+            });
+            await response.json();
+            if (response.status === 200) {
+                toast.success('Account Deleted');
+                if (ssoUser.isSignedIn) {
+                    toast.success("Signed out successfully");
+                    await signOut();
+                    AppDispatch({ type: 'SET_UNAUTHENTICATED' });
+                    AppDispatch({ type: 'REMOVE_TOKEN' });
+                    toast.success("Signed out successfully");
+                }
+                if (localStorage.getItem("token")) {
+                    AppDispatch({ type: 'REMOVE_TOKEN' });
+                    AppDispatch({ type: 'SET_UNAUTHENTICATED' });
+                    toast.success("Signed out successfully");
+                    console.log('token removed')
+                }
+                window.location.href = "/kf6003/";
+            }
+        } catch (e) {
+            toast.error('Error deleting account', e.message);
+        }
+    }
+
     return (
         <div >
             {!loading && (
@@ -361,7 +371,7 @@ const Settings = () => {
                             First Name: *
                             {userProfile &&
                                 <span className='px-2 py-2 pt-1 pb-1 rounded-md float-end bg-red-700 text-white text-pretty'
-                                    onClick={handleDeleteAccount}>delete profile</span>
+                                    onClick={handleDeleteAccount}>delete Account and profile</span>
                             }
                         </label>
                         <input
