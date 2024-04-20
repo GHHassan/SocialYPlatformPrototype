@@ -229,11 +229,11 @@ const Settings = () => {
 
 
     const checkDuplicateUseName = async () => {
-        const response = await fetch(`${API_ROOT}/register?userID=${signedInUser.id}`);
+        const response = await fetch(`${API_ROOT}/profile`);
         const data = await response.json();
-        if (data.message === 'success') {
-            const user = data[0];
-            if (user.username === userInfo.username) {
+        if (data.length > 0) {
+            const user = data.find((user) => user.username === userInfo.username);
+            if (user?.username === userInfo.username) {
                 setErrors((prev) => ({ ...prev, username: 'Username already exists try different username' }));
             }
         }
@@ -413,11 +413,11 @@ const Settings = () => {
                             type="text"
                             name="username"
                             id="username"
-                            value={userInfo.username || ''}
+                            value={userInfo?.username || ''}
                             onChange={handleInputChange}
                             onBlur={checkDuplicateUseName}
                             required
-                            // disabled={userInfo?.hasProfile}
+                            disabled={userInfo?.hasProfile}
                             className="mt-1 p-2 border rounded-md w-full"
                         />
                         <p className='text-red-500'>{errors.username}</p>

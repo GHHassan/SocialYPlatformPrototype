@@ -26,7 +26,7 @@ function App() {
     if (ssoUser?.isLoaded && ssoUser?.isSignedIn) {
       const signedInUser = {
         ...ssoUser.user,
-        email: ssoUser.user.emailAddresses[0].emailAddress,
+        email: ssoUser.user?.emailAddresses[0]?.emailAddress,
         isSignedIn: ssoUser.isSignedIn,
       };
       AppDispatch({ type: 'SET_SIGNEDIN_USER', payload: signedInUser });
