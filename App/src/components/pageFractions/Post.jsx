@@ -33,7 +33,7 @@ export const deleteImage = async (imageName) => {
             toast.success('Old image deleted successfully');
         }
     } catch (error) {
-        console.error('Error during deleteImage:', error);
+        toast.error('Error during deleteImage operation');
     }
 };
 
@@ -47,7 +47,7 @@ export const deleteVideo = async (videoName) => {
             toast.success('Old video deleted successfully');
         }
     } catch (error) {
-        console.error('Error during deleteVideo:', error);
+        toast.error('Error during deleteVideo operation');
     }
 };
 
@@ -71,7 +71,7 @@ const Post = () => {
             handleApiResponse(response, 'Post visibility updated successfully');
             HomeDispatch({ type: 'RELOAD_POSTS', payload: true })
         } catch (error) {
-            console.error('Error during updatePostVisibility:', error);
+            toast.error('Error during update operation');
         }
     };
 
@@ -101,7 +101,7 @@ const Post = () => {
             handleApiResponse(response, 'Post deleted successfully');
             HomeDispatch({ type: 'RELOAD_POSTS', payload: true })
         } catch (error) {
-            toast.error('Error during delete operation');
+            toast.error('Error during deletePost operation');
         }
     };
 
@@ -115,7 +115,7 @@ const Post = () => {
                 toast.success('Comments deleted successfully');
             }
         } catch (error) {
-            console.error('Error during deleteComments:', error);
+            toast.error('Error during deleting comment operation');
         }
     };
 

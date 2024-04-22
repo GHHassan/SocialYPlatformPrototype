@@ -103,53 +103,6 @@ export const FormGroup = ({
   );
 };
 
-// SelectGroup.jsx
-export const SelectGroup = ({
-  label,
-  id,
-  name,
-  value,
-  onChange,
-  options,
-  errorMessage,
-  required,
-}) => {
-  return (
-    <div className="mb-6">
-      {label && (
-        <label
-          htmlFor={id}
-          className="block mb-2 text-sm font-medium text-gray-700 "
-        >
-          {label}
-        </label>
-      )}
-      <select
-        id={id}
-        name={name}
-        onChange={onChange}
-        value={value}
-        required={required}
-        className={`w-full p-6 text-sm border rounded-lg focus:ring-blue-500 focus:border-blue-500 ${errorMessage ? "border-red-500" : "border-gray-300"
-          } `}
-      >
-        <option value="">Select your role</option>
-        {options.map((option) => (
-          <option
-            key={option.value}
-            value={option.value}
-          >
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {errorMessage && (
-        <p className="mt-2 text-xs text-red-600">{errorMessage}</p>
-      )}
-    </div>
-  );
-};
-
 const SignUp = () => {
 
   const user = useUser();
@@ -163,7 +116,6 @@ const SignUp = () => {
         window.location.href = "/";
       }
     } catch (error) {
-      console.log(error);
       toast.error("Error signing in with Google");
     }
   };
@@ -228,16 +180,13 @@ const SignUp = () => {
   };
 
   const registerUser = async (formData) => {
-    console.log("formData", formData);
     const body = JSON.stringify(formData);
     delete body.confirmPassword;
     const response = await fetch(`${API_ROOT}/register`, {
       method: "POST",
       body: body,
     });
-    console.log(response);
     const data = await response.json();
-    console.log(data);
     if (data.message === "success") {
       window.location.href = "/kf6003/login";
     } else if (data.message === "duplicate (Conflict)") {
