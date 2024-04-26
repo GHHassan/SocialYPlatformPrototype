@@ -54,6 +54,7 @@ function App() {
   useEffect(() => {
     if (signedIn && signedInUser) {
       getUserProfile(signedInUser.id);
+      AppDispatch({ type: 'RELOAD_PROFILE', payload: false });
     }
   }, [signedInUser, signedIn, reloadProfile]);
 

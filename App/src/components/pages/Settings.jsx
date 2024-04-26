@@ -2,9 +2,9 @@
  * @file Settings.jsx 
  * Is the profile setting page for the 
  * signed in user. It allows the user to
- * update their profile information.
+ * set/update their profile information.
  * 
- * @uses the ProfileForm component to display and manage the profile form.
+ * @uses the ProfileForm component to display the profile form.
  * @author Ghulam Hassan Hassani <w20017074>
  * 
  */
@@ -117,9 +117,28 @@ const Settings = () => {
 
         try {
             const body = {
-                ...userInfo,
+                "profileID": userInfo?.profileID,
+                "userID": signedInUser.id,
+                "firstName": userInfo?.firstName,
+                "lastName": userInfo?.lastName,
+                "username": userInfo?.username,
+                "bio": userInfo?.bio,
+                "website": userInfo?.website,
+                "dateOfBirth": userInfo?.dateOfBirth,
+                "gender": userInfo?.gender,
+                "email": userInfo?.email,
+                "phoneNumber": userInfo?.phoneNumber,
+                "address": userInfo?.address,
+                "relationshipStatus": userInfo?.relationshipStatus,
                 "profilePicturePath": pictures?.newProfilePicturePath || userInfo?.profilePicturePath,
-                "coverPicturePath": pictures?.newCoverPicturePath || userInfo?.coverPicturePath,
+                 "coverPicturePath": pictures?.newCoverPicturePath || userInfo?.coverPicturePath,
+                "profileVisibility": userInfo?.profileVisibility,
+                "emailVisibility": userInfo?.emailVisibility,
+                "phoneNumberVisibility": userInfo?.phoneNumberVisibility,
+                "addressVisibility": userInfo?.addressVisibility,
+                "dateOfBirthVisibility": userInfo?.dateOfBirthVisibility,
+                "genderVisibility": userInfo?.genderVisibility,
+                "relationshipStatusVisibility": userInfo?.relationshipStatusVisibility,
             }
             const response = await fetch(`${API_ROOT}/profile`,
                 {
@@ -218,16 +237,16 @@ const Settings = () => {
 
     return (
         <ProfileForm
-                userInfo={userInfo}
-                errors={errors}
-                loading={loading}
-                userProfile={userProfile}
-                setUserInfo={setUserInfo}
-                pictures={pictures}
-                setErrors={setErrors}
-                handleSubmit={handleSubmit}
-                handleDeleteAccount={handleDeleteAccount}
-            />
+            userInfo={userInfo}
+            errors={errors}
+            loading={loading}
+            userProfile={userProfile}
+            setUserInfo={setUserInfo}
+            pictures={pictures}
+            setErrors={setErrors}
+            handleSubmit={handleSubmit}
+            handleDeleteAccount={handleDeleteAccount}
+        />
     );
 };
 

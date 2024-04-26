@@ -1,5 +1,6 @@
 import React from 'react';
 import Select from '../pageFractions/Select';
+import { API_ROOT } from '../../Config';
 const ProfileForm = ({ userInfo, setUserInfo, handleSubmit, loading, userProfile, errors, setErrors, pictures, handleDeleteAccount }) => {
 
     function validateEmail(email) {

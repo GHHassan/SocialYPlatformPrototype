@@ -39,7 +39,7 @@ export const appReducer = (state, action) => {
         case 'TOGGLE_CHAT_VIEW':
             return { ...state, isChatOpen: !state.isChatOpen };
         case 'RELOAD_PROFILE':
-            return { ...state, reloadProfile: true };
+            return { ...state, reloadProfile: action.payload };
         default:
             return state;
     }
