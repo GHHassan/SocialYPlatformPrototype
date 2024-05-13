@@ -1,6 +1,9 @@
 /**
  * @file MainLayout.jsx 
- * It is used to display the main layout of the application.
+ * 
+ * It is used to arrange the main components of the application 
+ * for appropriatly displaying the contents in grids provided by TailWindCSS,
+ * and comply with the semantic use of HTML5 elements.
  * 
  * @author Ghulam Hassan Hassani <w20017074>
  */

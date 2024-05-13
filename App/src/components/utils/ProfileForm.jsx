@@ -1,3 +1,26 @@
+/**
+ * @file ProfileForm.jsx 
+ * This is a reusable component that renders a form for the user 
+ * to fill in their profile information.
+ * It takes in the following props:
+ * 1. userInfo: An object containing the user's profile information.
+ * 2. setUserInfo: A function to update the user's profile information.
+ * 3. handleSubmit: A function to handle the form submission.
+ * 4. loading: A boolean to indicate if the form is loading.
+ * 5. userProfile: existing user profile information if applicable.
+ * 6. errors: An object containing the form validation errors.
+ * 7. setErrors: A function to update the form validation errors.
+ * 8. pictures: An object containing the profile and cover pictures.
+ * 9. handleDeleteAccount: A function to handle the deletion of the user's account.
+ * 
+ * This component uses the Select component to render dropdowns 
+ * for the user to select the visibility of their profile information.
+ * The component also uses the Global Constants API_ROOT to make requests to the backend.
+ * 
+ * @author Ghulam Hassan Hassan <w20017074@northumbria.ac.uk>
+ * @genetated
+ */
+
 import React from 'react';
 import Select from '../pageFractions/Select';
 import { API_ROOT } from '../../Config';

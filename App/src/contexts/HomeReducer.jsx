@@ -1,3 +1,12 @@
+/**
+ * @fileoverview Home Reducer
+ * Reducer for the home page
+ * This reducer is used to manage the state of the home page 
+ * and its children components.
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ */
+
 export const homeInitialState = {
     reloadPosts: true,
     posts: [],

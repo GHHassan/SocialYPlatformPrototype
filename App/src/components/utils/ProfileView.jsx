@@ -1,4 +1,15 @@
-
+/**
+ * @file ProfileView.jsx 
+ * Thisis a reusable component that displays the profile of a user.
+ * It takes in a userID as a parameter and fetches the profile of the user from the database.
+ * It then displays the profile in a table format.
+ * 
+ * @uses ProfileViewTable - A table that displays the profile of a user.
+ * @param {string} userID - The userID of the user whose profile is to be displayed.
+ * @returns {JSX.Element} - A table displaying the profile of the user.
+ * @author Ghulam Hassan Hassani <w20017074@northumbria.ac.uk>
+ * 
+ */
 import ProfileViewTable from './ProfileViewTable';
 import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';

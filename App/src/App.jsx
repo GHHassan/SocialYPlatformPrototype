@@ -1,3 +1,16 @@
+/**
+ * @file App.jsx 
+ * This is the main entyr of the application. 
+ * It contains the routing of the application and uses all 
+ * sub componenets of this application.
+ * It uses the AppStateContext and Clerk's useUser to varify the user's
+ * sign in state.
+ * uses the MainLayout to arrange the main components of the application
+ * for appropriatly displaying the contents in grids provided by TailWindCSS.
+ * 
+ * @author Ghulam Hassan Hassani <w20017074>
+ */
+
 import React, { useEffect } from 'react';
 import { useAppState } from './contexts/AppStateContext';
 import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
