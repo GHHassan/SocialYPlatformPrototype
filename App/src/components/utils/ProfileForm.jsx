@@ -259,7 +259,7 @@ const ProfileForm = ({ userInfo, setUserInfo, handleSubmit, loading, userProfile
                         <p className='text-red-500'>{errors.dateOfBirth}</p>
                         <Select
                             options={['Private', 'Friends', 'Public']}
-                            value={userInfo.dateOfBirthVisibility || 'Select'}
+                            value={userInfo.dateOfBirthVisibility || 'Private'}
                             identifier='dateOfBirthVisibility'
                             onChange={handleVisibilityChange}
                         />
@@ -279,7 +279,7 @@ const ProfileForm = ({ userInfo, setUserInfo, handleSubmit, loading, userProfile
                         />
                         <Select
                             options={['Private', 'Friends', 'Public']}
-                            value={userInfo.genderVisibility || 'Select'}
+                            value={userInfo.genderVisibility || 'Private'}
                             identifier='genderVisibility'
                             onChange={handleVisibilityChange}
                         />
@@ -300,7 +300,7 @@ const ProfileForm = ({ userInfo, setUserInfo, handleSubmit, loading, userProfile
                         />
                         <Select
                             options={['Private', 'Friends', 'Public']}
-                            value={userInfo.phoneNumberVisibility || 'Select'}
+                            value={userInfo.phoneNumberVisibility || 'Friends'}
                             identifier='phoneNumberVisibility'
                             onChange={handleVisibilityChange}
                         />
@@ -321,7 +321,7 @@ const ProfileForm = ({ userInfo, setUserInfo, handleSubmit, loading, userProfile
                         />
                         <Select
                             options={['Private', 'Friends', 'Public']}
-                            value={userInfo.addressVisibility || 'Select'}
+                            value={userInfo.addressVisibility || 'Friends'}
                             identifier='addressVisibility'
                             onChange={handleVisibilityChange}
                         />
@@ -335,13 +335,13 @@ const ProfileForm = ({ userInfo, setUserInfo, handleSubmit, loading, userProfile
                         <Select
                             name="relationshipStatus"
                             options={['Select', 'Single', 'In a Relationship', 'Engaged', 'Married', 'It\'s Complicated', 'Prefer Not to Say']}
-                            value={userInfo.relationshipStatus || 'Select'}
+                            value={userInfo.relationshipStatus || 'Friends'}
                             identifier='relationshipStatus'
                             onChange={handleVisibilityChange}
                         />
                         <Select
                             options={['Private', 'Friends', 'Public']}
-                            value={userInfo.relationshipStatusVisibility || 'Select'}
+                            value={userInfo.relationshipStatusVisibility || 'Friends'}
                             identifier='relationshipStatusVisibility'
                             onChange={handleVisibilityChange}
                         />
@@ -355,7 +355,7 @@ const ProfileForm = ({ userInfo, setUserInfo, handleSubmit, loading, userProfile
                         <Select
                             name="profileVisibility"
                             options={['Private', 'Friends', 'Public']}
-                            value={userInfo.profileVisibility || 'Select'}
+                            value={userInfo.profileVisibility || 'Friends'}
                             identifier='profileVisibility'
                             onChange={handleVisibilityChange}
                         />

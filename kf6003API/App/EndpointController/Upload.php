@@ -77,6 +77,7 @@ class Upload extends Endpoint
                 }
             }
         }
+        // Set the message based on the number of successfully deleted files
         $data['message'] = count($data) > 0 ? 'success' : 'No files deleted';
         return $data;
     }
@@ -98,11 +99,13 @@ class Upload extends Endpoint
 
         $videoPath = '../FileStorage/Videos/' . $videoName;
 
+        // Delete video file if it exists
         if ($videoName && file_exists($videoPath)) {
             unlink($videoPath);
             $data['video'] = 'Video deleted successfully';
         }
 
+        // Set the message based on the number of successfully deleted files
         $data['message'] = count($data) > 0 ? 'success' : 'No files deleted';
         return $data;
     }

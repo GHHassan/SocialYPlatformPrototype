@@ -21,11 +21,7 @@ namespace App\Auth;
  */
 
 use Firebase\JWT\JWT;
-use App\{
-    Database,
-    Request,
-    ClientError
-};
+use App\Request;
 
 class Token extends \App\EndpointController\Endpoint
 {
@@ -71,33 +67,5 @@ class Token extends \App\EndpointController\Endpoint
             'iss' => $iss
         ];
         return JWT::encode($payload, $secretKey, 'HS256');
-    }
-
-    private function checkCredentials()
-    {
-        $sql = "SELECT userID, username, email, password_hash FROM users WHERE email = :email";
-        $dbConn = new Database(DB_USER_PATH);
-        if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
-            throw new ClientError(401, "Username or password is missing");
-        }
-        if (empty($_SERVER['PHP_AUTH_USER']) || empty($_SERVER['PHP_AUTH_PW'])) {
-            throw new ClientError(401, "Username or password is empty");
-        }
-
-        $sqlParams[":email"] = $_SERVER['PHP_AUTH_USER'];
-        $data = $dbConn->executeSQL($sql, $sqlParams);
-        if (count($data) < 1) {
-            throw new ClientError(401, "Username or password is incorrect");
-        }
-        if (count($data) > 1) {
-            throw new ClientError(500, "Please contact your admin");
-        }
-        if (!password_verify($_SERVER['PHP_AUTH_PW'], $data[0]['password_hash'])) {
-            throw new ClientError(401, "Username or password is incorrect");
-        }
-        $res['userID'] = $data[0]['userID'];
-        $res['username'] = $data[0]['username'];
-        $res['email'] = $data[0]['email'];
-        return $res;
     }
 }

@@ -101,6 +101,36 @@ class Endpoint
         }
         return $input;
     }
+    protected function normaliseString($input)
+    {
+        if (isset($input) && !is_numeric($input)) {
+            $result = strtolower($input);
+            $result = ucwords($result);
+            return $result;
+        }
+        return $input;
+    }
+
+    protected function checkAllowedParams($params, $allowedParams = [])
+    {
+        if (!is_array($params)) {
+            $params = [$params];
+        }
+
+        foreach ($params as $key => $value) {
+            if (!in_array($key, $allowedParams)) {
+                throw new ClientError(422, "Invalid parameter: $key");
+            }
+        }
+    }
+    protected function validateNumParam($num)
+    {
+        $sanitisedNum = $this->sanitiseNum($num);
+        if (!is_numeric($sanitisedNum) || $sanitisedNum <= 0) {
+            throw new ClientError(422);
+        }
+        return $sanitisedNum;
+    }
 
     protected function validateToken()
     {
@@ -120,6 +150,33 @@ class Endpoint
         }
     }
 
+    protected function checkCredentials()
+    {
+        $sql = "SELECT userID, username, email, password_hash FROM users WHERE email = :email";
+        $dbConn = new Database(DB_USER_PATH);
+        if (!isset($_SERVER['PHP_AUTH_USER']) || !isset($_SERVER['PHP_AUTH_PW'])) {
+            throw new ClientError(401, "Username or password is missing");
+        }
+        if (empty($_SERVER['PHP_AUTH_USER']) || empty($_SERVER['PHP_AUTH_PW'])) {
+            throw new ClientError(401, "Username or password is empty");
+        }
+
+        $sqlParams[":email"] = $_SERVER['PHP_AUTH_USER'];
+        $data = $dbConn->executeSQL($sql, $sqlParams);
+        if (count($data) < 1) {
+            throw new ClientError(401, "Username or password is incorrect");
+        }
+        if (count($data) > 1) {
+            throw new ClientError(500, "Please contact your admin");
+        }
+        if (!password_verify($_SERVER['PHP_AUTH_PW'], $data[0]['password_hash'])) {
+            throw new ClientError(401, "Username or password is incorrect");
+        }
+        $res['userID'] = $data[0]['userID'];
+        $res['username'] = $data[0]['username'];
+        $res['email'] = $data[0]['email'];
+        return $res;
+    }
     protected function getBearerToken()
     {
         $allHeaders = getallheaders();
@@ -151,29 +208,6 @@ class Endpoint
                 }
             }
         }
-    }
-
-    protected function postFieldKeys(array $requiredParams, array $optionalParams = [])
-    {
-        $providedOptionalParams = array_intersect($optionalParams, array_keys($this->requestData));
-        if (empty($providedOptionalParams)) {
-            throw new ClientError(422, "At least one of the optional parameters ("
-                . json_encode($optionalParams) . ") is required");
-        }
-
-        $allParams = array_merge($requiredParams, $optionalParams);
-        $providedPropertyKeys = array_intersect($this->allowedParams, array_keys($this->requestData));
-
-        if (empty($providedPropertyKeys)) {
-            throw new ClientError(422, "At least one property of the post is required");
-        }
-
-        $keys = array_intersect($providedPropertyKeys, $allParams);
-
-        if (empty($keys)) {
-            throw new ClientError(400, "No valid parameters provided");
-        }
-        return $keys;
     }
 
     public function setSql($sql)

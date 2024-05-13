@@ -171,11 +171,15 @@ class Friendship extends Endpoint
 
     private function removeFriend()
     {
-        if (!isset($_GET['connectionID'])) {
-            throw new ClientError(422, "connectionID is required");
+        $requiredParams = ['connectionID'];
+        foreach ($requiredParams as $param) {
+            if (!isset($this->requestData[$param])) {
+                throw new ClientError(422, "One or more required parameters are missing.");
+            }
         }
+
         $sql = "DELETE FROM Friends WHERE connectionID = :connectionID";
-        $sqlParams = [':connectionID' => $_GET['connectionID']];
+        $sqlParams = [':connectionID' => $this->requestData['connectionID']];
 
         $result = $this->db->executeSql($sql, $sqlParams);
         count($result) > 0 ? $result['message'] = 'success' : $result['message'] = 'failed';

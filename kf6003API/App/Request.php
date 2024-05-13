@@ -27,5 +27,20 @@ abstract class Request
         $path = parse_url($url)['path'];
         return str_replace(BASE_URL, "", $path);
     }
+
+    public static function params()
+    {
+        return $_GET;
+    }
+
+    public static function get($key, $default = null)
+    {
+        return isset($_GET[$key]) ? $_GET[$key] : $default;
+    }
+
+    public static function post($key, $default = null)
+    {
+        return isset($_POST[$key]) ? $_POST[$key] : $default;
+    }
 }
 

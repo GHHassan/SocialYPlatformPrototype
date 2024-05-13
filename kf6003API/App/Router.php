@@ -38,6 +38,10 @@ abstract class Router
                 case '/register':
                     $endpoint = new Auth\Register();
                     break;
+                case 'ssouser':
+                case '/ssouser':
+                    $endpoint = new Auth\Ssouser();
+                    break;
                 case 'profile':
                 case '/profile':
                     $endpoint = new EndpointController\Profile();

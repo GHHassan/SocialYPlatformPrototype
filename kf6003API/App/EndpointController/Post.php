@@ -121,6 +121,7 @@ class Post extends Endpoint
         $requiredParams = ['userID', 'username', 'firstName', 'lastName'];
         $optionalParams = ['textContent', 'location', 'photoPath', 'videoPath', 'visibility'];
 
+        $postFieldKeys = $this->validateParams($requiredParams, $optionalParams);
         $defaultValues = [
             'textContent' => null,
             'location' => null,
@@ -129,18 +130,14 @@ class Post extends Endpoint
             'visibility' => 'friends',
         ];
         
-        $this->checkRequiredParams($this->requestData, $requiredParams);
-        if (!isset($this->requestData['textContent']) || !isset($this->requestData['photoPath']) || !isset($this->requestData['videoPath'])) {
-            throw new ClientError(400, "At least one of the optional parameters (textContent, photoPath, videoPath) is required");
-        }
-
         $postParams = array_merge($defaultValues, $this->requestData);
+        $validParams = array_intersect_key($postParams, array_flip($postFieldKeys));
         $placeholders = implode(', ', array_map(function ($param) {
             return ":$param";
-        }, array_keys($postParams)));
-        $sqlParams = array_merge(array_values($this->requestData));
-        $sql = "INSERT INTO post (" . implode(', ', array_keys($postParams)) . ") VALUES ($placeholders)";
-        $data = $this->db->executeSQL($sql, $sqlParams);
+        }, array_keys($validParams)));
+
+        $sql = "INSERT INTO post (" . implode(', ', array_keys($validParams)) . ") VALUES ($placeholders)";
+        $data = $this->db->executeSQL($sql, $validParams);
         $data['lastInsertId'] > 0 ? $data['message'] = "success" : $data['message'] = "failed";
         return $data;
     }
@@ -169,19 +166,25 @@ class Post extends Endpoint
             'visibility',
             'location'
         ];
-        $keys = $this->postFieldKeys($requiredParams, $optionalParams);
+        $postFieldKeys = $this->validateParams($requiredParams, $optionalParams);
 
-        $validParams = array_intersect_key($this->requestData, array_flip($keys));
+        // Filter the requestData to include only the keys that are valid post fields
+        $validParams = array_intersect_key($this->requestData, array_flip($postFieldKeys));
+
+        // Prepare set clauses, excluding userID and postID from the updates
         $setClauses = array_map(function ($param) use ($validParams) {
             if (array_key_exists($param, $validParams)) {
                 return "$param = :$param";
             }
         }, array_keys($validParams));
 
+        // Remove null values from the set clauses array
         $setClauses = array_filter($setClauses);
 
         $sql = "UPDATE post SET " . implode(', ', $setClauses);
         $sql .= " WHERE userID = :userID AND postID = :postID";
+
+        // Ensure sqlParams includes all valid parameters plus userID and postID
         $sqlParams = array_merge(
             array_intersect_key($this->requestData, array_flip($optionalParams)),
             [':userID' => $this->requestData['userID'], ':postID' => $this->requestData['postID']]
@@ -214,7 +217,9 @@ class Post extends Endpoint
         return $data;
     }
 
-    protected function postFieldKeys(array $requiredParams, array $optionalParams = [])
+    // helper methods...
+
+    private function validateParams(array $requiredParams, array $optionalParams = [])
     {
         $providedOptionalParams = array_intersect($optionalParams, array_keys($this->requestData));
         if (empty($providedOptionalParams)) {
@@ -229,11 +234,20 @@ class Post extends Endpoint
             throw new ClientError(422, "At least one property of the post is required");
         }
 
-        $keys = array_intersect($providedPropertyKeys, $allParams);
+        $postFieldKeys = array_intersect($providedPropertyKeys, $allParams);
 
-        if (empty($keys)) {
+        if (empty($postFieldKeys)) {
             throw new ClientError(400, "No valid parameters provided");
         }
-        return $keys;
+
+        return $postFieldKeys;
     }
+
+    // private function validateRequiredParams(array $requiredParams)
+    // {
+    //     if (array_intersect($requiredParams, array_keys($this->requestData)) !== $requiredParams) {
+    //         throw new ClientError(422, "At least one of the required parameters (" .
+    //             (json_encode($requiredParams)) . ") is required");
+    //     }
+    // }
 }

@@ -22,7 +22,8 @@ namespace App\EndpointController;
 use App\{
     ClientError,
     Database,
-    Request
+    Request,
+    Requesthandler
 };
 
 class Comment extends Endpoint
@@ -31,12 +32,15 @@ class Comment extends Endpoint
     private $postID;
     private $userID;
     private $commentContent;
+    protected $requestData;
 
     private $allowedParams = [
         'commentContent',
         'postID',
         'userID',
         'username',
+        'firstName',
+        'lastName',
         'profilePath',
         'commentID',
         'imagePath',
@@ -53,6 +57,7 @@ class Comment extends Endpoint
     {
         $this->db = new Database(DB_PATH);
         $this->checkAllowedMethod(Request::method(), $this->allowedMethods);
+        $this->checkRequiredParams($this->allowedParams);
         $data = [];
         switch (Request::method()) {
             case 'GET':
@@ -123,10 +128,10 @@ class Comment extends Endpoint
     {
         // $this->validateToken();
         $this->setProperties();
-        $requiredParams = ['postID', 'userID', 'profilePath', 'username', 'commentContent'];
+        $requiredParams = ['postID', 'userID', 'profilePath', 'username', 'firstName', 'lastName', 'commentContent'];
         foreach ($requiredParams as $param) {
             if (!isset($this->requestData[$param])) {
-                throw new ClientError(422, "All required parameters ('postID', 'userID', 'username', 'commentContent') are mandatory.");
+                throw new ClientError(422, "All required parameters". implode($requiredParams) ."are mandatory.");
             }
         }
 

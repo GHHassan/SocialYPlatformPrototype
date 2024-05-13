@@ -63,16 +63,16 @@ class Profile extends Endpoint
     public function __construct()
     {
         $this->db = new Database(DB_PATH);
-        $this->performAction();       
+        $this->performAction();
         parent::__construct($this->getData());
     }
 
     protected function performAction()
     {
         $data = [];
-        switch(Request::method()) {
+        switch (Request::method()) {
             case 'GET':
-                $data = $this->getProfile();
+                $data = $this->getUserProfile();
                 break;
             case 'POST':
                 $data = $this->createProfile();
@@ -87,16 +87,19 @@ class Profile extends Endpoint
         $this->setData($data);
     }
 
-    private function getProfile()
+    private function getUserProfile()
     {
-        if(!isset($_GET['userID'])) {
-            throw new ClientError(422, "userID is required");
+        if (!isset($_GET['userID'])) {
+            $sql = "SELECT username FROM Profile";
+            $result = $this->db->executeSql($sql, []);
+            return $result;
+        } else if (isset($_GET['userID'])) {
+            $sql = "SELECT * FROM Profile WHERE userID = :userID";
+            $sqlParams = [':userID' => $_GET['userID']];
+            $result = $this->db->executeSql($sql, $sqlParams);
+            count($result) ? $result['message'] = 'success' : $result['message'] = 'Profile not found';
+            return $result;
         }
-        $sql = "SELECT * FROM Profile WHERE userID = :userID";
-        $sqlParams = [':userID' => $_GET['userID']];
-        $result = $this->db->executeSql($sql, $sqlParams);
-        count($result) ? $result['message'] = 'success' : $result['message'] = 'Profile not found'; 
-        return $result;
     }
 
     private function createProfile()
@@ -110,7 +113,7 @@ class Profile extends Endpoint
             'dateOfBirth',
             'email'
         ];
-        
+
         $this->checkRequiredParams($this->requestData, $requiredParams);
         $placeholders = implode(', ', array_map(function ($param) {
             return ":$param";
@@ -130,6 +133,7 @@ class Profile extends Endpoint
             }
             return ['message' => 'Profile already exists'];
         }
+        return ['message' => 'something went wrong'];
     }
 
     private function updateProfile()
@@ -182,7 +186,7 @@ class Profile extends Endpoint
     private function deleteProfile()
     {
         $db = new Database(DB_PATH);
-        if(!isset($_GET['userID'])) {
+        if (!isset($_GET['userID'])) {
             throw new ClientError(422, "userID is required");
         }
         $sql = "DELETE FROM Profile WHERE userID = :userID";
