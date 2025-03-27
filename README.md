@@ -36,7 +36,7 @@ npm run dev
 5. open the local host on port 5173/kf6003 (http://localhost:5173/kf6003/)
 6. you can then use the application
 
-for any further information contact the developer at w20017074@northumbria.ac.uk
+for any further information contact the developer gh.hassan07@gmail.com
 
 @Author
 Hassan Hassani
